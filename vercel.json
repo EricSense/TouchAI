@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "npm install -g pnpm@9.15.9 --no-fund --no-audit && pnpm install --no-fund --no-audit",
+  "installCommand": "corepack enable && corepack prepare pnpm@9.15.9 --activate && pnpm install --no-fund --no-audit",
   "buildCommand": "pnpm run build",
   "outputDirectory": "public"
 }

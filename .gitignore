@@ -1,0 +1,12 @@
+node_modules
+dist
+.turbo
+*.tsbuildinfo
+.DS_Store
+coverage
+.env
+.env.*
+packages/touch-adapter-android/.gradle
+packages/touch-adapter-android/build
+.swiftpm
+packages/touch-adapter-ios/.build

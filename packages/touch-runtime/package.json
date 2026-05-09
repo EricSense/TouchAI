@@ -1,0 +1,27 @@
+{
+  "name": "@touchai/touch-runtime",
+  "version": "0.1.0",
+  "description": "Platform-agnostic Touch Language runtime: gesture segmentation, rule engine, haptic materialization",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@touchai/touch-spec": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

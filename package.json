@@ -1,7 +1,6 @@
 {
   "name": "touchai",
   "private": true,
-  "packageManager": "pnpm@9.15.9",
   "workspaces": [
     "packages/touch-spec",
     "packages/touch-runtime",

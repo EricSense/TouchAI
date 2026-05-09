@@ -1,2 +1,4 @@
 packages:
-  - "packages/*"
+  - "packages/touch-spec"
+  - "packages/touch-runtime"
+  - "packages/touch-dataset"

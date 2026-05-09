@@ -2,13 +2,17 @@
   "name": "touchai",
   "private": true,
   "packageManager": "pnpm@9.15.9",
+  "workspaces": [
+    "packages/touch-spec",
+    "packages/touch-runtime",
+    "packages/touch-dataset"
+  ],
   "scripts": {
-    "build": "pnpm --filter @touchai/touch-spec run build && pnpm --filter @touchai/touch-runtime run build && pnpm --filter @touchai/touch-dataset run build",
-    "test": "pnpm -r run test",
-    "typecheck": "pnpm --filter @touchai/touch-spec exec tsc --noEmit && pnpm --filter @touchai/touch-spec run build && pnpm --filter @touchai/touch-runtime exec tsc --noEmit && pnpm --filter @touchai/touch-dataset exec tsc --noEmit"
+    "build": "npm run build -w @touchai/touch-spec && npm run build -w @touchai/touch-runtime && npm run build -w @touchai/touch-dataset",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm exec -w @touchai/touch-spec -- tsc --noEmit && npm run build -w @touchai/touch-spec && npm exec -w @touchai/touch-runtime -- tsc --noEmit && npm exec -w @touchai/touch-dataset -- tsc --noEmit"
   },
   "engines": {
-    "node": "20.x",
-    "pnpm": "9.x"
+    "node": "20.x"
   }
 }

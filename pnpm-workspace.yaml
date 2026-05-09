@@ -2,3 +2,4 @@ packages:
   - "packages/touch-spec"
   - "packages/touch-runtime"
   - "packages/touch-dataset"
+  - "packages/touch-adapter-web"

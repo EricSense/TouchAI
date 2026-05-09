@@ -1,0 +1,67 @@
+{
+  "lastUpdated": "2026-05-08",
+  "specVersion": "0.1.0",
+  "headline": "TouchAI",
+  "subhead": "A universal touch language, runtime, and adapters so AI can read intention from physical interaction—and answer with structured haptics—not only text and voice.",
+  "layers": [
+    {
+      "id": "input",
+      "title": "Input",
+      "subtitle": "Touch Language",
+      "body": "Normalized touch streams and gesture tokens: the user speaks in touch; devices emit a versioned wire format the model can learn."
+    },
+    {
+      "id": "output",
+      "title": "Output",
+      "subtitle": "Haptics",
+      "body": "Semantic haptics (ack, confirm, clarify…) compile to neutral pulse programs, then map to Core Haptics, Android Vibrator, or the web."
+    },
+    {
+      "id": "infra",
+      "title": "Infrastructure",
+      "subtitle": "Programs & envelopes",
+      "body": "Declarative rules and JSONL envelopes tie sessions, intents, and haptics together for reproducible datasets and cross-device runtimes."
+    }
+  ],
+  "packages": [
+    {
+      "name": "@touchai/touch-spec",
+      "summary": "Zod + TS wire types: TouchSample, GestureToken, HapticProgram, TouchEventEnvelope, TouchProgram.",
+      "status": "shipped"
+    },
+    {
+      "name": "@touchai/touch-runtime",
+      "summary": "Gesture segmentation, rule evaluation, semantic haptic materialization.",
+      "status": "shipped"
+    },
+    {
+      "name": "@touchai/touch-dataset",
+      "summary": "JSONL append/parse for envelopes—training and telemetry pipelines.",
+      "status": "shipped"
+    },
+    {
+      "name": "@touchai/touch-adapter-web",
+      "summary": "Pointer events → TouchSample in the browser; foundation for web playground & PWA.",
+      "status": "shipped"
+    },
+    {
+      "name": "touch-adapter-ios",
+      "summary": "Swift: UITouch → TouchSample, HapticProgram playback.",
+      "status": "shipped"
+    },
+    {
+      "name": "touch-adapter-android",
+      "summary": "Kotlin: MotionEvent → TouchSample, pulse playback via VibratorEffect.",
+      "status": "shipped"
+    }
+  ],
+  "next": [
+    "Wire playground to @touchai/touch-adapter-web bundle for identical semantics in-browser",
+    "Haptic semantics on the web (Vibration API) behind the same HapticProgram IR",
+    "Example TouchProgram JSON + live rule match in the playground"
+  ],
+  "links": {
+    "github": "https://github.com/EricSense/TouchAI",
+    "specVersionFile": "https://github.com/EricSense/TouchAI/blob/main/packages/touch-spec/src/version.ts"
+  }
+}

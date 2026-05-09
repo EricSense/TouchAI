@@ -1,13 +1,14 @@
 {
   "name": "touchai",
   "private": true,
-  "packageManager": "pnpm@9.15.0",
+  "packageManager": "pnpm@9.15.9",
   "scripts": {
     "build": "pnpm --filter @touchai/touch-spec run build && pnpm --filter @touchai/touch-runtime run build && pnpm --filter @touchai/touch-dataset run build",
     "test": "pnpm -r run test",
     "typecheck": "pnpm --filter @touchai/touch-spec exec tsc --noEmit && pnpm --filter @touchai/touch-spec run build && pnpm --filter @touchai/touch-runtime exec tsc --noEmit && pnpm --filter @touchai/touch-dataset exec tsc --noEmit"
   },
   "engines": {
-    "node": ">=20"
+    "node": "20.x",
+    "pnpm": "9.x"
   }
 }

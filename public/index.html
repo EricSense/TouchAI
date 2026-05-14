@@ -63,12 +63,13 @@
         </section>
 
         <section id="playground" aria-labelledby="play-title">
-          <h2 id="play-title">Playground — touch stream preview</h2>
-          <p class="lead" style="margin: -6px 0 14px; max-width: 70ch">
-            Drag on the pad. Samples use the same field names as <code>TouchSample</code> in
-            <code>@touchai/touch-spec</code> (<code>tMs</code>, <code>phase</code>, <code>pointerId</code>,
-            <code>x</code>, <code>y</code>, optional <code>pressure</code>). The web adapter package mirrors this
-            logic for real apps.
+          <h2 id="play-title">Playground — Touch Language live</h2>
+          <p class="lead" style="margin: -6px 0 14px; max-width: 72ch">
+            Drag on the pad. The page runs the same v0 segmenter and rule engine as
+            <code>@touchai/touch-runtime</code>, evaluates the demo
+            <code><a href="/touchai/program.example.json">program.example.json</a></code>, and plays a
+            <code>HapticProgram</code> via the Vibration API where supported. Every gesture also produces a
+            <code>TouchEventEnvelope</code> JSONL line — the same wire shape used for training datasets.
           </p>
           <div class="play">
             <div
@@ -78,13 +79,32 @@
               role="application"
               aria-label="Touch sampling pad. Uses pointer events."
             >
-              <div class="hint">
-                <strong>Drag here</strong><br />
-                Pointer capture · normalized coordinates · last 12 samples
+              <canvas id="trail" aria-hidden="true"></canvas>
+              <div class="hint" id="padhint">
+                <strong>Drag, tap, or long-press</strong><br />
+                Tap → ack · long-press → understood · swipe → confirm/cancel/more/dismiss
               </div>
             </div>
-            <div class="log" aria-live="polite" aria-relevant="additions">
-              <pre id="touchlog">Waiting for input…</pre>
+            <div class="result-stack">
+              <div class="result-row" id="result-row">
+                <span class="chip gesture" id="chip-gesture">gesture: —</span>
+                <span class="chip intent" id="chip-intent">intent: —</span>
+                <span class="chip haptic" id="chip-haptic">haptic: —</span>
+              </div>
+              <div class="haptic-status" id="haptic-status">Vibration API: probing…</div>
+              <div class="log" aria-live="polite">
+                <div class="log-head">
+                  <span>Last gesture envelope (JSONL)</span>
+                  <button type="button" id="copy-envelope" class="ghost">Copy</button>
+                </div>
+                <pre id="envelope-log">Waiting for input…</pre>
+              </div>
+              <div class="log">
+                <div class="log-head">
+                  <span>Stream samples (latest 12)</span>
+                </div>
+                <pre id="touchlog">Waiting for input…</pre>
+              </div>
             </div>
           </div>
         </section>

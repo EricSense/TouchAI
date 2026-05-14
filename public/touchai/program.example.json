@@ -1,0 +1,57 @@
+{
+  "_meta": {
+    "name": "TouchAI playground program",
+    "description": "Demo TouchProgram showing how Touch Language maps gestures to intents and haptics.",
+    "specVersion": "0.1.0"
+  },
+  "rules": [
+    {
+      "id": "tap_anywhere_ack",
+      "when": { "match": { "kind": "tap", "pointerCount": 1, "maxDurationMs": 280 } },
+      "then": {
+        "intent": { "intentId": "ack", "confidence": 0.95 },
+        "haptic": { "kind": "ack_medium" }
+      }
+    },
+    {
+      "id": "long_press_understood",
+      "when": { "match": { "kind": "long_press", "pointerCount": 1, "minDurationMs": 500 } },
+      "then": {
+        "intent": { "intentId": "understood", "confidence": 0.9 },
+        "haptic": { "kind": "understood" }
+      }
+    },
+    {
+      "id": "swipe_right_confirm",
+      "when": { "match": { "kind": "swipe", "direction": "right" } },
+      "then": {
+        "intent": { "intentId": "confirm", "confidence": 0.85 },
+        "haptic": { "kind": "confirm_success" }
+      }
+    },
+    {
+      "id": "swipe_left_cancel",
+      "when": { "match": { "kind": "swipe", "direction": "left" } },
+      "then": {
+        "intent": { "intentId": "cancel", "confidence": 0.85 },
+        "haptic": { "kind": "confirm_warning" }
+      }
+    },
+    {
+      "id": "swipe_up_more",
+      "when": { "match": { "kind": "swipe", "direction": "up" } },
+      "then": {
+        "intent": { "intentId": "more_detail", "confidence": 0.8 },
+        "haptic": { "kind": "ack_light" }
+      }
+    },
+    {
+      "id": "swipe_down_dismiss",
+      "when": { "match": { "kind": "swipe", "direction": "down" } },
+      "then": {
+        "intent": { "intentId": "dismiss", "confidence": 0.8 },
+        "haptic": { "kind": "clarify" }
+      }
+    }
+  ]
+}

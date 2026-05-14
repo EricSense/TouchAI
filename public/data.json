@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-05-08",
+  "lastUpdated": "2026-05-14",
   "specVersion": "0.1.0",
   "headline": "TouchAI",
   "subhead": "A universal touch language, runtime, and adapters so AI can read intention from physical interaction—and answer with structured haptics—not only text and voice.",
@@ -36,12 +36,12 @@
     },
     {
       "name": "@touchai/touch-dataset",
-      "summary": "JSONL append/parse for envelopes—training and telemetry pipelines.",
+      "summary": "JSONL append/parse for envelopes — training and telemetry pipelines.",
       "status": "shipped"
     },
     {
       "name": "@touchai/touch-adapter-web",
-      "summary": "Pointer events → TouchSample in the browser; foundation for web playground & PWA.",
+      "summary": "PointerEvent → TouchSample and HapticProgram → Vibration API.",
       "status": "shipped"
     },
     {
@@ -53,15 +53,22 @@
       "name": "touch-adapter-android",
       "summary": "Kotlin: MotionEvent → TouchSample, pulse playback via VibratorEffect.",
       "status": "shipped"
+    },
+    {
+      "name": "public/touchai/*",
+      "summary": "Build-free browser mirror of the runtime so this page runs Touch Language end-to-end.",
+      "status": "shipped"
     }
   ],
   "next": [
-    "Wire playground to @touchai/touch-adapter-web bundle for identical semantics in-browser",
-    "Haptic semantics on the web (Vibration API) behind the same HapticProgram IR",
-    "Example TouchProgram JSON + live rule match in the playground"
+    "Personalization layer: per-session normalization of velocity/pressure before segmentation",
+    "Multi-pointer gesture tokens (two-finger swipe, pinch) in the spec and runtime",
+    "DSL frontend that compiles a textual program (.touch) to TouchProgram JSON",
+    "Cloud ingest endpoint that only accepts TouchEventEnvelope with the matching spec version"
   ],
   "links": {
     "github": "https://github.com/EricSense/TouchAI",
-    "specVersionFile": "https://github.com/EricSense/TouchAI/blob/main/packages/touch-spec/src/version.ts"
+    "specVersionFile": "https://github.com/EricSense/TouchAI/blob/main/packages/touch-spec/src/version.ts",
+    "playgroundProgram": "/touchai/program.example.json"
   }
 }

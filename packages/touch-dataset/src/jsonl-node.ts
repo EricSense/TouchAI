@@ -24,7 +24,7 @@ export function createEnvelopeJsonlAppender(filePath: string): EnvelopeJsonlAppe
     },
     end() {
       return new Promise((resolve, reject) => {
-        stream.end((err) => (err ? reject(err) : resolve()));
+        stream.end((err: Error | null | undefined) => (err ? reject(err) : resolve()));
       });
     },
   };

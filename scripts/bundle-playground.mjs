@@ -25,6 +25,8 @@ await esbuild.build({
   outfile,
   sourcemap: true,
   logLevel: "info",
+  mainFields: ["module", "main"],
+  conditions: ["import", "module", "default"],
 });
 
 if (existsSync(schemasSrc)) {

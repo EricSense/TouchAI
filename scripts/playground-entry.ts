@@ -1,18 +1,14 @@
 /**
- * Single browser entry re-exporting the canonical npm packages for the static playground.
- * Bundled to public/touchai/runtime.mjs via `npm run build:playground`.
+ * Single browser entry re-exporting compiled package outputs for the static playground.
+ * Imports dist/ subpaths directly (avoids Node-only jsonl-node in the dataset barrel).
  */
-export { TOUCHLANG_SPEC_VERSION } from "@touchai/touch-spec";
+export { TOUCHLANG_SPEC_VERSION } from "../packages/touch-spec/dist/version.js";
 export {
   segmentGestureFromPath,
   swipeDirection,
   evaluateProgram,
   materializeHapticSemantic,
-} from "@touchai/touch-runtime";
-export { touchSampleFromPointerEvent, WebHapticProgramPlayer } from "@touchai/touch-adapter-web";
-export {
-  envelopeToJsonlLine,
-  makeEnvelope,
-  nextSessionId,
-  detectDeviceProfile,
-} from "@touchai/touch-dataset";
+} from "../packages/touch-runtime/dist/index.js";
+export { touchSampleFromPointerEvent, WebHapticProgramPlayer } from "../packages/touch-adapter-web/dist/index.js";
+export { envelopeToJsonlLine } from "../packages/touch-dataset/dist/jsonl-core.js";
+export { makeEnvelope, nextSessionId, detectDeviceProfile } from "../packages/touch-dataset/dist/envelope-client.js";

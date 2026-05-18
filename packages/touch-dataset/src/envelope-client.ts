@@ -31,17 +31,23 @@ export function makeEnvelope(input: MakeEnvelopeInput): TouchEventEnvelope {
   return env;
 }
 
+interface TouchNavigator {
+  userAgent?: string;
+  vendor?: string;
+  platform?: string;
+  maxTouchPoints?: number;
+}
+
 export function detectDeviceProfile(): TouchEventEnvelope["deviceProfile"] | undefined {
-  if (typeof navigator === "undefined") return undefined;
-  const ua = navigator.userAgent || "";
+  const nav = globalThis.navigator as TouchNavigator | undefined;
+  if (!nav) return undefined;
+  const ua = nav.userAgent || "";
   const maxPointers =
-    typeof navigator.maxTouchPoints === "number" && navigator.maxTouchPoints > 0
-      ? navigator.maxTouchPoints
-      : 1;
+    typeof nav.maxTouchPoints === "number" && nav.maxTouchPoints > 0 ? nav.maxTouchPoints : 1;
   return {
-    vendor: navigator.vendor || undefined,
+    vendor: nav.vendor || undefined,
     model: ua.slice(0, 120) || undefined,
-    os: typeof navigator.platform === "string" ? navigator.platform : undefined,
+    os: typeof nav.platform === "string" ? nav.platform : undefined,
     maxPointers,
   };
 }

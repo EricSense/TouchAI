@@ -15,6 +15,7 @@ export interface MakeEnvelopeInput {
   intent?: TouchEventEnvelope["intent"];
   haptic?: TouchEventEnvelope["haptic"];
   deviceProfile?: TouchEventEnvelope["deviceProfile"];
+  sessionProfile?: TouchEventEnvelope["sessionProfile"];
 }
 
 /** Build a versioned TouchEventEnvelope (browser + Node safe). */
@@ -24,6 +25,7 @@ export function makeEnvelope(input: MakeEnvelopeInput): TouchEventEnvelope {
     sessionId: input.sessionId,
   };
   if (input.deviceProfile) env.deviceProfile = input.deviceProfile;
+  if (input.sessionProfile) env.sessionProfile = input.sessionProfile;
   if (input.stream && input.stream.length > 0) env.stream = input.stream;
   if (input.gesture) env.gesture = input.gesture;
   if (input.intent) env.intent = input.intent;

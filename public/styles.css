@@ -387,7 +387,17 @@ section h2 {
   background: color-mix(in oklab, var(--accent) 14%, transparent);
 }
 
+.chip.session.live {
+  border-color: color-mix(in oklab, var(--accent2) 40%, transparent);
+  background: color-mix(in oklab, var(--accent2) 12%, transparent);
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
 .chip.intent.live {
+  border-color: color-mix(in oklab, var(--accent2) 50%, transparent);
+  background: color-mix(in oklab, var(--accent2) 16%, transparent);
+}
   border-color: color-mix(in oklab, var(--accent2) 50%, transparent);
   background: color-mix(in oklab, var(--accent2) 16%, transparent);
 }

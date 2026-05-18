@@ -65,11 +65,10 @@
         <section id="playground" aria-labelledby="play-title">
           <h2 id="play-title">Playground — Touch Language live</h2>
           <p class="lead" style="margin: -6px 0 14px; max-width: 72ch">
-            Drag on the pad. The page imports <code>public/touchai/runtime.mjs</code> — an esbuild bundle of
-            <code>@touchai/touch-runtime</code> and adapters — so behavior matches the npm packages exactly.
-            It evaluates <code><a href="/touchai/program.example.json">program.example.json</a></code>,
-            plays haptics via the Vibration API, and emits a
-            <code><a href="/schemas/TouchEventEnvelope.schema.json">TouchEventEnvelope</a></code> JSONL line.
+            Drag on the pad — use two fingers on a trackpad for pinch or two-finger swipe. The page imports
+            <code>public/touchai/runtime.mjs</code> (spec <strong>0.2.0</strong>): session normalization,
+            multi-pointer segmentation, rule evaluation, haptics, and
+            <code><a href="/schemas/TouchEventEnvelope.schema.json">TouchEventEnvelope</a></code> JSONL output.
           </p>
           <div class="play">
             <div
@@ -81,13 +80,14 @@
             >
               <canvas id="trail" aria-hidden="true"></canvas>
               <div class="hint" id="padhint">
-                <strong>Drag, tap, or long-press</strong><br />
-                Tap → ack · long-press → understood · swipe → confirm/cancel/more/dismiss
+                <strong>Tap · long-press · swipe · pinch · two-finger swipe</strong><br />
+                Session velocity/pressure baselines normalize input before segmentation
               </div>
             </div>
             <div class="result-stack">
               <div class="result-row" id="result-row">
                 <span class="chip gesture" id="chip-gesture">gesture: —</span>
+                <span class="chip session" id="chip-session">session: —</span>
                 <span class="chip intent" id="chip-intent">intent: —</span>
                 <span class="chip haptic" id="chip-haptic">haptic: —</span>
               </div>

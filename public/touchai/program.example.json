@@ -2,7 +2,7 @@
   "_meta": {
     "name": "TouchAI playground program",
     "description": "Demo TouchProgram showing how Touch Language maps gestures to intents and haptics.",
-    "specVersion": "0.1.0"
+    "specVersion": "0.2.0"
   },
   "rules": [
     {
@@ -19,6 +19,30 @@
       "then": {
         "intent": { "intentId": "understood", "confidence": 0.9 },
         "haptic": { "kind": "understood" }
+      }
+    },
+    {
+      "id": "pinch_in_zoom_out",
+      "when": { "match": { "kind": "pinch", "pointerCount": 2, "maxScale": 0.92 } },
+      "then": {
+        "intent": { "intentId": "zoom_out", "confidence": 0.88 },
+        "haptic": { "kind": "ack_light" }
+      }
+    },
+    {
+      "id": "pinch_out_zoom_in",
+      "when": { "match": { "kind": "pinch", "pointerCount": 2, "minScale": 1.08 } },
+      "then": {
+        "intent": { "intentId": "zoom_in", "confidence": 0.88 },
+        "haptic": { "kind": "ack_heavy" }
+      }
+    },
+    {
+      "id": "two_finger_swipe_back",
+      "when": { "match": { "kind": "two_finger_swipe", "direction": "left" } },
+      "then": {
+        "intent": { "intentId": "navigate_back", "confidence": 0.85 },
+        "haptic": { "kind": "confirm_warning" }
       }
     },
     {

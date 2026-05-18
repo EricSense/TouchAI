@@ -127,4 +127,24 @@ describe("evaluateProgram — pattern match", () => {
     const pan: GestureToken = { kind: "pan", delta: { dx: 0.1, dy: 0 }, pointerCount: 1 };
     expect(evaluateProgram(patternProgram, pan)).toBeUndefined();
   });
+
+  it("matches pinch scale bounds", () => {
+    const program: TouchProgram = {
+      rules: [
+        {
+          id: "pinch_in",
+          when: { match: { kind: "pinch", maxScale: 0.92 } },
+          then: { intent: { intentId: "zoom_out", confidence: 1 } },
+        },
+      ],
+    };
+    const pinch: GestureToken = {
+      kind: "pinch",
+      center: { x: 0.5, y: 0.5 },
+      scale: 0.7,
+      pointerCount: 2,
+      durationMs: 200,
+    };
+    expect(evaluateProgram(program, pinch)?.id).toBe("pinch_in");
+  });
 });

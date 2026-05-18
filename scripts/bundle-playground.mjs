@@ -31,7 +31,7 @@ await esbuild.build({
 
 if (existsSync(schemasSrc)) {
   mkdirSync(schemasDest, { recursive: true });
-  for (const name of ["TouchEventEnvelope", "HapticProgram", "TouchProgram"]) {
+  for (const name of ["TouchEventEnvelope", "HapticProgram", "TouchProgram", "SessionProfile"]) {
     const file = `${name}.schema.json`;
     cpSync(join(schemasSrc, file), join(schemasDest, file));
   }

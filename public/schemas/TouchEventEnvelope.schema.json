@@ -6,7 +6,7 @@
       "properties": {
         "specVersion": {
           "type": "string",
-          "const": "0.1.0"
+          "const": "0.2.0"
         },
         "sessionId": {
           "type": "string",
@@ -29,6 +29,29 @@
               "exclusiveMinimum": 0
             }
           },
+          "additionalProperties": false
+        },
+        "sessionProfile": {
+          "type": "object",
+          "properties": {
+            "sampleCount": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "velocityBaseline": {
+              "type": "number",
+              "minimum": 0
+            },
+            "pressureBaseline": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": [
+            "sampleCount",
+            "velocityBaseline",
+            "pressureBaseline"
+          ],
           "additionalProperties": false
         },
         "stream": {
@@ -253,6 +276,108 @@
               "required": [
                 "kind",
                 "delta",
+                "pointerCount"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "const": "pinch"
+                },
+                "center": {
+                  "type": "object",
+                  "properties": {
+                    "x": {
+                      "type": "number"
+                    },
+                    "y": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "x",
+                    "y"
+                  ],
+                  "additionalProperties": false
+                },
+                "scale": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "pointerCount": {
+                  "type": "number",
+                  "const": 2
+                },
+                "durationMs": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "kind",
+                "center",
+                "scale",
+                "pointerCount",
+                "durationMs"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "const": "two_finger_swipe"
+                },
+                "origin": {
+                  "type": "object",
+                  "properties": {
+                    "x": {
+                      "type": "number"
+                    },
+                    "y": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "x",
+                    "y"
+                  ],
+                  "additionalProperties": false
+                },
+                "vector": {
+                  "type": "object",
+                  "properties": {
+                    "dx": {
+                      "type": "number"
+                    },
+                    "dy": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "dx",
+                    "dy"
+                  ],
+                  "additionalProperties": false
+                },
+                "velocity": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "pointerCount": {
+                  "type": "number",
+                  "const": 2
+                }
+              },
+              "required": [
+                "kind",
+                "origin",
+                "vector",
+                "velocity",
                 "pointerCount"
               ],
               "additionalProperties": false

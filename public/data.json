@@ -1,6 +1,6 @@
 {
-  "lastUpdated": "2026-05-14",
-  "specVersion": "0.1.0",
+  "lastUpdated": "2026-05-18",
+  "specVersion": "0.2.0",
   "headline": "TouchAI",
   "subhead": "A universal touch language, runtime, and adapters so AI can read intention from physical interaction—and answer with structured haptics—not only text and voice.",
   "layers": [
@@ -8,7 +8,7 @@
       "id": "input",
       "title": "Input",
       "subtitle": "Touch Language",
-      "body": "Normalized touch streams and gesture tokens: the user speaks in touch; devices emit a versioned wire format the model can learn."
+      "body": "Normalized touch streams and gesture tokens — including pinch and two-finger swipe — with per-session velocity and pressure baselines."
     },
     {
       "id": "output",
@@ -20,28 +20,28 @@
       "id": "infra",
       "title": "Infrastructure",
       "subtitle": "Programs & envelopes",
-      "body": "Declarative rules and JSONL envelopes tie sessions, intents, and haptics together for reproducible datasets and cross-device runtimes."
+      "body": "TouchProgram rules, SessionProfile in envelopes, and JSONL for reproducible cross-device datasets."
     }
   ],
   "packages": [
     {
       "name": "@touchai/touch-spec",
-      "summary": "Zod + TS wire types; JSON Schema export for TouchEventEnvelope, HapticProgram, TouchProgram.",
+      "summary": "v0.2.0 — SessionProfile, pinch & two_finger_swipe tokens, JSON Schema export.",
       "status": "shipped"
     },
     {
       "name": "@touchai/touch-runtime",
-      "summary": "Gesture segmentation, exact + pattern rule evaluation, semantic haptic materialization — fully tested.",
+      "summary": "Session normalization, segmentGestureFromStream (multi-pointer), pattern rules, haptics.",
       "status": "shipped"
     },
     {
       "name": "@touchai/touch-dataset",
-      "summary": "JSONL parse/append + browser-safe envelope builders for training pipelines.",
+      "summary": "JSONL + envelope builders with sessionProfile field.",
       "status": "shipped"
     },
     {
       "name": "@touchai/touch-adapter-web",
-      "summary": "PointerEvent → TouchSample and HapticProgram → Vibration API.",
+      "summary": "PointerEvent → TouchSample, HapticProgram → Vibration API.",
       "status": "shipped"
     },
     {
@@ -51,32 +51,25 @@
     },
     {
       "name": "touch-adapter-android",
-      "summary": "Kotlin: MotionEvent → TouchSample, pulse playback via VibratorEffect.",
+      "summary": "Kotlin: MotionEvent → TouchSample, pulse playback.",
       "status": "shipped"
     },
     {
       "name": "public/touchai/runtime.mjs",
-      "summary": "esbuild bundle of npm packages — playground behavior matches @touchai/touch-runtime exactly.",
-      "status": "shipped"
-    },
-    {
-      "name": "public/schemas/*.schema.json",
-      "summary": "Published JSON Schema artifacts generated from Zod (formal wire contract).",
+      "summary": "esbuild bundle — playground matches npm packages exactly.",
       "status": "shipped"
     }
   ],
   "next": [
-    "Phase 2 — Grammar v0.2: session normalization + multi-pointer gesture tokens",
     "Phase 3 — Native envelope SDKs (Swift/Kotlin emit TouchEventEnvelope end-to-end)",
     "Phase 4 — @touchai/ai-bridge: envelope stream → LLM → intent + haptic response",
-    "Phase 5 — Dataset ingest API with strict specVersion rejection"
+    "Phase 5 — Dataset ingest API with strict specVersion rejection",
+    ".touch DSL compiler → TouchProgram JSON"
   ],
   "links": {
     "github": "https://github.com/EricSense/TouchAI",
     "specVersionFile": "https://github.com/EricSense/TouchAI/blob/main/packages/touch-spec/src/version.ts",
     "playgroundProgram": "/touchai/program.example.json",
-    "touchEventEnvelopeSchema": "/schemas/TouchEventEnvelope.schema.json",
-    "hapticProgramSchema": "/schemas/HapticProgram.schema.json",
-    "touchProgramSchema": "/schemas/TouchProgram.schema.json"
+    "touchEventEnvelopeSchema": "/schemas/TouchEventEnvelope.schema.json"
   }
 }

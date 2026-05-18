@@ -5,6 +5,7 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 import { HapticProgramSchema } from "./haptic-output.js";
 import { TouchEventEnvelopeSchema } from "./envelope.js";
 import { TouchProgramSchema } from "./program.js";
+import { SessionProfileSchema } from "./session.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const outDir = join(here, "..", "dist", "schemas");
@@ -13,6 +14,7 @@ const exports = [
   ["TouchEventEnvelope", TouchEventEnvelopeSchema],
   ["HapticProgram", HapticProgramSchema],
   ["TouchProgram", TouchProgramSchema],
+  ["SessionProfile", SessionProfileSchema],
 ] as const;
 
 mkdirSync(outDir, { recursive: true });

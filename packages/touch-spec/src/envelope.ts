@@ -3,6 +3,7 @@ import { TOUCHLANG_SPEC_VERSION } from "./version.js";
 import { GestureTokenSchema, TouchSampleSchema } from "./touch-input.js";
 import { HapticSemanticSchema } from "./haptic-output.js";
 import { TouchIntentSchema } from "./intent.js";
+import { SessionProfileSchema } from "./session.js";
 
 /**
  * Wire envelope for logging, sync between device and model server, and reproducible datasets.
@@ -19,6 +20,7 @@ export const TouchEventEnvelopeSchema = z.object({
       maxPointers: z.number().int().positive().optional(),
     })
     .optional(),
+  sessionProfile: SessionProfileSchema.optional(),
   stream: z.array(TouchSampleSchema).optional(),
   gesture: GestureTokenSchema.optional(),
   intent: TouchIntentSchema.optional(),

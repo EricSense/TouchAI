@@ -7,18 +7,173 @@ var __export = (target, all) => {
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
 
 // packages/touch-spec/dist/version.js
-var TOUCHLANG_SPEC_VERSION = "0.1.0";
+var TOUCHLANG_SPEC_VERSION = "0.2.0";
+
+// packages/touch-runtime/dist/session.js
+var DEFAULT_VELOCITY_BASELINE = 3e-3;
+function computeSessionProfile(stream) {
+  let pressureBaseline = 0;
+  const velocities = [];
+  for (const s of stream) {
+    if (s.pressure !== void 0 && s.pressure > 0) {
+      pressureBaseline = Math.max(pressureBaseline, s.pressure);
+    }
+  }
+  const paths = splitStreamByPointer(stream);
+  for (const path of paths.values()) {
+    const sorted = [...path].sort((a, b) => a.tMs - b.tMs);
+    const first = sorted[0];
+    const last = sorted[sorted.length - 1];
+    if (!first || !last || first.phase !== "began")
+      continue;
+    if (last.phase !== "ended" && last.phase !== "cancelled")
+      continue;
+    const dx = last.x - first.x;
+    const dy = last.y - first.y;
+    const travel = Math.hypot(dx, dy);
+    const dt = Math.max(1, last.tMs - first.tMs);
+    if (travel >= 0.06)
+      velocities.push(travel / dt);
+  }
+  velocities.sort((a, b) => a - b);
+  const velocityBaseline = velocities.length > 0 ? velocities[Math.floor(velocities.length / 2)] : DEFAULT_VELOCITY_BASELINE;
+  return {
+    sampleCount: stream.length,
+    velocityBaseline,
+    pressureBaseline: pressureBaseline > 0 ? pressureBaseline : 1
+  };
+}
+function normalizeSamples(stream, profile) {
+  const pb = Math.max(profile.pressureBaseline, 1e-6);
+  return stream.map((s) => {
+    if (s.pressure === void 0)
+      return s;
+    return {
+      ...s,
+      pressure: Math.min(1, Math.max(0, s.pressure / pb))
+    };
+  });
+}
+function sessionRelativeVelocity(rawVelocity, profile) {
+  const base = profile.velocityBaseline > 0 ? profile.velocityBaseline : DEFAULT_VELOCITY_BASELINE;
+  return rawVelocity / base;
+}
+function splitStreamByPointer(stream) {
+  const paths = /* @__PURE__ */ new Map();
+  for (const s of stream) {
+    const list = paths.get(s.pointerId) ?? [];
+    list.push(s);
+    paths.set(s.pointerId, list);
+  }
+  return paths;
+}
 
 // packages/touch-runtime/dist/segment.js
 var DEFAULT_LONG_PRESS_MS = 500;
 var DEFAULT_TAP_MAX_MS = 280;
 var MOVE_EPS = 0.02;
+var PINCH_SCALE_EPS = 0.12;
 function dist(a, b) {
-  const dx = a.x - b.x;
-  const dy = a.y - b.y;
-  return Math.hypot(dx, dy);
+  return Math.hypot(a.x - b.x, a.y - b.y);
 }
-function segmentGestureFromPath(samples) {
+function pathComplete(path) {
+  if (path.length === 0)
+    return false;
+  const sorted = [...path].sort((a, b) => a.tMs - b.tMs);
+  const first = sorted[0];
+  const last = sorted[sorted.length - 1];
+  return first.phase === "began" && (last.phase === "ended" || last.phase === "cancelled");
+}
+function pinchCenter(a, b) {
+  return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+}
+function segmentPinch(pathA, pathB) {
+  if (!pathComplete(pathA) || !pathComplete(pathB))
+    return null;
+  const a = [...pathA].sort((x, y) => x.tMs - y.tMs);
+  const b = [...pathB].sort((x, y) => x.tMs - y.tMs);
+  const startA = a[0];
+  const startB = b[0];
+  const endA = a[a.length - 1];
+  const endB = b[b.length - 1];
+  const d0 = dist(startA, startB);
+  const d1 = dist(endA, endB);
+  if (d0 < MOVE_EPS)
+    return null;
+  const scale = d1 / d0;
+  if (Math.abs(scale - 1) < PINCH_SCALE_EPS)
+    return null;
+  const durationMs = Math.max(endA.tMs - startA.tMs, endB.tMs - startB.tMs);
+  return {
+    kind: "pinch",
+    center: pinchCenter(endA, endB),
+    scale,
+    pointerCount: 2,
+    durationMs
+  };
+}
+function segmentTwoFingerSwipe(pathA, pathB, profile) {
+  if (!pathComplete(pathA) || !pathComplete(pathB))
+    return null;
+  const gA = segmentGestureFromPath(pathA, profile);
+  const gB = segmentGestureFromPath(pathB, profile);
+  if (gA?.kind !== "swipe" || gB?.kind !== "swipe")
+    return null;
+  const vA = gA.vector;
+  const vB = gB.vector;
+  const magA = Math.hypot(vA.dx, vA.dy);
+  const magB = Math.hypot(vB.dx, vB.dy);
+  if (magA < MOVE_EPS || magB < MOVE_EPS)
+    return null;
+  const dot = (vA.dx * vB.dx + vA.dy * vB.dy) / (magA * magB);
+  if (dot < 0.75)
+    return null;
+  const dx = (vA.dx + vB.dx) / 2;
+  const dy = (vA.dy + vB.dy) / 2;
+  const velocity = (gA.velocity + gB.velocity) / 2;
+  return {
+    kind: "two_finger_swipe",
+    origin: { x: (gA.origin.x + gB.origin.x) / 2, y: (gA.origin.y + gB.origin.y) / 2 },
+    vector: { dx, dy },
+    velocity,
+    pointerCount: 2
+  };
+}
+function segmentMultiPointer(paths, profile) {
+  if (paths.size !== 2)
+    return null;
+  const [pathA, pathB] = [...paths.values()];
+  if (!pathA || !pathB)
+    return null;
+  const pinch = segmentPinch(pathA, pathB);
+  if (pinch)
+    return pinch;
+  return segmentTwoFingerSwipe(pathA, pathB, profile);
+}
+function segmentGestureFromStream(stream) {
+  if (stream.length === 0)
+    return null;
+  const profile = computeSessionProfile(stream);
+  const normalized = normalizeSamples(stream, profile);
+  const paths = splitStreamByPointer(normalized);
+  if (paths.size === 2) {
+    const multi = segmentMultiPointer(paths, profile);
+    if (multi)
+      return multi;
+  }
+  if (paths.size === 1) {
+    const only = paths.values().next().value;
+    if (only)
+      return segmentGestureFromPath(only, profile);
+  }
+  for (const path of paths.values()) {
+    const g = segmentGestureFromPath(path, profile);
+    if (g)
+      return g;
+  }
+  return null;
+}
+function segmentGestureFromPath(samples, profile) {
   if (samples.length === 0)
     return null;
   const pointerIds = new Set(samples.map((s) => s.pointerId));
@@ -56,7 +211,8 @@ function segmentGestureFromPath(samples) {
   const travel = Math.hypot(dx, dy);
   if (travel >= MOVE_EPS * 3) {
     const dt = Math.max(1, last.tMs - first.tMs);
-    const velocity = travel / dt;
+    const rawVelocity = travel / dt;
+    const velocity = profile ? sessionRelativeVelocity(rawVelocity, profile) : rawVelocity;
     return {
       kind: "swipe",
       origin: { x: first.x, y: first.y },
@@ -100,6 +256,10 @@ function gestureEqualsExact(a, b) {
       return b.kind === "swipe" && a.pointerCount === b.pointerCount && approxEqual(a.vector.dx, b.vector.dx) && approxEqual(a.vector.dy, b.vector.dy);
     case "pan":
       return b.kind === "pan" && a.pointerCount === b.pointerCount && approxEqual(a.delta.dx, b.delta.dx) && approxEqual(a.delta.dy, b.delta.dy);
+    case "pinch":
+      return b.kind === "pinch" && a.pointerCount === b.pointerCount && approxEqual(a.scale, b.scale) && approxEqual(a.center.x, b.center.x) && approxEqual(a.center.y, b.center.y);
+    case "two_finger_swipe":
+      return b.kind === "two_finger_swipe" && a.pointerCount === b.pointerCount && approxEqual(a.vector.dx, b.vector.dx) && approxEqual(a.vector.dy, b.vector.dy);
     default:
       return false;
   }
@@ -122,11 +282,21 @@ function matchPattern(pattern, gesture) {
     if (pattern.maxDurationMs !== void 0 && gesture.durationMs > pattern.maxDurationMs)
       return false;
   }
-  if (gesture.kind === "swipe") {
+  if (gesture.kind === "swipe" || gesture.kind === "two_finger_swipe") {
     if (pattern.direction !== void 0 && swipeDirection(gesture.vector) !== pattern.direction) {
       return false;
     }
     if (pattern.minVelocity !== void 0 && gesture.velocity < pattern.minVelocity)
+      return false;
+  }
+  if (gesture.kind === "pinch") {
+    if (pattern.minScale !== void 0 && gesture.scale < pattern.minScale)
+      return false;
+    if (pattern.maxScale !== void 0 && gesture.scale > pattern.maxScale)
+      return false;
+    if (pattern.minDurationMs !== void 0 && gesture.durationMs < pattern.minDurationMs)
+      return false;
+    if (pattern.maxDurationMs !== void 0 && gesture.durationMs > pattern.maxDurationMs)
       return false;
   }
   return true;
@@ -4338,6 +4508,22 @@ var GestureTokenSchema = external_exports.discriminatedUnion("kind", [
     kind: external_exports.literal("pan"),
     delta: external_exports.object({ dx: external_exports.number(), dy: external_exports.number() }),
     pointerCount: external_exports.number().int().min(1).max(10)
+  }),
+  external_exports.object({
+    kind: external_exports.literal("pinch"),
+    center: external_exports.object({ x: external_exports.number(), y: external_exports.number() }),
+    /** endDistance / startDistance; <1 pinch in, >1 pinch out */
+    scale: external_exports.number().positive(),
+    pointerCount: external_exports.literal(2),
+    durationMs: external_exports.number().nonnegative()
+  }),
+  external_exports.object({
+    kind: external_exports.literal("two_finger_swipe"),
+    origin: external_exports.object({ x: external_exports.number(), y: external_exports.number() }),
+    vector: external_exports.object({ dx: external_exports.number(), dy: external_exports.number() }),
+    /** Session-relative when segmentation used a SessionProfile */
+    velocity: external_exports.number().nonnegative(),
+    pointerCount: external_exports.literal(2)
   })
 ]);
 
@@ -4376,10 +4562,19 @@ var TouchIntentSchema = external_exports.object({
   slots: external_exports.record(external_exports.unknown()).optional()
 });
 
+// packages/touch-spec/dist/session.js
+var SessionProfileSchema = external_exports.object({
+  sampleCount: external_exports.number().int().nonnegative(),
+  /** Typical swipe velocity in this session (median of completed swipes, or fallback). */
+  velocityBaseline: external_exports.number().nonnegative(),
+  /** Max observed pressure in session, lower-bounded at 1 for division safety. */
+  pressureBaseline: external_exports.number().positive()
+});
+
 // packages/touch-spec/dist/program.js
 var SwipeDirectionSchema = external_exports.enum(["up", "down", "left", "right"]);
 var TouchRuleMatchPatternSchema = external_exports.object({
-  kind: external_exports.enum(["tap", "long_press", "swipe", "pan"]).optional(),
+  kind: external_exports.enum(["tap", "long_press", "swipe", "pan", "pinch", "two_finger_swipe"]).optional(),
   pointerCount: external_exports.number().int().min(1).max(10).optional(),
   region: external_exports.object({
     x0: external_exports.number().min(0).max(1),
@@ -4390,7 +4585,10 @@ var TouchRuleMatchPatternSchema = external_exports.object({
   minDurationMs: external_exports.number().nonnegative().optional(),
   maxDurationMs: external_exports.number().nonnegative().optional(),
   direction: SwipeDirectionSchema.optional(),
-  minVelocity: external_exports.number().nonnegative().optional()
+  minVelocity: external_exports.number().nonnegative().optional(),
+  /** Pinch scale bounds (endDistance / startDistance) */
+  minScale: external_exports.number().positive().optional(),
+  maxScale: external_exports.number().positive().optional()
 });
 var TouchRuleConditionSchema = external_exports.object({
   gesture: GestureTokenSchema.optional(),
@@ -4427,6 +4625,7 @@ var TouchEventEnvelopeSchema = external_exports.object({
     os: external_exports.string().optional(),
     maxPointers: external_exports.number().int().positive().optional()
   }).optional(),
+  sessionProfile: SessionProfileSchema.optional(),
   stream: external_exports.array(TouchSampleSchema).optional(),
   gesture: GestureTokenSchema.optional(),
   intent: TouchIntentSchema.optional(),
@@ -4453,6 +4652,8 @@ function makeEnvelope(input) {
   };
   if (input.deviceProfile)
     env.deviceProfile = input.deviceProfile;
+  if (input.sessionProfile)
+    env.sessionProfile = input.sessionProfile;
   if (input.stream && input.stream.length > 0)
     env.stream = input.stream;
   if (input.gesture)
@@ -4479,6 +4680,7 @@ function detectDeviceProfile() {
 export {
   TOUCHLANG_SPEC_VERSION,
   WebHapticProgramPlayer,
+  computeSessionProfile,
   detectDeviceProfile,
   envelopeToJsonlLine,
   evaluateProgram,
@@ -4486,6 +4688,7 @@ export {
   materializeHapticSemantic,
   nextSessionId,
   segmentGestureFromPath,
+  segmentGestureFromStream,
   swipeDirection,
   touchSampleFromPointerEvent
 };

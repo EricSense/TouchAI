@@ -42,6 +42,21 @@ function gestureEqualsExact(a: GestureToken, b: GestureToken): boolean {
         approxEqual(a.delta.dx, b.delta.dx) &&
         approxEqual(a.delta.dy, b.delta.dy)
       );
+    case "pinch":
+      return (
+        b.kind === "pinch" &&
+        a.pointerCount === b.pointerCount &&
+        approxEqual(a.scale, b.scale) &&
+        approxEqual(a.center.x, b.center.x) &&
+        approxEqual(a.center.y, b.center.y)
+      );
+    case "two_finger_swipe":
+      return (
+        b.kind === "two_finger_swipe" &&
+        a.pointerCount === b.pointerCount &&
+        approxEqual(a.vector.dx, b.vector.dx) &&
+        approxEqual(a.vector.dy, b.vector.dy)
+      );
     default:
       return false;
   }
@@ -65,11 +80,18 @@ function matchPattern(pattern: TouchRuleMatchPattern, gesture: GestureToken): bo
     if (pattern.maxDurationMs !== undefined && gesture.durationMs > pattern.maxDurationMs) return false;
   }
 
-  if (gesture.kind === "swipe") {
+  if (gesture.kind === "swipe" || gesture.kind === "two_finger_swipe") {
     if (pattern.direction !== undefined && swipeDirection(gesture.vector) !== pattern.direction) {
       return false;
     }
     if (pattern.minVelocity !== undefined && gesture.velocity < pattern.minVelocity) return false;
+  }
+
+  if (gesture.kind === "pinch") {
+    if (pattern.minScale !== undefined && gesture.scale < pattern.minScale) return false;
+    if (pattern.maxScale !== undefined && gesture.scale > pattern.maxScale) return false;
+    if (pattern.minDurationMs !== undefined && gesture.durationMs < pattern.minDurationMs) return false;
+    if (pattern.maxDurationMs !== undefined && gesture.durationMs > pattern.maxDurationMs) return false;
   }
 
   return true;

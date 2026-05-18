@@ -11,7 +11,7 @@ export type SwipeDirection = z.infer<typeof SwipeDirectionSchema>;
  * Exact `when.gesture` remains for deterministic test fixtures.
  */
 export const TouchRuleMatchPatternSchema = z.object({
-  kind: z.enum(["tap", "long_press", "swipe", "pan"]).optional(),
+  kind: z.enum(["tap", "long_press", "swipe", "pan", "pinch", "two_finger_swipe"]).optional(),
   pointerCount: z.number().int().min(1).max(10).optional(),
   region: z
     .object({
@@ -25,6 +25,9 @@ export const TouchRuleMatchPatternSchema = z.object({
   maxDurationMs: z.number().nonnegative().optional(),
   direction: SwipeDirectionSchema.optional(),
   minVelocity: z.number().nonnegative().optional(),
+  /** Pinch scale bounds (endDistance / startDistance) */
+  minScale: z.number().positive().optional(),
+  maxScale: z.number().positive().optional(),
 });
 
 export type TouchRuleMatchPattern = z.infer<typeof TouchRuleMatchPatternSchema>;

@@ -1,11 +1,12 @@
 /**
  * Single browser entry re-exporting compiled package outputs for the static playground.
- * Imports dist/ subpaths directly (avoids Node-only jsonl-node in the dataset barrel).
  */
 export { TOUCHLANG_SPEC_VERSION } from "../packages/touch-spec/dist/version.js";
 export {
   segmentGestureFromPath,
+  segmentGestureFromStream,
   swipeDirection,
+  computeSessionProfile,
   evaluateProgram,
   materializeHapticSemantic,
 } from "../packages/touch-runtime/dist/index.js";

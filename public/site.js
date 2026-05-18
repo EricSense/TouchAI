@@ -9,7 +9,8 @@
 import {
   TOUCHLANG_SPEC_VERSION,
   touchSampleFromPointerEvent,
-  segmentGestureFromPath,
+  segmentGestureFromStream,
+  computeSessionProfile,
   evaluateProgram,
   materializeHapticSemantic,
   WebHapticProgramPlayer,
@@ -20,7 +21,7 @@ import {
 } from "/touchai/runtime.mjs";
 
 const FALLBACK = {
-  lastUpdated: "2026-05-14",
+  lastUpdated: "2026-05-18",
   specVersion: TOUCHLANG_SPEC_VERSION,
   headline: "TouchAI",
   subhead:
@@ -218,6 +219,7 @@ function wirePlayground(program) {
   let stream = [];
   const tail = [];
   const maxTail = 12;
+  const activePointers = new Set();
 
   const pushSample = (event) => {
     const s = touchSampleFromPointerEvent(event, pad, sessionStart);
@@ -229,30 +231,35 @@ function wirePlayground(program) {
   };
 
   const onStart = (e) => {
-    sessionStart = performance.now();
-    stream = [];
-    tail.length = 0;
-    renderer.clear();
-    pad.classList.add("live");
-    pad.setPointerCapture(e.pointerId);
+    if (activePointers.size === 0) {
+      sessionStart = performance.now();
+      stream = [];
+      tail.length = 0;
+      renderer.clear();
+      pad.classList.add("live");
+    }
+    activePointers.add(e.pointerId);
     pushSample(e);
   };
 
   const onMove = (e) => {
-    if (!pad.hasPointerCapture(e.pointerId)) return;
+    if (!activePointers.has(e.pointerId)) return;
     pushSample(e);
   };
 
   const onEnd = (e) => {
-    if (!pad.hasPointerCapture(e.pointerId)) return;
+    if (!activePointers.has(e.pointerId)) return;
     pushSample(e);
-    pad.releasePointerCapture(e.pointerId);
-    pad.classList.remove("live");
-    finishSession();
+    activePointers.delete(e.pointerId);
+    if (activePointers.size === 0) {
+      pad.classList.remove("live");
+      finishSession();
+    }
   };
 
   function finishSession() {
-    const gesture = segmentGestureFromPath(stream);
+    const sessionProfile = computeSessionProfile(stream);
+    const gesture = segmentGestureFromStream(stream);
     const rule = gesture ? evaluateProgram(program, gesture) : undefined;
     const intent = rule?.then?.intent;
     const hapticSemantic = rule?.then?.haptic;
@@ -265,6 +272,13 @@ function wirePlayground(program) {
     } else {
       setChip("chip-gesture", "gesture", "no match", false);
     }
+
+    setChip(
+      "chip-session",
+      "session",
+      `v₀ ${sessionProfile.velocityBaseline.toExponential(2)} · p₀ ${sessionProfile.pressureBaseline.toFixed(2)} · n=${sessionProfile.sampleCount}`,
+      true,
+    );
 
     if (intent) {
       setChip("chip-intent", "intent", `${intent.intentId} · ${(intent.confidence * 100).toFixed(0)}%`, true);
@@ -286,6 +300,7 @@ function wirePlayground(program) {
       intent,
       haptic: hapticSemantic,
       deviceProfile,
+      sessionProfile,
     });
     envLog.textContent = envelopeToJsonlLine(envelope).trimEnd();
   }
@@ -315,13 +330,18 @@ function wirePlayground(program) {
 function describeGesture(g) {
   if (g.kind === "tap") return `tap @ (${g.center.x.toFixed(2)}, ${g.center.y.toFixed(2)})`;
   if (g.kind === "long_press") return `long_press ${Math.round(g.durationMs)}ms`;
-  if (g.kind === "swipe") {
+  if (g.kind === "pinch") {
+    const dir = g.scale < 1 ? "in" : "out";
+    return `pinch ${dir} ×${g.scale.toFixed(2)}`;
+  }
+  if (g.kind === "swipe" || g.kind === "two_finger_swipe") {
     const angle = (Math.atan2(g.vector.dy, g.vector.dx) * 180) / Math.PI;
     let dir = "right";
     if (angle >= 45 && angle < 135) dir = "down";
     else if (angle >= -135 && angle < -45) dir = "up";
     else if (angle >= 135 || angle < -135) dir = "left";
-    return `swipe ${dir}`;
+    const prefix = g.kind === "two_finger_swipe" ? "2f-swipe" : "swipe";
+    return `${prefix} ${dir}`;
   }
   if (g.kind === "pan") return "pan";
   return g.kind;

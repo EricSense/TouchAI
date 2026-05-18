@@ -6,6 +6,7 @@ dist
 coverage
 .env
 .env.*
+.npmrc
 packages/touch-adapter-android/.gradle
 packages/touch-adapter-android/build
 .swiftpm

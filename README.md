@@ -26,13 +26,19 @@ When TouchAI is real:
 ## Install
 
 ```bash
-npm install @touchai/touch-runtime @touchai/touch-spec
+npm install @touchai/touch-runtime @touchai/touch-spec @touchai/touch-dataset
 ```
 
 Works in **Node.js** and bundlers (Vite, esbuild, webpack). Requires Node 20+.
 
-> Packages are published-ready from this monorepo. If `@touchai/*` is not yet on npm, install from the repo:  
-> `pnpm install` then `pnpm run build` and link locally, or watch [GitHub releases](https://github.com/EricSense/TouchAI).
+### Publish locally
+
+```bash
+npm login
+pnpm run publish:npm
+```
+
+Or set `NPM_TOKEN` and run `node scripts/publish-npm.mjs`. GitHub Actions workflow **Publish npm packages** uses the `NPM_TOKEN` repository secret.
 
 ---
 
@@ -96,15 +102,7 @@ Output is a **`TouchEventEnvelope`**—the wire format for logging, training dat
 pnpm install
 pnpm run build:all   # compile packages + playground bundle
 pnpm test            # 40+ tests
-```
-
-### Publish to npm
-
-```bash
-node scripts/prepare-publish.mjs   # workspace:* → ^0.2.0 for registry
-cd packages/touch-spec && npm publish --access public
-cd ../touch-runtime && npm publish --access public
-git checkout -- packages/*/package.json   # restore workspace protocol
+pnpm run publish:npm # after npm login — publishes all @touchai/* packages
 ```
 
 Monorepo uses **pnpm workspaces**. Root `package.json` scripts orchestrate builds; Vercel deploys static `public/` (no install on CI).

@@ -1,0 +1,53 @@
+name: Publish npm packages
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+          cache: "pnpm"
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: node scripts/prepare-publish.mjs
+
+      - run: pnpm run build -w @touchai/touch-spec && pnpm run build -w @touchai/touch-runtime && pnpm run build -w @touchai/touch-dataset && pnpm run build -w @touchai/touch-adapter-web
+
+      - name: Publish @touchai/touch-spec
+        run: npm publish --access public --provenance
+        working-directory: packages/touch-spec
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @touchai/touch-runtime
+        run: npm publish --access public --provenance
+        working-directory: packages/touch-runtime
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @touchai/touch-dataset
+        run: npm publish --access public --provenance
+        working-directory: packages/touch-dataset
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @touchai/touch-adapter-web
+        run: npm publish --access public --provenance
+        working-directory: packages/touch-adapter-web
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

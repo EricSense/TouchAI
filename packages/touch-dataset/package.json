@@ -1,7 +1,8 @@
 {
   "name": "@touchai/touch-dataset",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "JSONL helpers for TouchEventEnvelope datasets (export, parse, append)",
+  "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -12,9 +13,23 @@
     }
   },
   "files": ["dist"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EricSense/TouchAI.git",
+    "directory": "packages/touch-dataset"
+  },
+  "homepage": "https://github.com/EricSense/TouchAI#install",
+  "bugs": {
+    "url": "https://github.com/EricSense/TouchAI/issues"
+  },
+  "keywords": ["touchai", "touch", "jsonl", "dataset", "touch-language"],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@touchai/touch-spec": "workspace:*"
@@ -23,5 +38,8 @@
     "@types/node": "^22.10.1",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

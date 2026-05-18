@@ -4677,6 +4677,150 @@ function detectDeviceProfile() {
     maxPointers
   };
 }
+
+// packages/touch-ai-bridge/dist/providers/rules.js
+function resolveWithRules(envelope, program) {
+  if (envelope.gesture) {
+    const rule = evaluateProgram(program, envelope.gesture);
+    if (rule) {
+      return {
+        source: "rules",
+        ruleId: rule.id,
+        intent: rule.then.intent ?? envelope.intent,
+        haptic: rule.then.haptic ?? envelope.haptic
+      };
+    }
+  }
+  if (envelope.intent || envelope.haptic) {
+    return {
+      source: "envelope",
+      intent: envelope.intent,
+      haptic: envelope.haptic
+    };
+  }
+  return { source: "none" };
+}
+
+// packages/touch-ai-bridge/dist/prompt.js
+var DEFAULT_SYSTEM = `You are TouchAI, a touch interaction interpreter.
+Given a TouchEventEnvelope (gesture + optional session context), respond with JSON only:
+{
+  "intent": { "intentId": string, "confidence": number 0-1, "slots"?: object },
+  "haptic": { "kind": "ack_light"|"ack_medium"|"ack_heavy"|"confirm_success"|"confirm_warning"|"confirm_error"|"understood"|"clarify" },
+  "reasoning"?: string
+}
+Pick intentId from the TouchProgram rules when possible. Be concise.`;
+function buildBridgeMessages(envelope, program, systemPrompt = DEFAULT_SYSTEM) {
+  const programSummary = program?.rules.map((r) => `- ${r.id}: ${JSON.stringify(r.when)} \u2192 intent=${r.then.intent?.intentId ?? "\u2014"}`).join("\n") ?? "(no program rules)";
+  const userContent = [
+    `specVersion: ${envelope.specVersion ?? TOUCHLANG_SPEC_VERSION}`,
+    `sessionId: ${envelope.sessionId}`,
+    envelope.sessionProfile ? `sessionProfile: velocityBaseline=${envelope.sessionProfile.velocityBaseline}, pressureBaseline=${envelope.sessionProfile.pressureBaseline}, samples=${envelope.sessionProfile.sampleCount}` : null,
+    envelope.gesture ? `gesture: ${JSON.stringify(envelope.gesture)}` : "gesture: (none)",
+    envelope.intent ? `existingIntent: ${JSON.stringify(envelope.intent)}` : null,
+    `
+TouchProgram rules:
+${programSummary}`,
+    "\nRespond with JSON only."
+  ].filter(Boolean).join("\n");
+  return [
+    { role: "system", content: systemPrompt },
+    { role: "user", content: userContent }
+  ];
+}
+
+// packages/touch-ai-bridge/dist/parse.js
+var BridgeResponseSchema = external_exports.object({
+  intent: TouchIntentSchema.optional(),
+  haptic: HapticSemanticSchema.optional(),
+  reasoning: external_exports.string().optional()
+});
+function parseBridgeResponseText(text) {
+  const trimmed = text.trim();
+  const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  const candidate = (fenced?.[1] ?? trimmed).trim();
+  let json;
+  try {
+    json = JSON.parse(candidate);
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "invalid_json";
+    return { ok: false, error: message };
+  }
+  const parsed = BridgeResponseSchema.safeParse(json);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: parsed.error.flatten().formErrors.join("; ") || "schema_mismatch"
+    };
+  }
+  return { ok: true, value: parsed.data };
+}
+
+// packages/touch-ai-bridge/dist/providers/llm.js
+var DEFAULT_API_URL = "https://api.openai.com/v1/chat/completions";
+var DEFAULT_MODEL = "gpt-4o-mini";
+async function resolveWithLLM(envelope, program, config, fetchFn = fetch) {
+  const messages = buildBridgeMessages(envelope, program, config.systemPrompt);
+  const controller = new AbortController();
+  const timeoutMs = config.timeoutMs ?? 3e4;
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  let response;
+  try {
+    response = await fetchFn(config.apiUrl ?? DEFAULT_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${config.apiKey}`
+      },
+      body: JSON.stringify({
+        model: config.model ?? DEFAULT_MODEL,
+        temperature: 0.2,
+        response_format: { type: "json_object" },
+        messages
+      }),
+      signal: controller.signal
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    throw new Error(`LLM request failed (${response.status}): ${detail.slice(0, 200)}`);
+  }
+  const body = await response.json();
+  const content = body.choices?.[0]?.message?.content;
+  if (!content)
+    throw new Error("LLM response missing message content");
+  const parsed = parseBridgeResponseText(content);
+  if (!parsed.ok)
+    throw new Error(`LLM JSON parse failed: ${parsed.error}`);
+  return {
+    source: "llm",
+    intent: parsed.value.intent ?? envelope.intent,
+    haptic: parsed.value.haptic ?? envelope.haptic,
+    reasoning: parsed.value.reasoning
+  };
+}
+
+// packages/touch-ai-bridge/dist/resolve.js
+async function resolveTouchBridge(input) {
+  const mode = input.mode ?? "rules";
+  if (mode === "rules") {
+    return resolveWithRules(input.envelope, input.program);
+  }
+  if (mode === "llm") {
+    if (!input.llm)
+      throw new Error("resolveTouchBridge: llm config required for mode=llm");
+    return resolveWithLLM(input.envelope, input.program, input.llm, input.fetch);
+  }
+  const rulesResult = resolveWithRules(input.envelope, input.program);
+  if (rulesResult.source === "rules" && (rulesResult.intent || rulesResult.haptic)) {
+    return rulesResult;
+  }
+  if (!input.llm)
+    throw new Error("resolveTouchBridge: llm config required for mode=rules-then-llm fallback");
+  return resolveWithLLM(input.envelope, input.program, input.llm, input.fetch);
+}
 export {
   TOUCHLANG_SPEC_VERSION,
   WebHapticProgramPlayer,
@@ -4687,6 +4831,7 @@ export {
   makeEnvelope,
   materializeHapticSemantic,
   nextSessionId,
+  resolveTouchBridge,
   segmentGestureFromPath,
   segmentGestureFromStream,
   swipeDirection,

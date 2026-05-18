@@ -26,7 +26,7 @@ jobs:
 
       - run: node scripts/prepare-publish.mjs
 
-      - run: pnpm run build -w @touchai/touch-spec && pnpm run build -w @touchai/touch-runtime && pnpm run build -w @touchai/touch-dataset && pnpm run build -w @touchai/touch-adapter-web
+      - run: pnpm run build -w @touchai/touch-spec && pnpm run build -w @touchai/touch-runtime && pnpm run build -w @touchai/touch-dataset && pnpm run build -w @touchai/touch-adapter-web && pnpm run build -w @touchai/ai-bridge
 
       - name: Publish @touchai/touch-spec
         run: npm publish --access public --provenance
@@ -49,5 +49,11 @@ jobs:
       - name: Publish @touchai/touch-adapter-web
         run: npm publish --access public --provenance
         working-directory: packages/touch-adapter-web
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @touchai/ai-bridge
+        run: npm publish --access public --provenance
+        working-directory: packages/touch-ai-bridge
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

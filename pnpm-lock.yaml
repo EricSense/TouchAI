@@ -31,6 +31,28 @@ importers:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@22.19.19)
 
+  packages/touch-ai-bridge:
+    dependencies:
+      '@touchai/touch-runtime':
+        specifier: workspace:*
+        version: link:../touch-runtime
+      '@touchai/touch-spec':
+        specifier: workspace:*
+        version: link:../touch-spec
+      zod:
+        specifier: ^3.24.1
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.1
+        version: 22.19.19
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.19.19)
+
   packages/touch-dataset:
     dependencies:
       '@touchai/touch-spec':

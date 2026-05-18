@@ -6,10 +6,11 @@
     "packages/touch-spec",
     "packages/touch-runtime",
     "packages/touch-dataset",
-    "packages/touch-adapter-web"
+    "packages/touch-adapter-web",
+    "packages/touch-ai-bridge"
   ],
   "scripts": {
-    "build": "npm run build -w @touchai/touch-spec && npm run build -w @touchai/touch-runtime && npm run build -w @touchai/touch-dataset && npm run build -w @touchai/touch-adapter-web",
+    "build": "npm run build -w @touchai/touch-spec && npm run build -w @touchai/touch-runtime && npm run build -w @touchai/touch-dataset && npm run build -w @touchai/touch-adapter-web && npm run build -w @touchai/ai-bridge",
     "build:playground": "node scripts/bundle-playground.mjs",
     "build:all": "npm run build && npm run build:playground",
     "publish:npm": "node scripts/publish-npm.mjs",

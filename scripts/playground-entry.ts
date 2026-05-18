@@ -13,3 +13,4 @@ export {
 export { touchSampleFromPointerEvent, WebHapticProgramPlayer } from "../packages/touch-adapter-web/dist/index.js";
 export { envelopeToJsonlLine } from "../packages/touch-dataset/dist/jsonl-core.js";
 export { makeEnvelope, nextSessionId, detectDeviceProfile } from "../packages/touch-dataset/dist/envelope-client.js";
+export { resolveTouchBridge } from "../packages/touch-ai-bridge/dist/index.js";

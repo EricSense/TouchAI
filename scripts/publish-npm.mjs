@@ -6,7 +6,7 @@
  *   npm login   OR   NPM_TOKEN=npm_xxx node scripts/publish-npm.mjs
  *   OTP=123456 pnpm run publish:npm   (when 2FA is enabled on your npm account)
  *
- * Publishes: touch-spec → touch-runtime → touch-dataset → touch-adapter-web
+ * Publishes: touch-spec → touch-runtime → touch-dataset → touch-adapter-web → ai-bridge
  * Restores workspace:* in package.json when done.
  */
 import { execSync } from "node:child_process";
@@ -43,7 +43,7 @@ function cleanup() {
   if (!hadNpmrc && existsSync(npmrcPath)) {
     unlinkSync(npmrcPath);
   }
-  run("git checkout -- packages/touch-spec/package.json packages/touch-runtime/package.json packages/touch-dataset/package.json packages/touch-adapter-web/package.json");
+  run("git checkout -- packages/touch-spec/package.json packages/touch-runtime/package.json packages/touch-dataset/package.json packages/touch-adapter-web/package.json packages/touch-ai-bridge/package.json");
 }
 
 const publishOrder = [
@@ -51,6 +51,7 @@ const publishOrder = [
   "packages/touch-runtime",
   "packages/touch-dataset",
   "packages/touch-adapter-web",
+  "packages/touch-ai-bridge",
 ];
 
 try {
@@ -65,6 +66,7 @@ try {
   run("pnpm run build -w @touchai/touch-runtime");
   run("pnpm run build -w @touchai/touch-dataset");
   run("pnpm run build -w @touchai/touch-adapter-web");
+  run("pnpm run build -w @touchai/ai-bridge");
 
   const otp = process.env.NPM_OTP || process.env.OTP;
   const otpFlag = otp ? ` --otp=${otp}` : "";

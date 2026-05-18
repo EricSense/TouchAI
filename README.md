@@ -103,6 +103,25 @@ val env = makeEnvelope(MakeEnvelopeInput(
 val line = envelopeToJsonlLine(env)
 ```
 
+### AI bridge (rules or LLM)
+
+```typescript
+import { resolveTouchBridge } from "@touchai/ai-bridge";
+import { makeEnvelope } from "@touchai/touch-dataset";
+
+// Offline: TouchProgram rules (playground default)
+const rules = await resolveTouchBridge({ mode: "rules", envelope, program });
+
+// Hybrid: rules first, LLM when no rule matches
+const hybrid = await resolveTouchBridge({
+  mode: "rules-then-llm",
+  envelope,
+  program,
+  llm: { apiKey: process.env.OPENAI_API_KEY! },
+});
+// hybrid.intent, hybrid.haptic, hybrid.source → "rules" | "llm"
+```
+
 ---
 
 ## What's in the repo
@@ -113,6 +132,7 @@ val line = envelopeToJsonlLine(env)
 | `@touchai/touch-runtime` | Session normalization, gesture segmentation, rule engine, haptic materialization |
 | `@touchai/touch-dataset` | JSONL helpers + envelope builders |
 | `@touchai/touch-adapter-web` | Browser pointer → `TouchSample`, Vibration API haptics |
+| `@touchai/ai-bridge` | Envelope → intent + haptic via **rules** or **LLM** (OpenAI-compatible) |
 | `touch-adapter-ios` | UIKit mappers, haptic playback, **`TouchEventEnvelope` + JSONL export** |
 | `touch-adapter-android` | MotionEvent mappers, haptic playback, **`TouchEventEnvelope` + JSONL export** |
 
@@ -141,8 +161,8 @@ Monorepo uses **pnpm workspaces**. Root `package.json` scripts orchestrate build
 - [x] Session normalization + multi-pointer gestures (pinch, two-finger swipe)
 - [x] npm publish `@touchai/*` v0.2.0
 - [x] Native envelope builders (Swift/Kotlin → JSONL)
+- [x] `@touchai/ai-bridge` — envelope → intent + haptic (rules + LLM)
 - [ ] On-device gesture segmentation in native adapters
-- [ ] `@touchai/ai-bridge` — envelope stream → LLM → intent + haptic
 - [ ] Dataset ingest API with strict `specVersion` validation
 - [ ] `.touch` DSL → `TouchProgram` compiler
 

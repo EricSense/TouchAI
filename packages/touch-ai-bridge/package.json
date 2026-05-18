@@ -1,0 +1,47 @@
+{
+  "name": "@touchai/ai-bridge",
+  "version": "0.2.0",
+  "description": "TouchAI bridge: TouchEventEnvelope → intent + haptic via rules or LLM",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EricSense/TouchAI.git",
+    "directory": "packages/touch-ai-bridge"
+  },
+  "homepage": "https://github.com/EricSense/TouchAI#install",
+  "bugs": {
+    "url": "https://github.com/EricSense/TouchAI/issues"
+  },
+  "keywords": ["touchai", "touch", "ai", "llm", "haptics", "touch-language"],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@touchai/touch-spec": "workspace:*",
+    "@touchai/touch-runtime": "workspace:*",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

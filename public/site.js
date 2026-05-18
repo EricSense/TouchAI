@@ -7,13 +7,13 @@ import {
   touchSampleFromPointerEvent,
   segmentGestureFromStream,
   computeSessionProfile,
-  evaluateProgram,
   materializeHapticSemantic,
   WebHapticProgramPlayer,
   detectDeviceProfile,
   envelopeToJsonlLine,
   makeEnvelope,
   nextSessionId,
+  resolveTouchBridge,
 } from "/touchai/runtime.mjs";
 
 async function loadProgram() {
@@ -188,49 +188,65 @@ function wirePlayground(program) {
   function finishSession() {
     const sessionProfile = computeSessionProfile(stream);
     const gesture = segmentGestureFromStream(stream);
-    const rule = gesture ? evaluateProgram(program, gesture) : undefined;
-    const intent = rule?.then?.intent;
-    const hapticSemantic = rule?.then?.haptic;
-    const hapticProgram = hapticSemantic ? materializeHapticSemantic(hapticSemantic) : undefined;
+    const envelope = makeEnvelope({
+      sessionId: nextSessionId(),
+      stream,
+      gesture: gesture || undefined,
+      deviceProfile,
+      sessionProfile,
+    });
 
-    if (gesture) {
-      setChip("chip-gesture", "gesture", describeGesture(gesture), true);
-      renderer.flash();
-    } else {
-      setChip("chip-gesture", "gesture", "no match", false);
-    }
+    resolveTouchBridge({ mode: "rules", envelope, program }).then((bridge) => {
+      const intent = bridge.intent;
+      const hapticSemantic = bridge.haptic;
+      const hapticProgram = hapticSemantic ? materializeHapticSemantic(hapticSemantic) : undefined;
 
-    setChip(
-      "chip-session",
-      "session",
-      `v₀ ${sessionProfile.velocityBaseline.toExponential(2)} · p₀ ${sessionProfile.pressureBaseline.toFixed(2)} · n=${sessionProfile.sampleCount}`,
-      true,
-    );
+      if (gesture) {
+        setChip("chip-gesture", "gesture", describeGesture(gesture), true);
+        renderer.flash();
+      } else {
+        setChip("chip-gesture", "gesture", "no match", false);
+      }
 
-    if (intent) {
-      setChip("chip-intent", "intent", `${intent.intentId} · ${(intent.confidence * 100).toFixed(0)}%`, true);
-    } else {
-      setChip("chip-intent", "intent", "—", false);
-    }
+      setChip(
+        "chip-session",
+        "session",
+        `v₀ ${sessionProfile.velocityBaseline.toExponential(2)} · p₀ ${sessionProfile.pressureBaseline.toFixed(2)} · n=${sessionProfile.sampleCount}`,
+        true,
+      );
 
-    if (hapticSemantic) {
-      setChip("chip-haptic", "haptic", hapticSemantic.kind, true);
-      if (hapticProgram && haptics.isSupported()) haptics.play(hapticProgram);
-    } else {
-      setChip("chip-haptic", "haptic", "—", false);
-    }
+      setChip(
+        "chip-bridge",
+        "bridge",
+        bridge.ruleId ? `${bridge.source} · ${bridge.ruleId}` : bridge.source,
+        bridge.source !== "none",
+      );
 
-    envLog.textContent = envelopeToJsonlLine(
-      makeEnvelope({
-        sessionId: nextSessionId(),
-        stream,
-        gesture: gesture || undefined,
-        intent,
-        haptic: hapticSemantic,
-        deviceProfile,
-        sessionProfile,
-      }),
-    ).trimEnd();
+      if (intent) {
+        setChip("chip-intent", "intent", `${intent.intentId} · ${(intent.confidence * 100).toFixed(0)}%`, true);
+      } else {
+        setChip("chip-intent", "intent", "—", false);
+      }
+
+      if (hapticSemantic) {
+        setChip("chip-haptic", "haptic", hapticSemantic.kind, true);
+        if (hapticProgram && haptics.isSupported()) haptics.play(hapticProgram);
+      } else {
+        setChip("chip-haptic", "haptic", "—", false);
+      }
+
+      envLog.textContent = envelopeToJsonlLine(
+        makeEnvelope({
+          sessionId: envelope.sessionId,
+          stream,
+          gesture: gesture || undefined,
+          intent,
+          haptic: hapticSemantic,
+          deviceProfile,
+          sessionProfile,
+        }),
+      ).trimEnd();
+    });
   }
 
   if (copyBtn) {

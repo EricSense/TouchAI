@@ -17,6 +17,7 @@ const packages = [
   "packages/touch-runtime",
   "packages/touch-dataset",
   "packages/touch-adapter-web",
+  "packages/touch-ai-bridge",
 ];
 
 for (const pkgDir of packages) {

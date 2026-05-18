@@ -1,0 +1,127 @@
+# TouchAI
+
+**TouchAI is a touch interaction language and runtime that lets app and AI developers turn gestures into structured intents and haptic responses—without rebuilding gesture detection on every platform.**
+
+Built for **mobile/web app developers**, **AI/ML engineers** shipping on-device experiences, and **platform teams** who need one touch+haptic layer above iOS, Android, and the web.
+
+---
+
+## The problem
+
+Touch is the primary interface on phones and tablets, but AI still mostly speaks **text and voice**.
+
+Today, every app reinvents gesture handling with platform-specific APIs. There is no shared vocabulary for what a user *meant* with their fingers—and no standard way for AI to answer back with **haptics** instead of more pixels. That makes on-device AI feel disconnected from how people actually use hardware.
+
+## The vision
+
+When TouchAI is real:
+
+- **One grammar** for touch input and haptic output across devices
+- **Developers** write `TouchProgram` rules once; adapters map to UIKit, Android, and the web
+- **Models** train on versioned `TouchEventEnvelope` JSONL—not raw coordinates
+- **Users** get AI that understands physical intention and responds with *feel*, not only text
+
+---
+
+## Install
+
+```bash
+npm install @touchai/touch-runtime @touchai/touch-spec
+```
+
+Works in **Node.js** and bundlers (Vite, esbuild, webpack). Requires Node 20+.
+
+> Packages are published-ready from this monorepo. If `@touchai/*` is not yet on npm, install from the repo:  
+> `pnpm install` then `pnpm run build` and link locally, or watch [GitHub releases](https://github.com/EricSense/TouchAI).
+
+---
+
+## Quickstart (~10 lines)
+
+```typescript
+import { segmentGestureFromStream, evaluateProgram, materializeHapticSemantic } from "@touchai/touch-runtime";
+import { makeEnvelope } from "@touchai/touch-dataset";
+import type { TouchProgram, TouchSample } from "@touchai/touch-spec";
+
+const program: TouchProgram = {
+  rules: [{
+    id: "swipe_confirm",
+    when: { match: { kind: "swipe", direction: "right" } },
+    then: {
+      intent: { intentId: "confirm", confidence: 0.9 },
+      haptic: { kind: "confirm_success" },
+    },
+  }],
+};
+
+const stream: TouchSample[] = [ /* pointer samples: tMs, phase, x, y, pointerId */ ];
+const gesture = segmentGestureFromStream(stream);
+const rule = gesture ? evaluateProgram(program, gesture) : undefined;
+const hapticProgram = rule?.then.haptic
+  ? materializeHapticSemantic(rule.then.haptic)
+  : undefined;
+
+const envelope = makeEnvelope({
+  sessionId: "demo-1",
+  stream,
+  gesture: gesture ?? undefined,
+  intent: rule?.then.intent,
+  haptic: rule?.then.haptic,
+});
+```
+
+Output is a **`TouchEventEnvelope`**—the wire format for logging, training data, and cross-device replay.
+
+---
+
+## What's in the repo
+
+| Package | Purpose |
+|---------|---------|
+| `@touchai/touch-spec` | Wire types + Zod schemas + JSON Schema export (v0.2.0) |
+| `@touchai/touch-runtime` | Session normalization, gesture segmentation, rule engine, haptic materialization |
+| `@touchai/touch-dataset` | JSONL helpers + envelope builders |
+| `@touchai/touch-adapter-web` | Browser pointer → `TouchSample`, Vibration API haptics |
+| `touch-adapter-ios` / `touch-adapter-android` | Native sample mappers + haptic playback |
+
+**Live demo:** [touchai site](https://github.com/EricSense/TouchAI) — try the prototype playground (gesture pad → intent + JSONL envelope).
+
+**Spec artifacts:** `public/schemas/*.schema.json` · [TouchEventEnvelope](public/schemas/TouchEventEnvelope.schema.json)
+
+---
+
+## Develop
+
+```bash
+pnpm install
+pnpm run build:all   # compile packages + playground bundle
+pnpm test            # 40+ tests
+```
+
+### Publish to npm
+
+```bash
+node scripts/prepare-publish.mjs   # workspace:* → ^0.2.0 for registry
+cd packages/touch-spec && npm publish --access public
+cd ../touch-runtime && npm publish --access public
+git checkout -- packages/*/package.json   # restore workspace protocol
+```
+
+Monorepo uses **pnpm workspaces**. Root `package.json` scripts orchestrate builds; Vercel deploys static `public/` (no install on CI).
+
+---
+
+## Roadmap
+
+- [x] Touch Language spec + runtime + JSON Schema
+- [x] Session normalization + multi-pointer gestures (pinch, two-finger swipe)
+- [ ] Native envelope SDKs (Swift/Kotlin end-to-end)
+- [ ] `@touchai/ai-bridge` — envelope stream → LLM → intent + haptic
+- [ ] Dataset ingest API with strict `specVersion` validation
+- [ ] `.touch` DSL → `TouchProgram` compiler
+
+---
+
+## License
+
+MIT · [EricSense/TouchAI](https://github.com/EricSense/TouchAI)

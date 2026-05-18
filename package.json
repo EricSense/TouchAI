@@ -1,6 +1,7 @@
 {
   "name": "touchai",
   "private": true,
+  "license": "MIT",
   "workspaces": [
     "packages/touch-spec",
     "packages/touch-runtime",

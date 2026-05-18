@@ -1,13 +1,9 @@
 /**
- * TouchAI landing + playground.
- *
- * Runtime is bundled from npm packages → public/touchai/runtime.mjs
- * via `npm run build:all`. The static site imports that bundle so behavior
- * matches @touchai/touch-runtime exactly.
+ * TouchAI playground — wires the gesture pad only.
+ * All landing-page copy lives in index.html (no JS required for first paint).
  */
 
 import {
-  TOUCHLANG_SPEC_VERSION,
   touchSampleFromPointerEvent,
   segmentGestureFromStream,
   computeSessionProfile,
@@ -20,96 +16,14 @@ import {
   nextSessionId,
 } from "/touchai/runtime.mjs";
 
-const FALLBACK = {
-  lastUpdated: "2026-05-18",
-  specVersion: TOUCHLANG_SPEC_VERSION,
-  headline: "TouchAI",
-  subhead:
-    "Touch as a structured language for AI on devices: normalized streams in, haptic programs out, versioned envelopes for training.",
-  layers: [
-    { id: "input", title: "Input", subtitle: "Touch Language", body: "Pointer and touch paths → TouchSample streams and GestureTokens." },
-    { id: "output", title: "Output", subtitle: "Haptics", body: "Semantic haptics → neutral pulse programs → platform adapters." },
-    { id: "infra", title: "Infrastructure", subtitle: "Programs & envelopes", body: "TouchProgram + TouchEventEnvelope JSONL across devices." },
-  ],
-  packages: [],
-  next: [],
-  links: { github: "https://github.com/EricSense/TouchAI" },
-};
-
-function el(tag, props = {}, children = []) {
-  const node = document.createElement(tag);
-  for (const [k, v] of Object.entries(props)) {
-    if (k === "class") node.className = v;
-    else if (k === "text") node.textContent = v;
-    else node.setAttribute(k, String(v));
+async function loadProgram() {
+  try {
+    const res = await fetch("/touchai/program.example.json", { cache: "no-store" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch {
+    return { rules: [] };
   }
-  for (const c of children) node.appendChild(c);
-  return node;
-}
-
-function renderSite(data) {
-  document.title = `${data.headline} — touch language for AI on devices`;
-  setText("spec-pill", `spec ${data.specVersion}`);
-  setText("hero-title", data.headline);
-  setText("hero-lead", data.subhead);
-
-  const pills = document.getElementById("hero-pills");
-  if (pills) pills.hidden = false;
-  setText("pill-spec", data.specVersion);
-  setText("pill-updated", data.lastUpdated);
-
-  const gh = document.getElementById("nav-github");
-  if (gh && data.links?.github) gh.href = data.links.github;
-
-  const layersGrid = document.getElementById("layers-grid");
-  if (layersGrid) {
-    layersGrid.replaceChildren(
-      ...data.layers.map((layer) =>
-        el("article", { class: "card" }, [
-          el("h3", { text: layer.title }),
-          el("p", { class: "sub", text: layer.subtitle }),
-          el("p", { text: layer.body }),
-        ]),
-      ),
-    );
-  }
-
-  const pkgGrid = document.getElementById("packages-grid");
-  if (pkgGrid) {
-    pkgGrid.replaceChildren(
-      ...(data.packages || []).map((pkg) => {
-        const badge = el("span", {
-          class: `badge ${pkg.status === "shipped" ? "shipped" : "planned"}`,
-          text: pkg.status || "planned",
-        });
-        const header = el("header", {}, [el("code", { text: pkg.name }), badge]);
-        return el("article", { class: "pkg" }, [header, el("p", { text: pkg.summary || "" })]);
-      }),
-    );
-  }
-
-  const nextList = document.getElementById("next-list");
-  if (nextList) {
-    nextList.replaceChildren(...(data.next || []).map((t) => el("li", { text: t })));
-  }
-
-  const footLinks = document.getElementById("foot-links");
-  if (footLinks && data.links) {
-    const parts = [];
-    if (data.links.github) parts.push(el("a", { href: data.links.github, text: "Repository" }));
-    if (data.links.specVersionFile) parts.push(el("a", { href: data.links.specVersionFile, text: "Spec version (source)" }));
-    const out = [];
-    parts.forEach((a, i) => {
-      if (i > 0) out.push(document.createTextNode(" · "));
-      out.push(a);
-    });
-    footLinks.replaceChildren(...out);
-  }
-}
-
-function setText(id, text) {
-  const node = document.getElementById(id);
-  if (node) node.textContent = text;
 }
 
 function setChip(id, label, value, live) {
@@ -122,7 +36,7 @@ function setChip(id, label, value, live) {
 class TrailRenderer {
   constructor(canvas) {
     this.canvas = canvas;
-    this.ctx = canvas.getContext("2d");
+    this.ctx = canvas?.getContext("2d") ?? null;
     this.points = [];
     this.fadeUntil = 0;
     this.resize();
@@ -131,6 +45,7 @@ class TrailRenderer {
   }
 
   resize() {
+    if (!this.canvas?.parentElement) return;
     const dpr = window.devicePixelRatio || 1;
     const rect = this.canvas.parentElement.getBoundingClientRect();
     this.canvas.width = Math.max(1, Math.floor(rect.width * dpr));
@@ -186,14 +101,24 @@ class TrailRenderer {
   }
 }
 
-async function loadProgram() {
-  try {
-    const res = await fetch("/touchai/program.example.json", { cache: "no-store" });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
-  } catch {
-    return { rules: [] };
+function describeGesture(g) {
+  if (g.kind === "tap") return `tap @ (${g.center.x.toFixed(2)}, ${g.center.y.toFixed(2)})`;
+  if (g.kind === "long_press") return `long_press ${Math.round(g.durationMs)}ms`;
+  if (g.kind === "pinch") {
+    const dir = g.scale < 1 ? "in" : "out";
+    return `pinch ${dir} ×${g.scale.toFixed(2)}`;
   }
+  if (g.kind === "swipe" || g.kind === "two_finger_swipe") {
+    const angle = (Math.atan2(g.vector.dy, g.vector.dx) * 180) / Math.PI;
+    let dir = "right";
+    if (angle >= 45 && angle < 135) dir = "down";
+    else if (angle >= -135 && angle < -45) dir = "up";
+    else if (angle >= 135 || angle < -135) dir = "left";
+    const prefix = g.kind === "two_finger_swipe" ? "2f-swipe" : "swipe";
+    return `${prefix} ${dir}`;
+  }
+  if (g.kind === "pan") return "pan";
+  return g.kind;
 }
 
 function wirePlayground(program) {
@@ -212,7 +137,7 @@ function wirePlayground(program) {
   if (hapticStatus) {
     hapticStatus.textContent = haptics.isSupported()
       ? "Vibration API: supported on this device"
-      : "Vibration API: unavailable (desktop / iOS Safari). Semantic haptic still computed below.";
+      : "Vibration API: unavailable (desktop / iOS Safari). Semantic haptic still computed.";
   }
 
   let sessionStart = performance.now();
@@ -230,7 +155,7 @@ function wirePlayground(program) {
     renderer.push(s);
   };
 
-  const onStart = (e) => {
+  pad.addEventListener("pointerdown", (e) => {
     if (activePointers.size === 0) {
       sessionStart = performance.now();
       stream = [];
@@ -240,12 +165,12 @@ function wirePlayground(program) {
     }
     activePointers.add(e.pointerId);
     pushSample(e);
-  };
+  });
 
-  const onMove = (e) => {
+  pad.addEventListener("pointermove", (e) => {
     if (!activePointers.has(e.pointerId)) return;
     pushSample(e);
-  };
+  });
 
   const onEnd = (e) => {
     if (!activePointers.has(e.pointerId)) return;
@@ -257,6 +182,9 @@ function wirePlayground(program) {
     }
   };
 
+  pad.addEventListener("pointerup", onEnd);
+  pad.addEventListener("pointercancel", onEnd);
+
   function finishSession() {
     const sessionProfile = computeSessionProfile(stream);
     const gesture = segmentGestureFromStream(stream);
@@ -266,8 +194,7 @@ function wirePlayground(program) {
     const hapticProgram = hapticSemantic ? materializeHapticSemantic(hapticSemantic) : undefined;
 
     if (gesture) {
-      const description = describeGesture(gesture);
-      setChip("chip-gesture", "gesture", description, true);
+      setChip("chip-gesture", "gesture", describeGesture(gesture), true);
       renderer.flash();
     } else {
       setChip("chip-gesture", "gesture", "no match", false);
@@ -293,27 +220,23 @@ function wirePlayground(program) {
       setChip("chip-haptic", "haptic", "—", false);
     }
 
-    const envelope = makeEnvelope({
-      sessionId: nextSessionId(),
-      stream,
-      gesture: gesture || undefined,
-      intent,
-      haptic: hapticSemantic,
-      deviceProfile,
-      sessionProfile,
-    });
-    envLog.textContent = envelopeToJsonlLine(envelope).trimEnd();
+    envLog.textContent = envelopeToJsonlLine(
+      makeEnvelope({
+        sessionId: nextSessionId(),
+        stream,
+        gesture: gesture || undefined,
+        intent,
+        haptic: hapticSemantic,
+        deviceProfile,
+        sessionProfile,
+      }),
+    ).trimEnd();
   }
-
-  pad.addEventListener("pointerdown", onStart);
-  pad.addEventListener("pointermove", onMove);
-  pad.addEventListener("pointerup", onEnd);
-  pad.addEventListener("pointercancel", onEnd);
 
   if (copyBtn) {
     copyBtn.addEventListener("click", async () => {
       const text = envLog.textContent || "";
-      if (!text || text.startsWith("Waiting")) return;
+      if (!text || text.startsWith("Enable")) return;
       try {
         await navigator.clipboard.writeText(text);
         const old = copyBtn.textContent;
@@ -327,40 +250,25 @@ function wirePlayground(program) {
   }
 }
 
-function describeGesture(g) {
-  if (g.kind === "tap") return `tap @ (${g.center.x.toFixed(2)}, ${g.center.y.toFixed(2)})`;
-  if (g.kind === "long_press") return `long_press ${Math.round(g.durationMs)}ms`;
-  if (g.kind === "pinch") {
-    const dir = g.scale < 1 ? "in" : "out";
-    return `pinch ${dir} ×${g.scale.toFixed(2)}`;
-  }
-  if (g.kind === "swipe" || g.kind === "two_finger_swipe") {
-    const angle = (Math.atan2(g.vector.dy, g.vector.dx) * 180) / Math.PI;
-    let dir = "right";
-    if (angle >= 45 && angle < 135) dir = "down";
-    else if (angle >= -135 && angle < -45) dir = "up";
-    else if (angle >= 135 || angle < -135) dir = "left";
-    const prefix = g.kind === "two_finger_swipe" ? "2f-swipe" : "swipe";
-    return `${prefix} ${dir}`;
-  }
-  if (g.kind === "pan") return "pan";
-  return g.kind;
+function wireCopyInstall() {
+  const btn = document.getElementById("copy-install");
+  const cmd = document.getElementById("install-cmd");
+  if (!btn || !cmd) return;
+  btn.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(cmd.textContent || "");
+      const old = btn.textContent;
+      btn.textContent = "Copied";
+      setTimeout(() => (btn.textContent = old), 1200);
+    } catch {
+      btn.textContent = "Select & copy";
+      setTimeout(() => (btn.textContent = "Copy"), 1500);
+    }
+  });
 }
 
 async function main() {
-  const err = document.getElementById("data-error");
-  let data = FALLBACK;
-  try {
-    const res = await fetch("/data.json", { cache: "no-store" });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    data = { ...FALLBACK, ...(await res.json()) };
-  } catch (e) {
-    if (err) {
-      err.hidden = false;
-      err.textContent = `Could not load data.json (${e instanceof Error ? e.message : "error"}). Showing embedded fallback.`;
-    }
-  }
-  renderSite(data);
+  wireCopyInstall();
   const program = await loadProgram();
   wirePlayground(program);
 }

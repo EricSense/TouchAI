@@ -1,75 +1,13 @@
 {
   "lastUpdated": "2026-05-18",
   "specVersion": "0.2.0",
-  "headline": "TouchAI",
-  "subhead": "A universal touch language, runtime, and adapters so AI can read intention from physical interaction—and answer with structured haptics—not only text and voice.",
-  "layers": [
-    {
-      "id": "input",
-      "title": "Input",
-      "subtitle": "Touch Language",
-      "body": "Normalized touch streams and gesture tokens — including pinch and two-finger swipe — with per-session velocity and pressure baselines."
-    },
-    {
-      "id": "output",
-      "title": "Output",
-      "subtitle": "Haptics",
-      "body": "Semantic haptics (ack, confirm, clarify…) compile to neutral pulse programs, then map to Core Haptics, Android Vibrator, or the web."
-    },
-    {
-      "id": "infra",
-      "title": "Infrastructure",
-      "subtitle": "Programs & envelopes",
-      "body": "TouchProgram rules, SessionProfile in envelopes, and JSONL for reproducible cross-device datasets."
-    }
-  ],
-  "packages": [
-    {
-      "name": "@touchai/touch-spec",
-      "summary": "v0.2.0 — SessionProfile, pinch & two_finger_swipe tokens, JSON Schema export.",
-      "status": "shipped"
-    },
-    {
-      "name": "@touchai/touch-runtime",
-      "summary": "Session normalization, segmentGestureFromStream (multi-pointer), pattern rules, haptics.",
-      "status": "shipped"
-    },
-    {
-      "name": "@touchai/touch-dataset",
-      "summary": "JSONL + envelope builders with sessionProfile field.",
-      "status": "shipped"
-    },
-    {
-      "name": "@touchai/touch-adapter-web",
-      "summary": "PointerEvent → TouchSample, HapticProgram → Vibration API.",
-      "status": "shipped"
-    },
-    {
-      "name": "touch-adapter-ios",
-      "summary": "Swift: UITouch → TouchSample, HapticProgram playback.",
-      "status": "shipped"
-    },
-    {
-      "name": "touch-adapter-android",
-      "summary": "Kotlin: MotionEvent → TouchSample, pulse playback.",
-      "status": "shipped"
-    },
-    {
-      "name": "public/touchai/runtime.mjs",
-      "summary": "esbuild bundle — playground matches npm packages exactly.",
-      "status": "shipped"
-    }
-  ],
-  "next": [
-    "Phase 3 — Native envelope SDKs (Swift/Kotlin emit TouchEventEnvelope end-to-end)",
-    "Phase 4 — @touchai/ai-bridge: envelope stream → LLM → intent + haptic response",
-    "Phase 5 — Dataset ingest API with strict specVersion rejection",
-    ".touch DSL compiler → TouchProgram JSON"
-  ],
+  "pitch": "TouchAI is a touch interaction language and runtime that lets app and AI developers turn gestures into structured intents and haptic responses—without rebuilding gesture detection on every platform.",
+  "audience": "App developers, AI/ML engineers, platform teams",
+  "headline": "Turn touch into structured AI input—and haptics into structured AI output.",
+  "subhead": "Map gestures to intents and haptic responses without platform-specific gesture code.",
   "links": {
     "github": "https://github.com/EricSense/TouchAI",
-    "specVersionFile": "https://github.com/EricSense/TouchAI/blob/main/packages/touch-spec/src/version.ts",
-    "playgroundProgram": "/touchai/program.example.json",
-    "touchEventEnvelopeSchema": "/schemas/TouchEventEnvelope.schema.json"
+    "docs": "https://github.com/EricSense/TouchAI#install",
+    "spec": "/schemas/TouchEventEnvelope.schema.json"
   }
 }

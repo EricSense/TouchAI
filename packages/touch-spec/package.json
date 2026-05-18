@@ -1,7 +1,8 @@
 {
   "name": "@touchai/touch-spec",
-  "version": "0.1.0",
-  "description": "Versioned Touch Language grammar: touch input, haptic output, and program IR",
+  "version": "0.2.0",
+  "description": "Touch Language wire types, Zod schemas, and JSON Schema export (v0.2.0)",
+  "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -13,9 +14,23 @@
     "./schemas/*": "./dist/schemas/*"
   },
   "files": ["dist"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EricSense/TouchAI.git",
+    "directory": "packages/touch-spec"
+  },
+  "homepage": "https://github.com/EricSense/TouchAI#install",
+  "bugs": {
+    "url": "https://github.com/EricSense/TouchAI/issues"
+  },
+  "keywords": ["touchai", "touch", "gestures", "haptics", "schema", "zod", "touch-language"],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.build.json && node dist/json-schema.js",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "zod": "^3.24.1",
@@ -25,5 +40,8 @@
     "@types/node": "^22.10.1",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

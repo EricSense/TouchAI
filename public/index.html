@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="TouchAI — touch as language for AI: input streams, haptic output, and cross-device infrastructure."
+      content="TouchAI — a touch language and runtime for app and AI developers. Turn gestures into structured intents and haptic responses without platform-specific gesture code."
     />
     <title>TouchAI — touch language for AI on devices</title>
     <link rel="stylesheet" href="/styles.css" />
@@ -18,57 +18,141 @@
     <a class="skip" href="#main">Skip to content</a>
     <div class="wrap">
       <header class="top">
-        <div class="brand">
-          TouchAI
-          <small id="spec-pill">spec …</small>
-        </div>
+        <div class="brand">TouchAI</div>
         <nav aria-label="Primary">
-          <a href="#layers">Touch Language</a>
-          <a href="#platform">Platform</a>
-          <a href="#playground">Playground</a>
-          <a id="nav-github" href="https://github.com/EricSense/TouchAI">GitHub</a>
+          <a href="#problem">Problem</a>
+          <a href="#install">Install</a>
+          <a href="#docs">Docs</a>
+          <a href="#prototype">Prototype</a>
+          <a href="https://github.com/EricSense/TouchAI">GitHub</a>
         </nav>
       </header>
 
       <main id="main">
+        <!-- Hero: static — no JS required -->
         <section class="hero" aria-labelledby="hero-title">
-          <h1 id="hero-title">TouchAI</h1>
-          <p class="lead" id="hero-lead">
-            Loading…
+          <p class="eyebrow">Built for app developers &amp; AI engineers</p>
+          <h1 id="hero-title">
+            Turn touch into structured AI input—and haptics into structured AI output.
+          </h1>
+          <p class="lead">
+            TouchAI is a touch interaction language and runtime that lets you map gestures to intents and
+            haptic responses without rebuilding gesture detection on every platform.
           </p>
-          <div class="pills" id="hero-pills" hidden>
-            <span class="pill">Wire spec <strong id="pill-spec">0.1.0</strong></span>
-            <span class="pill">Site data <strong id="pill-updated">—</strong></span>
+          <div class="cta-row">
+            <a class="btn primary" href="https://github.com/EricSense/TouchAI">Star on GitHub</a>
+            <a class="btn" href="https://github.com/EricSense/TouchAI#install">Read the docs</a>
+            <a class="btn" href="/schemas/TouchEventEnvelope.schema.json">Read the spec</a>
           </div>
-          <div id="data-error" class="err" hidden></div>
         </section>
 
-        <section id="layers" aria-labelledby="layers-title">
-          <h2 id="layers-title">Touch Language — three layers</h2>
-          <div class="grid3" id="layers-grid"></div>
+        <section id="problem" class="split" aria-labelledby="problem-title">
+          <div>
+            <h2 id="problem-title">The problem</h2>
+            <p>
+              Touch is how people use phones and tablets—but AI still mostly speaks text and voice. Every app
+              reinvents gestures with UIKit, Android, or ad-hoc web listeners. There is no shared vocabulary for
+              what a user <em>meant</em> with their fingers, and no standard way for AI to answer with haptics
+              instead of more UI.
+            </p>
+          </div>
+          <div>
+            <h2 id="vision-title">The vision</h2>
+            <p>
+              One grammar for touch in and haptics out. Developers write <code>TouchProgram</code> rules once;
+              models train on versioned <code>TouchEventEnvelope</code> JSONL; devices adapt to humans through
+              AI—not the other way around.
+            </p>
+          </div>
         </section>
 
-        <section id="platform" aria-labelledby="platform-title">
-          <h2 id="platform-title">What exists in the repo today</h2>
-          <p class="lead" style="margin: -6px 0 14px; max-width: 70ch">
-            This page reads <code>public/data.json</code>. When we ship a new package or milestone, update that file
-            and the site reflects it on the next deploy—no separate marketing CMS required yet.
+        <section aria-labelledby="layers-title">
+          <h2 id="layers-title">How it works — three layers</h2>
+          <div class="grid3">
+            <article class="card">
+              <h3>Input</h3>
+              <p class="sub">Touch Language</p>
+              <p>
+                Normalized touch streams and gesture tokens (tap, swipe, pinch, two-finger swipe). Session
+                baselines make velocity and pressure comparable within a session.
+              </p>
+            </article>
+            <article class="card">
+              <h3>Output</h3>
+              <p class="sub">Haptics</p>
+              <p>
+                Semantic haptics—ack, confirm, clarify—compile to neutral pulse programs, then map to Core
+                Haptics, Android Vibrator, or the web Vibration API.
+              </p>
+            </article>
+            <article class="card">
+              <h3>Infrastructure</h3>
+              <p class="sub">Programs &amp; envelopes</p>
+              <p>
+                Declarative <code>TouchProgram</code> rules plus versioned JSONL envelopes for training,
+                telemetry, and cross-device replay.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section id="install" aria-labelledby="install-title">
+          <h2 id="install-title">Install</h2>
+          <p class="lead section-lead">
+            The installable core is <code>@touchai/touch-runtime</code>—gesture segmentation, rule evaluation,
+            and haptic materialization. Pair with <code>@touchai/touch-spec</code> for types and schemas.
           </p>
-          <div class="gridpk" id="packages-grid"></div>
+          <div class="install-block">
+            <pre><code id="install-cmd">npm install @touchai/touch-runtime @touchai/touch-spec</code></pre>
+            <button type="button" class="ghost" id="copy-install">Copy</button>
+          </div>
+          <pre class="code-example"><code>import { segmentGestureFromStream, evaluateProgram } from "@touchai/touch-runtime";
+import { makeEnvelope } from "@touchai/touch-dataset";
+
+const gesture = segmentGestureFromStream(touchSamples);
+const rule = gesture ? evaluateProgram(program, gesture) : undefined;
+const envelope = makeEnvelope({ sessionId: "sess-1", stream: touchSamples, gesture });</code></pre>
+          <p class="muted-note">
+            Full quickstart in the
+            <a href="https://github.com/EricSense/TouchAI#quickstart-10-lines">README</a>.
+            Wire spec version: <strong>0.2.0</strong> ·
+            <a href="/schemas/TouchEventEnvelope.schema.json">TouchEventEnvelope schema</a>
+          </p>
         </section>
 
-        <section aria-labelledby="next-title">
-          <h2 id="next-title">Next build targets</h2>
-          <ul class="list" id="next-list"></ul>
+        <section id="docs" aria-labelledby="docs-title">
+          <h2 id="docs-title">Documentation</h2>
+          <div class="gridpk">
+            <article class="pkg">
+              <header><code>README.md</code></header>
+              <p>What TouchAI is, why it matters, install, and a 10-line code example.</p>
+              <p><a href="https://github.com/EricSense/TouchAI#install">Open on GitHub →</a></p>
+            </article>
+            <article class="pkg">
+              <header><code>public/schemas/</code></header>
+              <p>JSON Schema for TouchEventEnvelope, TouchProgram, HapticProgram, SessionProfile.</p>
+              <p><a href="/schemas/TouchProgram.schema.json">TouchProgram schema →</a></p>
+            </article>
+            <article class="pkg">
+              <header><code>packages/touch-runtime</code></header>
+              <p>Segmenter, session normalization, rule engine, haptic materialization. 26+ unit tests.</p>
+              <p><a href="https://github.com/EricSense/TouchAI/tree/main/packages/touch-runtime">Source →</a></p>
+            </article>
+            <article class="pkg">
+              <header><code>packages/touch-spec</code></header>
+              <p>Zod wire types—the contract every adapter and dataset must honor.</p>
+              <p><a href="https://github.com/EricSense/TouchAI/tree/main/packages/touch-spec">Source →</a></p>
+            </article>
+          </div>
         </section>
 
-        <section id="playground" aria-labelledby="play-title">
-          <h2 id="play-title">Playground — Touch Language live</h2>
-          <p class="lead" style="margin: -6px 0 14px; max-width: 72ch">
-            Drag on the pad — use two fingers on a trackpad for pinch or two-finger swipe. The page imports
-            <code>public/touchai/runtime.mjs</code> (spec <strong>0.2.0</strong>): session normalization,
-            multi-pointer segmentation, rule evaluation, haptics, and
-            <code><a href="/schemas/TouchEventEnvelope.schema.json">TouchEventEnvelope</a></code> JSONL output.
+        <section id="prototype" aria-labelledby="play-title">
+          <p class="eyebrow prototype-label">Try the prototype</p>
+          <h2 id="play-title">Interactive playground</h2>
+          <p class="lead section-lead">
+            Not the product—a live demo of the runtime. Drag on the pad (two fingers on a trackpad for pinch).
+            You get a segmented gesture, matched intent, haptic feedback where supported, and a
+            <code>TouchEventEnvelope</code> JSONL line you can copy into your own pipeline.
           </p>
           <div class="play">
             <div
@@ -81,49 +165,51 @@
               <canvas id="trail" aria-hidden="true"></canvas>
               <div class="hint" id="padhint">
                 <strong>Tap · long-press · swipe · pinch · two-finger swipe</strong><br />
-                Session velocity/pressure baselines normalize input before segmentation
+                Requires JavaScript
               </div>
             </div>
             <div class="result-stack">
-              <div class="result-row" id="result-row">
+              <div class="result-row">
                 <span class="chip gesture" id="chip-gesture">gesture: —</span>
                 <span class="chip session" id="chip-session">session: —</span>
                 <span class="chip intent" id="chip-intent">intent: —</span>
                 <span class="chip haptic" id="chip-haptic">haptic: —</span>
               </div>
-              <div class="haptic-status" id="haptic-status">Vibration API: probing…</div>
+              <div class="haptic-status" id="haptic-status">Vibration API: requires JavaScript</div>
               <div class="log" aria-live="polite">
                 <div class="log-head">
                   <span>Last gesture envelope (JSONL)</span>
                   <button type="button" id="copy-envelope" class="ghost">Copy</button>
                 </div>
-                <pre id="envelope-log">Waiting for input…</pre>
+                <pre id="envelope-log">Enable JavaScript to use the playground.</pre>
               </div>
               <div class="log">
-                <div class="log-head">
-                  <span>Stream samples (latest 12)</span>
-                </div>
-                <pre id="touchlog">Waiting for input…</pre>
+                <div class="log-head"><span>Stream samples (latest 12)</span></div>
+                <pre id="touchlog">—</pre>
               </div>
             </div>
           </div>
         </section>
 
+        <section aria-labelledby="roadmap-title">
+          <h2 id="roadmap-title">What's next</h2>
+          <ul class="list">
+            <li>Native envelope SDKs — Swift/Kotlin emit <code>TouchEventEnvelope</code> end-to-end</li>
+            <li><code>@touchai/ai-bridge</code> — envelope stream → LLM → intent + haptic response</li>
+            <li>Dataset ingest API with strict <code>specVersion</code> validation</li>
+            <li><code>.touch</code> DSL compiler → <code>TouchProgram</code> JSON</li>
+          </ul>
+        </section>
+
         <footer class="foot">
-          <span>TouchAI monorepo — static shell, living <code>data.json</code>, real packages under <code>packages/</code>.</span>
-          <span id="foot-links"></span>
+          <span>TouchAI — open source touch language for AI on devices.</span>
+          <span>
+            <a href="https://github.com/EricSense/TouchAI">GitHub</a> ·
+            <a href="/schemas/TouchEventEnvelope.schema.json">Spec</a>
+          </span>
         </footer>
       </main>
     </div>
-
-    <noscript>
-      <div class="wrap">
-        <p>
-          TouchAI needs JavaScript to load <code>data.json</code> and the touch playground. See the repository on
-          <a href="https://github.com/EricSense/TouchAI">GitHub</a>.
-        </p>
-      </div>
-    </noscript>
 
     <script type="module" src="/site.js"></script>
   </body>

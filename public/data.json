@@ -1,6 +1,7 @@
 {
   "lastUpdated": "2026-05-18",
   "specVersion": "0.2.0",
+  "npmPublished": true,
   "pitch": "TouchAI is a touch interaction language and runtime that lets app and AI developers turn gestures into structured intents and haptic responses—without rebuilding gesture detection on every platform.",
   "audience": "App developers, AI/ML engineers, platform teams",
   "headline": "Turn touch into structured AI input—and haptics into structured AI output.",

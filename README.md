@@ -29,16 +29,16 @@ When TouchAI is real:
 npm install @touchai/touch-runtime @touchai/touch-spec @touchai/touch-dataset
 ```
 
-Works in **Node.js** and bundlers (Vite, esbuild, webpack). Requires Node 20+.
+Published on npm at **v0.2.0** under the [`@touchai`](https://www.npmjs.com/org/touchai) scope. Works in **Node.js** and bundlers (Vite, esbuild, webpack). Requires Node 20+.
 
-### Publish locally
+### Publish updates
 
 ```bash
-npm login
-pnpm run publish:npm
+npm login   # or set NPM_TOKEN
+OTP=123456 pnpm run publish:npm   # when 2FA enabled
 ```
 
-Or set `NPM_TOKEN` and run `node scripts/publish-npm.mjs`. GitHub Actions workflow **Publish npm packages** uses the `NPM_TOKEN` repository secret.
+GitHub Actions workflow **Publish npm packages** uses the `NPM_TOKEN` repository secret.
 
 ---
 
@@ -78,6 +78,31 @@ const envelope = makeEnvelope({
 
 Output is a **`TouchEventEnvelope`**—the wire format for logging, training data, and cross-device replay.
 
+### Native (iOS / Android)
+
+Swift and Kotlin adapters can emit the same envelope JSON as the TypeScript runtime:
+
+```swift
+// iOS — TouchAdapterIOS
+let env = makeEnvelope(MakeEnvelopeInput(
+    sessionId: nextSessionId(),
+    stream: samples,
+    gesture: GestureToken(kind: "tap", center: Point2D(x: 0.5, y: 0.5), pointerCount: 1, durationMs: 40),
+    deviceProfile: detectDeviceProfile()
+))
+let line = try envelopeToJsonlLine(env)
+```
+
+```kotlin
+// Android — com.touchai.touchadapter
+val env = makeEnvelope(MakeEnvelopeInput(
+    sessionId = nextSessionId(),
+    stream = samples,
+    deviceProfile = detectDeviceProfile(context),
+))
+val line = envelopeToJsonlLine(env)
+```
+
 ---
 
 ## What's in the repo
@@ -88,7 +113,8 @@ Output is a **`TouchEventEnvelope`**—the wire format for logging, training dat
 | `@touchai/touch-runtime` | Session normalization, gesture segmentation, rule engine, haptic materialization |
 | `@touchai/touch-dataset` | JSONL helpers + envelope builders |
 | `@touchai/touch-adapter-web` | Browser pointer → `TouchSample`, Vibration API haptics |
-| `touch-adapter-ios` / `touch-adapter-android` | Native sample mappers + haptic playback |
+| `touch-adapter-ios` | UIKit mappers, haptic playback, **`TouchEventEnvelope` + JSONL export** |
+| `touch-adapter-android` | MotionEvent mappers, haptic playback, **`TouchEventEnvelope` + JSONL export** |
 
 **Live demo:** [touchai site](https://github.com/EricSense/TouchAI) — try the prototype playground (gesture pad → intent + JSONL envelope).
 
@@ -113,7 +139,9 @@ Monorepo uses **pnpm workspaces**. Root `package.json` scripts orchestrate build
 
 - [x] Touch Language spec + runtime + JSON Schema
 - [x] Session normalization + multi-pointer gestures (pinch, two-finger swipe)
-- [ ] Native envelope SDKs (Swift/Kotlin end-to-end)
+- [x] npm publish `@touchai/*` v0.2.0
+- [x] Native envelope builders (Swift/Kotlin → JSONL)
+- [ ] On-device gesture segmentation in native adapters
 - [ ] `@touchai/ai-bridge` — envelope stream → LLM → intent + haptic
 - [ ] Dataset ingest API with strict `specVersion` validation
 - [ ] `.touch` DSL → `TouchProgram` compiler

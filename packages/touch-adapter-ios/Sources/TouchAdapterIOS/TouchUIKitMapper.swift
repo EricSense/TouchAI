@@ -1,4 +1,5 @@
 import UIKit
+import TouchAdapterCore
 
 /// Maps `UITouch` streams into normalized `TouchSample` values (0–1 in the given view).
 public enum TouchUIKitMapper {

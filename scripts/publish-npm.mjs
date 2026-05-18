@@ -4,6 +4,7 @@
  *
  * Prerequisites:
  *   npm login   OR   NPM_TOKEN=npm_xxx node scripts/publish-npm.mjs
+ *   OTP=123456 pnpm run publish:npm   (when 2FA is enabled on your npm account)
  *
  * Publishes: touch-spec → touch-runtime → touch-dataset → touch-adapter-web
  * Restores workspace:* in package.json when done.
@@ -65,8 +66,11 @@ try {
   run("pnpm run build -w @touchai/touch-dataset");
   run("pnpm run build -w @touchai/touch-adapter-web");
 
+  const otp = process.env.NPM_OTP || process.env.OTP;
+  const otpFlag = otp ? ` --otp=${otp}` : "";
+
   for (const pkgDir of publishOrder) {
-    run("npm publish --access public", join(root, pkgDir));
+    run(`npm publish --access public${otpFlag}`, join(root, pkgDir));
   }
 
   console.log("\n✅ Published @touchai/* v0.2.0 to npm\n");

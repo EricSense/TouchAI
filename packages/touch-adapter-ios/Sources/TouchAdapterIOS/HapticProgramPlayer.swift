@@ -1,4 +1,5 @@
 import UIKit
+import TouchAdapterCore
 
 /// Plays neutral `HapticProgram` pulses using `UIImpactFeedbackGenerator` (mapped from intensity/sharpness).
 public final class HapticProgramPlayer {

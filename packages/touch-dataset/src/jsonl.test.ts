@@ -6,7 +6,7 @@ import {
   envelopeToJsonlLine,
   parseJsonlLine,
   splitLines,
-} from "./jsonl.js";
+} from "./index.js";
 import { mkdir, readFile, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";

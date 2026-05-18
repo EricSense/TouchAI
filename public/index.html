@@ -65,11 +65,11 @@
         <section id="playground" aria-labelledby="play-title">
           <h2 id="play-title">Playground — Touch Language live</h2>
           <p class="lead" style="margin: -6px 0 14px; max-width: 72ch">
-            Drag on the pad. The page runs the same v0 segmenter and rule engine as
-            <code>@touchai/touch-runtime</code>, evaluates the demo
-            <code><a href="/touchai/program.example.json">program.example.json</a></code>, and plays a
-            <code>HapticProgram</code> via the Vibration API where supported. Every gesture also produces a
-            <code>TouchEventEnvelope</code> JSONL line — the same wire shape used for training datasets.
+            Drag on the pad. The page imports <code>public/touchai/runtime.mjs</code> — an esbuild bundle of
+            <code>@touchai/touch-runtime</code> and adapters — so behavior matches the npm packages exactly.
+            It evaluates <code><a href="/touchai/program.example.json">program.example.json</a></code>,
+            plays haptics via the Vibration API, and emits a
+            <code><a href="/schemas/TouchEventEnvelope.schema.json">TouchEventEnvelope</a></code> JSONL line.
           </p>
           <div class="play">
             <div

@@ -71,3 +71,13 @@ export function segmentGestureFromPath(samples: TouchSample[]): GestureToken | n
     durationMs,
   };
 }
+
+/** Coarse direction label for swipe vectors — shared by rule pattern matching. */
+export function swipeDirection(vector: { dx: number; dy: number }): "up" | "down" | "left" | "right" {
+  const angle = Math.atan2(vector.dy, vector.dx);
+  const deg = (angle * 180) / Math.PI;
+  if (deg >= -45 && deg < 45) return "right";
+  if (deg >= 45 && deg < 135) return "down";
+  if (deg >= -135 && deg < -45) return "up";
+  return "left";
+}

@@ -9,8 +9,14 @@
   ],
   "scripts": {
     "build": "npm run build -w @touchai/touch-spec && npm run build -w @touchai/touch-runtime && npm run build -w @touchai/touch-dataset && npm run build -w @touchai/touch-adapter-web",
+    "build:playground": "node scripts/bundle-playground.mjs",
+    "build:all": "npm run build && npm run build:playground",
     "test": "npm run test --workspaces --if-present",
     "typecheck": "npm exec -w @touchai/touch-spec -- tsc --noEmit && npm run build -w @touchai/touch-spec && npm exec -w @touchai/touch-runtime -- tsc --noEmit && npm run build -w @touchai/touch-runtime && npm exec -w @touchai/touch-dataset -- tsc --noEmit && npm run build -w @touchai/touch-dataset && npm exec -w @touchai/touch-adapter-web -- tsc --noEmit && npm run build -w @touchai/touch-adapter-web"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "typescript": "^5.7.2"
   },
   "engines": {
     "node": "20.x"

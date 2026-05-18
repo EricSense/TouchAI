@@ -1,18 +1,23 @@
 /**
  * TouchAI landing + playground.
  *
- * - Hydrates the page from public/data.json.
- * - Wires the playground end-to-end using the vendored Touch Language runtime
- *   (public/touchai/*), so the demo runs the same logic as @touchai/touch-runtime
- *   without any build step.
+ * Runtime is bundled from npm packages → public/touchai/runtime.mjs
+ * via `npm run build:all`. The static site imports that bundle so behavior
+ * matches @touchai/touch-runtime exactly.
  */
 
-import { touchSampleFromPointerEvent } from "/touchai/adapter-web.js";
-import { segmentGestureFromPath } from "/touchai/segment.js";
-import { evaluateProgram } from "/touchai/rules.js";
-import { materializeHapticSemantic, WebHapticProgramPlayer } from "/touchai/haptics.js";
-import { detectDeviceProfile, envelopeToJsonlLine, makeEnvelope, nextSessionId } from "/touchai/envelope.js";
-import { TOUCHLANG_SPEC_VERSION } from "/touchai/spec.js";
+import {
+  TOUCHLANG_SPEC_VERSION,
+  touchSampleFromPointerEvent,
+  segmentGestureFromPath,
+  evaluateProgram,
+  materializeHapticSemantic,
+  WebHapticProgramPlayer,
+  detectDeviceProfile,
+  envelopeToJsonlLine,
+  makeEnvelope,
+  nextSessionId,
+} from "/touchai/runtime.mjs";
 
 const FALLBACK = {
   lastUpdated: "2026-05-14",

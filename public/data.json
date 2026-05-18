@@ -26,17 +26,17 @@
   "packages": [
     {
       "name": "@touchai/touch-spec",
-      "summary": "Zod + TS wire types: TouchSample, GestureToken, HapticProgram, TouchEventEnvelope, TouchProgram.",
+      "summary": "Zod + TS wire types; JSON Schema export for TouchEventEnvelope, HapticProgram, TouchProgram.",
       "status": "shipped"
     },
     {
       "name": "@touchai/touch-runtime",
-      "summary": "Gesture segmentation, rule evaluation, semantic haptic materialization.",
+      "summary": "Gesture segmentation, exact + pattern rule evaluation, semantic haptic materialization — fully tested.",
       "status": "shipped"
     },
     {
       "name": "@touchai/touch-dataset",
-      "summary": "JSONL append/parse for envelopes — training and telemetry pipelines.",
+      "summary": "JSONL parse/append + browser-safe envelope builders for training pipelines.",
       "status": "shipped"
     },
     {
@@ -55,20 +55,28 @@
       "status": "shipped"
     },
     {
-      "name": "public/touchai/*",
-      "summary": "Build-free browser mirror of the runtime so this page runs Touch Language end-to-end.",
+      "name": "public/touchai/runtime.mjs",
+      "summary": "esbuild bundle of npm packages — playground behavior matches @touchai/touch-runtime exactly.",
+      "status": "shipped"
+    },
+    {
+      "name": "public/schemas/*.schema.json",
+      "summary": "Published JSON Schema artifacts generated from Zod (formal wire contract).",
       "status": "shipped"
     }
   ],
   "next": [
-    "Personalization layer: per-session normalization of velocity/pressure before segmentation",
-    "Multi-pointer gesture tokens (two-finger swipe, pinch) in the spec and runtime",
-    "DSL frontend that compiles a textual program (.touch) to TouchProgram JSON",
-    "Cloud ingest endpoint that only accepts TouchEventEnvelope with the matching spec version"
+    "Phase 2 — Grammar v0.2: session normalization + multi-pointer gesture tokens",
+    "Phase 3 — Native envelope SDKs (Swift/Kotlin emit TouchEventEnvelope end-to-end)",
+    "Phase 4 — @touchai/ai-bridge: envelope stream → LLM → intent + haptic response",
+    "Phase 5 — Dataset ingest API with strict specVersion rejection"
   ],
   "links": {
     "github": "https://github.com/EricSense/TouchAI",
     "specVersionFile": "https://github.com/EricSense/TouchAI/blob/main/packages/touch-spec/src/version.ts",
-    "playgroundProgram": "/touchai/program.example.json"
+    "playgroundProgram": "/touchai/program.example.json",
+    "touchEventEnvelopeSchema": "/schemas/TouchEventEnvelope.schema.json",
+    "hapticProgramSchema": "/schemas/HapticProgram.schema.json",
+    "touchProgramSchema": "/schemas/TouchProgram.schema.json"
   }
 }

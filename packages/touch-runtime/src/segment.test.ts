@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { TouchSample } from "@touchai/touch-spec";
-import { segmentGestureFromPath } from "./segment.js";
+import { segmentGestureFromPath, swipeDirection } from "./segment.js";
 
 function pathTap(center: { x: number; y: number }): TouchSample[] {
   const t0 = 1000;
@@ -44,5 +44,14 @@ describe("segmentGestureFromPath", () => {
     if (g?.kind === "swipe") {
       expect(g.vector.dx).toBeGreaterThan(0.4);
     }
+  });
+});
+
+describe("swipeDirection", () => {
+  it("classifies primary axes", () => {
+    expect(swipeDirection({ dx: 1, dy: 0 })).toBe("right");
+    expect(swipeDirection({ dx: -1, dy: 0 })).toBe("left");
+    expect(swipeDirection({ dx: 0, dy: 1 })).toBe("down");
+    expect(swipeDirection({ dx: 0, dy: -1 })).toBe("up");
   });
 });

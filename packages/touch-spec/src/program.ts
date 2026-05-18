@@ -3,13 +3,40 @@ import { GestureTokenSchema } from "./touch-input.js";
 import { HapticSemanticSchema } from "./haptic-output.js";
 import { TouchIntentSchema } from "./intent.js";
 
+export const SwipeDirectionSchema = z.enum(["up", "down", "left", "right"]);
+export type SwipeDirection = z.infer<typeof SwipeDirectionSchema>;
+
 /**
- * Touch Language *program* (infrastructure layer): declarative rules + hooks for model output.
- * v0 is JSON-safe; a textual DSL can compile down to this IR later.
+ * Qualitative pattern for rule matching (demo programs + future DSL output).
+ * Exact `when.gesture` remains for deterministic test fixtures.
  */
-export const TouchRuleConditionSchema = z.object({
-  gesture: GestureTokenSchema,
+export const TouchRuleMatchPatternSchema = z.object({
+  kind: z.enum(["tap", "long_press", "swipe", "pan"]).optional(),
+  pointerCount: z.number().int().min(1).max(10).optional(),
+  region: z
+    .object({
+      x0: z.number().min(0).max(1),
+      y0: z.number().min(0).max(1),
+      x1: z.number().min(0).max(1),
+      y1: z.number().min(0).max(1),
+    })
+    .optional(),
+  minDurationMs: z.number().nonnegative().optional(),
+  maxDurationMs: z.number().nonnegative().optional(),
+  direction: SwipeDirectionSchema.optional(),
+  minVelocity: z.number().nonnegative().optional(),
 });
+
+export type TouchRuleMatchPattern = z.infer<typeof TouchRuleMatchPatternSchema>;
+
+export const TouchRuleConditionSchema = z
+  .object({
+    gesture: GestureTokenSchema.optional(),
+    match: TouchRuleMatchPatternSchema.optional(),
+  })
+  .refine((w) => w.gesture !== undefined || w.match !== undefined, {
+    message: "when must include gesture and/or match",
+  });
 
 export const TouchRuleActionSchema = z.object({
   intent: TouchIntentSchema.optional(),
@@ -24,7 +51,14 @@ export const TouchRuleSchema = z.object({
 
 export type TouchRule = z.infer<typeof TouchRuleSchema>;
 
+export const TouchProgramMetaSchema = z.object({
+  name: z.string().optional(),
+  description: z.string().optional(),
+  specVersion: z.string().optional(),
+});
+
 export const TouchProgramSchema = z.object({
+  _meta: TouchProgramMetaSchema.optional(),
   rules: z.array(TouchRuleSchema),
 });
 

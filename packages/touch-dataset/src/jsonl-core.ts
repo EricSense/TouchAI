@@ -1,6 +1,4 @@
 import { TouchEventEnvelopeSchema, type TouchEventEnvelope } from "@touchai/touch-spec";
-import { createWriteStream, type WriteStream } from "node:fs";
-import { appendFile } from "node:fs/promises";
 
 /** One JSON object per line, UTF-8, for NDJSON / JSONL pipelines. */
 export function envelopeToJsonlLine(envelope: TouchEventEnvelope): string {
@@ -48,31 +46,4 @@ export function* splitLines(chunk: string, carry: { buf: string }): Generator<st
 export function parseJsonl(text: string): ParseJsonlLineResult[] {
   const lines = text.split(/\n/).filter((l) => l.trim().length > 0);
   return lines.map((line, i) => parseJsonlLine(line, i + 1));
-}
-
-export async function appendEnvelopeJsonlFile(
-  filePath: string,
-  envelope: TouchEventEnvelope,
-): Promise<void> {
-  await appendFile(filePath, envelopeToJsonlLine(envelope), "utf8");
-}
-
-export interface EnvelopeJsonlAppender {
-  append(envelope: TouchEventEnvelope): void;
-  end(): Promise<void>;
-}
-
-/** Streaming append for large local datasets (Node.js). */
-export function createEnvelopeJsonlAppender(filePath: string): EnvelopeJsonlAppender {
-  const stream: WriteStream = createWriteStream(filePath, { flags: "a" });
-  return {
-    append(envelope: TouchEventEnvelope) {
-      stream.write(envelopeToJsonlLine(envelope));
-    },
-    end() {
-      return new Promise((resolve, reject) => {
-        stream.end((err) => (err ? reject(err) : resolve()));
-      });
-    },
-  };
 }

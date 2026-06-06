@@ -448,6 +448,59 @@ body {
 .cat-name { font-size: 0.82rem; color: var(--text); font-weight: 500; line-height: 1.3; }
 .cat-tag { font-size: 0.68rem; color: var(--text-dim); }
 
+/* ── Company section ────────────────────────────────────────── */
+.company-section {
+  margin-top: 64px;
+  padding-top: 48px;
+  border-top: 1px solid var(--border);
+}
+
+.company-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.company-block {
+  padding: 20px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.company-block h3 {
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.company-block p {
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.company-list {
+  list-style: none;
+  font-size: 0.78rem;
+  line-height: 1.7;
+  color: var(--text-dim);
+}
+
+.company-list strong { color: var(--text); font-weight: 500; }
+
+.company-cta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.company-cta a.btn { text-decoration: none; display: inline-flex; align-items: center; }
+
 /* ── Solutions view ─────────────────────────────────────────── */
 .solutions-view {
   height: 100%;

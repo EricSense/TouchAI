@@ -274,6 +274,10 @@ function setupVoice() {
   });
 }
 
+export function getDemoContext() {
+  return { vertical: activeVertical, company: activeCompany };
+}
+
 export function preloadDemoModel(onProgress) {
   return preloadModel(activeModel, onProgress);
 }

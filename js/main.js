@@ -1,7 +1,7 @@
 import { runBootSequence } from './boot.js';
 import { renderPlatformView } from './platform.js';
 import { renderSolutionsView } from './solutions.js';
-import { initDemo, mountDemoPanel, setDemoContext, preloadDemoModel, getDemoStatus } from './demo.js';
+import { initDemo, mountDemoPanel, setDemoContext, preloadDemoModel, getDemoStatus, getDemoContext } from './demo.js';
 import { initRipples } from './ripple.js';
 import { initCursor } from './cursor.js';
 import { totalCompanies } from './ecosystem.js';
@@ -38,7 +38,11 @@ function navigate(view, opts = {}) {
     }
   }
 
-  document.getElementById('demoVerticalBadge')?.classList.toggle('hidden', view !== 'demo' || !opts.company);
+  const ctx = getDemoContext();
+  document.getElementById('demoVerticalBadge')?.classList.toggle(
+    'hidden',
+    view !== 'demo' || !ctx.company,
+  );
 }
 
 function initApp(hw) {

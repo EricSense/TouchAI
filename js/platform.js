@@ -41,6 +41,32 @@ export function renderPlatformView(container, hw) {
         <h2 class="section-title">One runtime. Every vertical.</h2>
         <div class="category-grid" id="categoryPreview"></div>
       </section>
+
+      <section class="company-section">
+        <h2 class="section-title">The business</h2>
+        <div class="company-grid">
+          <div class="company-block">
+            <h3>What we sell</h3>
+            <p>TouchAI is runtime infrastructure — not another chatbot. We license the hardware-aware layer to AI companies that need on-device deployment without rebuilding for every chip.</p>
+          </div>
+          <div class="company-block">
+            <h3>Who pays</h3>
+            <ul class="company-list">
+              <li><strong>Foundation model cos</strong> — edge deployment SDK</li>
+              <li><strong>Enterprise AI</strong> — air-gapped, zero-egress inference</li>
+              <li><strong>Device OEMs</strong> — pre-installed NPU-aware runtime</li>
+            </ul>
+          </div>
+          <div class="company-block">
+            <h3>Why now</h3>
+            <p>Every phone, laptop, and robot ships with an NPU. Every AI company still routes inference to a datacenter. TouchAI closes that gap.</p>
+          </div>
+        </div>
+        <div class="company-cta">
+          <button class="btn btn-primary interactive" data-nav="demo">Run on your hardware</button>
+          <a class="btn btn-ghost interactive" href="https://github.com/EricSense/TouchAI" target="_blank" rel="noopener">View source</a>
+        </div>
+      </section>
     </div>
   `;
 

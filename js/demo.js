@@ -1,6 +1,7 @@
 import { hardwareSummary } from './hardware.js';
 import { MODELS, MODEL_ORDER, getModel } from './models.js';
-import { getCategory } from './ecosystem.js';
+import { getCategory, getCompany } from './ecosystem.js';
+import { THESIS } from './focus.js';
 import { MemoryStore } from './memory.js';
 import { SessionStats } from './stats.js';
 import { generate, preloadModel } from './inference.js';
@@ -28,6 +29,7 @@ export function setDemoContext(categoryId, companyName) {
   activeCompany = companyName ?? null;
   updateDemoHeader();
   renderDemoContext();
+  renderPromptChips();
   if (hardware && chatMessages) showWelcome(hardware);
 }
 
@@ -89,6 +91,7 @@ export function mountDemoPanel(root) {
             </button>
           </div>
           <div id="voiceStatus" class="voice-status hidden">Listening on-device…</div>
+          <div class="prompt-chips" id="promptChips"></div>
         </div>
       </section>
 
@@ -117,7 +120,10 @@ export function mountDemoPanel(root) {
     renderHardware(hardware);
     renderModels();
     showWelcome(hardware);
+    renderPromptChips();
     stats.renderMini(root.querySelector('#statsMini'));
+    const badge = document.getElementById('modelBadge');
+    if (badge) badge.textContent = getModel(activeModel).name;
   }
 
   wireDemoEvents(root);
@@ -140,15 +146,66 @@ function renderDemoContext() {
   const el = document.getElementById('demoContext');
   if (!el) return;
   if (!activeVertical) {
-    el.innerHTML = `<div class="nav-label">Vertical</div><p class="ctx-hint">Select a company from Solutions to demo TouchAI in that vertical.</p>`;
+    el.innerHTML = `
+      <div class="nav-label">Get started</div>
+      <p class="ctx-hint">Pick a company in Solutions, or try a prompt below. Everything runs on your hardware — 0 bytes sent.</p>
+    `;
     return;
   }
+
+  const co = activeCompany && activeVertical
+    ? getCompany(activeVertical.id, activeCompany)
+    : null;
+
   el.innerHTML = `
-    <div class="nav-label">Active Vertical</div>
+    <div class="nav-label">Active vertical</div>
     <div class="ctx-vertical">${activeVertical.name}</div>
     ${activeCompany ? `<div class="ctx-company">${activeCompany}</div>` : ''}
-    <p class="ctx-role">${activeVertical.touchaiRole}</p>
+    ${co ? `
+      <div class="ctx-block ctx-problem"><span class="co-label">Cloud problem</span><p>${co.problem}</p></div>
+      <div class="ctx-block ctx-solution"><span class="co-label co-label-accent">TouchAI layer</span><p>${co.touchai}</p></div>
+    ` : `<p class="ctx-role">${activeVertical.touchaiRole}</p>`}
+    <div class="ctx-metrics">
+      ${Object.entries(activeVertical.metrics).map(([k, v]) => `<span><em>${k}</em> ${v}</span>`).join('')}
+    </div>
   `;
+}
+
+const STARTER_PROMPTS = {
+  default: [
+    'What hardware am I running on?',
+    'How is TouchAI different from cloud AI?',
+    'Explain the zero egress policy',
+  ],
+  foundation: ['How would OpenAI deploy on my NPU?', 'Route a model to my GPU', 'Why not send prompts to a server?'],
+  infrastructure: ['How does TouchAI sit in an ML pipeline?', 'Select WASM vs CoreML for this device'],
+  productivity: ['Run a local RAG query without network', 'How does Harvey work on-device?'],
+  coding: ['Complete code using my hardware budget', 'How does Cursor use TouchAI locally?'],
+  robotics: ['What latency can this hardware achieve?', 'Run inference under 100ms'],
+  healthcare: ['Keep PHI on this device', 'How is TouchAI HIPAA-aligned?'],
+  creative: ['Scale video quality to my GPU', 'What can my VRAM handle?'],
+};
+
+function renderPromptChips() {
+  const el = document.getElementById('promptChips');
+  if (!el) return;
+
+  const key = activeVertical?.id ?? 'default';
+  const prompts = STARTER_PROMPTS[key] ?? STARTER_PROMPTS.default;
+  const label = activeCompany
+    ? `Try with ${activeCompany}`
+    : 'Focused prompts';
+
+  el.innerHTML = `
+    <div class="prompt-chips-label">${label}</div>
+    <div class="prompt-chips-row">
+      ${prompts.map((p) => `<button type="button" class="prompt-chip interactive">${esc(p)}</button>`).join('')}
+    </div>
+  `;
+
+  el.querySelectorAll('.prompt-chip').forEach((chip) => {
+    chip.addEventListener('click', () => sendQuery(chip.textContent));
+  });
 }
 
 function renderModels() {
@@ -181,7 +238,7 @@ function showWelcome(hw) {
     <div class="chat-welcome">
       <h2>AI that knows your hardware</h2>
       ${verticalLine}
-      <p class="welcome-thesis">Cloud AI sends your prompt to a server. TouchAI runs on <strong>${hw.platform}</strong> (${hw.arch}, ${hw.cores ?? '?'} cores) — 0 bytes egress.</p>
+      <p class="welcome-thesis">${THESIS.problem.split('.')[0]}. TouchAI runs on <strong>${hw.platform}</strong> (${hw.arch}, ${hw.cores ?? '?'} cores) — 0 bytes egress.</p>
       <div class="welcome-hw">
         <div class="welcome-hw-item"><span>GPU</span><span>${esc(hw.gpu)}</span></div>
         <div class="welcome-hw-item"><span>Accelerator</span><span>${esc(hw.npu)}</span></div>

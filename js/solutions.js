@@ -1,4 +1,5 @@
 import { CATEGORIES, getCategory, totalCompanies, searchCompanies } from './ecosystem.js';
+import { THESIS } from './focus.js';
 
 let activeCategory = 'foundation';
 let searchQuery = '';
@@ -29,7 +30,7 @@ function buildShell() {
         <div class="solutions-header-top">
           <div>
             <h1>Solutions</h1>
-            <p>How TouchAI applies across ${CATEGORIES.length} AI verticals and ${totalCompanies()} companies — the hardware-aware runtime each one is missing.</p>
+            <p>How TouchAI applies across ${CATEGORIES.length} AI verticals and ${totalCompanies()} companies — ${THESIS.insight.toLowerCase()}</p>
           </div>
           <div class="solutions-search-wrap">
             <input type="search" id="solutionsSearch" class="solutions-search interactive" placeholder="Search companies…" aria-label="Search companies" />

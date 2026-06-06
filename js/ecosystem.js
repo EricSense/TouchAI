@@ -156,3 +156,17 @@ export function searchCompanies(query) {
   }
   return results;
 }
+
+export function getCompany(categoryId, companyName) {
+  const cat = getCategory(categoryId);
+  return cat.companies.find((c) => c.name === companyName) ?? null;
+}
+
+export function slugify(name) {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
+
+export function getCompanyBySlug(categoryId, companySlug) {
+  const cat = getCategory(categoryId);
+  return cat.companies.find((c) => slugify(c.name) === companySlug) ?? null;
+}

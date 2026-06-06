@@ -4,10 +4,10 @@ import { renderSolutionsView } from './solutions.js';
 import { initDemo, mountDemoPanel, setDemoContext, preloadDemoModel, getDemoStatus, getDemoContext } from './demo.js';
 import { initRipples } from './ripple.js';
 import { initCursor } from './cursor.js';
-import { totalCompanies } from './ecosystem.js';
+import { totalCompanies, getCompanyBySlug, slugify } from './ecosystem.js';
+import { focusLine } from './focus.js';
 
 let hardware = null;
-let currentView = 'platform';
 let demoMounted = false;
 
 const views = {
@@ -16,8 +16,43 @@ const views = {
   demo: document.getElementById('viewDemo'),
 };
 
-function navigate(view, opts = {}) {
-  currentView = view;
+function updateHash(view, opts = {}) {
+  let hash = view;
+  if (view === 'solutions' && opts.category) hash += `/${opts.category}`;
+  if (view === 'demo') {
+    if (opts.company && opts.category) hash += `/${opts.category}/${slug(opts.company)}`;
+    else if (opts.category) hash += `/${opts.category}`;
+  }
+  if (location.hash !== `#${hash}`) location.hash = hash;
+}
+
+function slug(name) {
+  return slugify(name);
+}
+
+function parseHash() {
+  const parts = location.hash.slice(1).split('/').filter(Boolean);
+  if (!parts.length) return { view: 'platform' };
+  const view = parts[0];
+  if (view === 'solutions') return { view: 'solutions', category: parts[1] };
+  if (view === 'demo') {
+    const category = parts[1];
+    const co = parts[2] && category ? getCompanyBySlug(category, parts[2]) : null;
+    return { view: 'demo', category, company: co?.name };
+  }
+  if (['platform', 'solutions', 'demo'].includes(view)) return { view };
+  return { view: 'platform' };
+}
+
+function updateFocusBar(view, hw) {
+  const bar = document.getElementById('focusBar');
+  if (!bar) return;
+  const labels = { platform: 'Platform · thesis & stack', solutions: 'Solutions · 7 verticals · 34 companies', demo: 'Live Demo · on-device inference' };
+  bar.querySelector('.focus-view').textContent = labels[view] ?? '';
+  bar.querySelector('.focus-device').textContent = focusLine(hw);
+}
+
+export function navigate(view, opts = {}) {
   document.querySelectorAll('.nav-link').forEach((l) => {
     l.classList.toggle('active', l.dataset.view === view);
   });
@@ -39,10 +74,9 @@ function navigate(view, opts = {}) {
   }
 
   const ctx = getDemoContext();
-  document.getElementById('demoVerticalBadge')?.classList.toggle(
-    'hidden',
-    view !== 'demo' || !ctx.company,
-  );
+  document.getElementById('demoVerticalBadge')?.classList.toggle('hidden', view !== 'demo' || !ctx.company);
+  updateFocusBar(view, hardware);
+  updateHash(view, opts);
 }
 
 function initApp(hw) {
@@ -53,17 +87,21 @@ function initApp(hw) {
   initRipples(document.getElementById('rippleLayer'));
 
   document.getElementById('navCompanyCount').textContent = `${totalCompanies()} AI companies`;
+  updateFocusBar('platform', hw);
 
   document.querySelectorAll('.nav-link').forEach((link) => {
     link.addEventListener('click', () => navigate(link.dataset.view));
   });
 
-  document.addEventListener('touchai:nav', (e) => {
-    navigate(e.detail.view, e.detail);
-  });
+  document.addEventListener('touchai:nav', (e) => navigate(e.detail.view, e.detail));
 
   document.addEventListener('touchai:vertical', (e) => {
     setDemoContext(e.detail.category);
+  });
+
+  window.addEventListener('hashchange', () => {
+    const route = parseHash();
+    navigate(route.view, route);
   });
 
   preloadDemoModel((msg) => {
@@ -72,7 +110,8 @@ function initApp(hw) {
     document.getElementById('statusText').textContent = getDemoStatus(hw);
   });
 
-  navigate('platform');
+  const route = parseHash();
+  navigate(route.view, route);
 }
 
 runBootSequence(initApp);

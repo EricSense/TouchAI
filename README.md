@@ -4,14 +4,29 @@
 
 Every AI product today assumes cloud-first: type a prompt, wait for a server, hope your data stays private. TouchAI is the infrastructure layer that sits between AI applications and silicon — profiling hardware, routing inference locally, and guaranteeing zero egress.
 
+## Product focus
 
-## Product
+Three pillars — everything we build serves these:
 
-Three views in one app:
+1. **Knows your hardware** — scans CPU, GPU, RAM, NPU, form factor at runtime
+2. **Zero egress** — no API calls, no datacenter hop, 0 bytes sent
+3. **One runtime, every vertical** — 7 verticals, 34 companies, one layer
 
-1. **Platform** — Startup thesis, stack diagram, vertical overview
-2. **Solutions** — Browse all 7 verticals and 34 companies with TouchAI fit for each
-3. **Live Demo** — Hardware-aware inference running on YOUR machine via WASM
+## Three views
+
+| View | Purpose |
+|------|---------|
+| **Platform** | Thesis, live hardware scan, pillars, stack diagram, business model |
+| **Solutions** | 7 verticals · 34 companies · cloud problem → TouchAI layer per company |
+| **Live Demo** | On-device WASM inference with vertical context and focused prompts |
+
+## Deep links
+
+```
+#platform
+#solutions/foundation
+#demo/healthcare/tempus
+```
 
 ## Quick start
 
@@ -20,14 +35,16 @@ npm install
 npm run dev
 ```
 
+Deploy via Vercel (`vercel.json` → `dist/`).
+
 ## Tech
 
-- Real hardware scan (CPU, GPU, RAM, NPU inference, arch)
+- Real hardware scan (CPU, GPU, RAM, NPU, arch)
 - Transformers.js / ONNX WASM (Qwen2.5-0.5B)
 - Vertical-aware system prompts
 - Zero egress inference
-- Touch-native UX (ripples, cursor, voice)
+- Touch-native UX (ripples, cursor, voice, memory, stats)
 
 ## Positioning
 
-TouchAI is the runtime they deploy on. The layer every AI startup is missing between their model and the user's device.
+TouchAI is not competing with OpenAI or Harvey — it's the runtime they deploy on. The layer every AI startup is missing between their model and the user's device.

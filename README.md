@@ -10,7 +10,7 @@ Every AI product today assumes cloud-first: type a prompt, wait for a server, ho
 Three views in one app:
 
 1. **Platform** — Startup thesis, stack diagram, vertical overview
-2. **Solutions** — Browse all 7 verticals and 38 companies with TouchAI fit for each
+2. **Solutions** — Browse all 7 verticals and 34 companies with TouchAI fit for each
 3. **Live Demo** — Hardware-aware inference running on YOUR machine via WASM
 
 ## Quick start

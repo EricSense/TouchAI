@@ -6,6 +6,7 @@ import { initRipples } from './ripple.js';
 import { initCursor } from './cursor.js';
 import { totalCompanies, getCompanyBySlug, slugify } from './ecosystem.js';
 import { focusLine } from './focus.js';
+import { markJourneyStep, initJourney, renderJourneyStrip } from './onboarding.js';
 
 let hardware = null;
 let demoMounted = false;
@@ -77,6 +78,8 @@ export function navigate(view, opts = {}) {
   document.getElementById('demoVerticalBadge')?.classList.toggle('hidden', view !== 'demo' || !ctx.company);
   updateFocusBar(view, hardware);
   updateHash(view, opts);
+  markJourneyStep(view);
+  renderJourneyStrip();
 }
 
 function initApp(hw) {
@@ -85,6 +88,7 @@ function initApp(hw) {
 
   initCursor(document.getElementById('cursor'));
   initRipples(document.getElementById('rippleLayer'));
+  initJourney();
 
   document.getElementById('navCompanyCount').textContent = `${totalCompanies()} AI companies`;
   updateFocusBar('platform', hw);

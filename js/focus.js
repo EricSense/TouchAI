@@ -34,3 +34,40 @@ export function focusLine(hw) {
   const machine = hw ? `${hw.platform} · ${hw.cores ?? '?'} cores` : 'your device';
   return `Intelligence on ${machine} — 0 bytes egress`;
 }
+
+/** Guided path — Platform → Solutions → Demo */
+export const JOURNEY = [
+  { step: 1, view: 'platform', title: 'Thesis', desc: 'Understand why cloud-first AI breaks on-device' },
+  { step: 2, view: 'solutions', title: 'Verticals', desc: 'See TouchAI fit across 7 verticals and 34 companies' },
+  { step: 3, view: 'demo', title: 'Prove it', desc: 'Run hardware-aware inference on this machine' },
+];
+
+/** Runtime SDK surface — maps to pillars */
+export const RUNTIME_API = [
+  {
+    name: 'scanHardware()',
+    pillar: 'hardware',
+    desc: 'Detect platform, CPU, GPU, RAM, NPU, form factor at runtime.',
+    code: `const hw = await scanHardware();\n// → { platform, arch, cores, gpu, npu, ... }`,
+  },
+  {
+    name: 'runInference(query, ctx)',
+    pillar: 'hardware',
+    desc: 'Hardware-aware generation with vertical and company context baked in.',
+    code: `const { response, latency } = await runInference(\n  query, hw, model, history, { vertical, company }\n);`,
+  },
+  {
+    name: 'getNetworkStats()',
+    pillar: 'egress',
+    desc: 'Always returns { bytesSent: 0, serverCalls: 0 } — zero egress by design.',
+    code: `const net = getNetworkStats();\n// → { bytesSent: 0, policy: "zero-egress" }`,
+  },
+  {
+    name: 'loadVertical(categoryId)',
+    pillar: 'runtime',
+    desc: 'Load vertical metadata — cloud problem, TouchAI gain, integration flow.',
+    code: `const vertical = getCategory("healthcare");\n// → Tempus, PathAI, HIPAA context`,
+  },
+];
+
+export const FOCUS_CHECKLIST = PILLARS.map((p) => p.label);

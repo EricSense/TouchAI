@@ -12,13 +12,15 @@ Three pillars — everything we build serves these:
 2. **Zero egress** — no API calls, no datacenter hop, 0 bytes sent
 3. **One runtime, every vertical** — 7 verticals, 34 companies, one layer
 
-## Three views
+## Three views + focus path
 
-| View | Purpose |
-|------|---------|
-| **Platform** | Thesis, live hardware scan, pillars, stack diagram, business model |
-| **Solutions** | 7 verticals · 34 companies · cloud problem → TouchAI layer per company |
-| **Live Demo** | On-device WASM inference with vertical context and focused prompts |
+| Step | View | Purpose |
+|------|------|---------|
+| 1 | **Platform** | Thesis, pillars, live hardware, Runtime SDK |
+| 2 | **Solutions** | 7 verticals · 34 companies · comparison matrix |
+| 3 | **Live Demo** | On-device WASM inference with vertical context |
+
+A guided journey strip tracks progress: Platform → Solutions → Demo.
 
 ## Deep links
 

@@ -15,6 +15,7 @@ export function renderSolutionsView(container, categoryId) {
   if (!mounted) {
     container.innerHTML = buildShell();
     wireShellEvents(container);
+    renderComparisonMatrix(container.querySelector('#matrixSection'));
     mounted = true;
   }
 
@@ -37,6 +38,7 @@ function buildShell() {
           </div>
         </div>
         <div class="ecosystem-strip" id="ecosystemStrip"></div>
+        <div class="matrix-section" id="matrixSection"></div>
       </header>
 
       <select id="verticalSelect" class="vertical-select interactive" aria-label="Select vertical"></select>
@@ -263,6 +265,75 @@ function renderSearchResults(container) {
       }));
     });
   });
+}
+
+function renderComparisonMatrix(el) {
+  if (!el) return;
+
+  el.innerHTML = `
+    <div class="matrix-header">
+      <span class="vd-role-label">Vertical comparison</span>
+      <button type="button" class="matrix-toggle interactive" id="matrixToggle" aria-expanded="false">Show matrix</button>
+    </div>
+    <div class="matrix-wrap hidden" id="matrixWrap">
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th>Vertical</th>
+            <th>Cos</th>
+            <th>Latency</th>
+            <th>Egress</th>
+            <th>Top capability</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${CATEGORIES.map((cat) => `
+            <tr class="matrix-row interactive" data-id="${cat.id}">
+              <td><strong>${shortVerticalName(cat.name)}</strong><span class="matrix-tag">${cat.tagline}</span></td>
+              <td>${cat.companies.length}</td>
+              <td>${cat.metrics.latency}</td>
+              <td class="matrix-zero">${cat.metrics.egress}</td>
+              <td>${cat.capabilities[0]}</td>
+              <td><span class="matrix-link">Explore →</span></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  const toggle = el.querySelector('#matrixToggle');
+  const wrap = el.querySelector('#matrixWrap');
+  toggle?.addEventListener('click', () => {
+    wrap.classList.toggle('hidden');
+    const isHidden = wrap.classList.contains('hidden');
+    toggle.textContent = isHidden ? 'Show matrix' : 'Hide matrix';
+    toggle.setAttribute('aria-expanded', String(!isHidden));
+  });
+
+  el.querySelectorAll('.matrix-row').forEach((row) => {
+    row.addEventListener('click', () => {
+      activeCategory = row.dataset.id;
+      const container = document.getElementById('viewSolutions');
+      if (container) {
+        updateNav(container);
+        renderDetail(container.querySelector('#verticalDetail'), getCategory(activeCategory));
+        container.querySelector('.solutions-layout')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+}
+
+function shortVerticalName(name) {
+  if (name.includes('Foundation')) return 'Foundation Models';
+  if (name.includes('Infrastructure')) return 'Infrastructure';
+  if (name.includes('Productivity')) return 'Search & Productivity';
+  if (name.includes('Coding')) return 'AI Coding';
+  if (name.includes('Robotics')) return 'Robotics';
+  if (name.includes('Healthcare')) return 'Healthcare';
+  if (name.includes('Creative')) return 'Creative AI';
+  return name.split(' ')[0];
 }
 
 function esc(text) {

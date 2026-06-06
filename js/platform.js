@@ -1,5 +1,6 @@
 import { CATEGORIES, totalCompanies } from './ecosystem.js';
-import { THESIS, PILLARS, FLOW, focusLine } from './focus.js';
+import { THESIS, PILLARS, FLOW, focusLine, FOCUS_CHECKLIST } from './focus.js';
+import { renderRuntimeSection } from './runtime.js';
 
 export function renderPlatformView(container, hw) {
   container.innerHTML = `
@@ -67,6 +68,16 @@ export function renderPlatformView(container, hw) {
         <h2 class="section-title">One runtime. Every vertical.</h2>
         <p class="section-sub">Each vertical has cloud problems, integration flows, and company-specific TouchAI layers — explore in Solutions.</p>
         <div class="category-grid" id="categoryPreview"></div>
+      </section>
+
+      ${renderRuntimeSection()}
+
+      <section class="focus-check-section">
+        <h2 class="section-title">Built in focus</h2>
+        <p class="section-sub">Every feature in TouchAI maps to one of three pillars — if it doesn't, it doesn't ship.</p>
+        <div class="focus-check-grid">
+          ${FOCUS_CHECKLIST.map((label) => `<div class="focus-check-item"><span class="focus-check-dot"></span>${label}</div>`).join('')}
+        </div>
       </section>
 
       <section class="company-section">

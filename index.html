@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="TouchAI — the hardware-aware runtime layer for every AI company. On-device inference, zero egress, adaptive to your silicon." />
+  <title>TouchAI — Hardware-Aware AI Runtime</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div id="boot" class="boot" aria-hidden="false">
+    <div class="boot-inner">
+      <div class="boot-logo"><span class="boot-ring"></span><span class="boot-dot"></span></div>
+      <div class="boot-title">TouchAI</div>
+      <div class="boot-sub">Hardware-Aware AI Runtime</div>
+      <div id="bootLog" class="boot-log" role="log" aria-live="polite"></div>
+      <div class="boot-bar"><div id="bootProgress" class="boot-bar-fill"></div></div>
+    </div>
+  </div>
+
+  <div id="cursor" class="cursor" aria-hidden="true">
+    <div class="cursor-ring"></div>
+    <div class="cursor-dot"></div>
+  </div>
+  <div id="rippleLayer" class="ripple-layer" aria-hidden="true"></div>
+
+  <div id="app" class="app hidden">
+    <header class="site-header">
+      <div class="header-left">
+        <div class="logo-mark"><span class="logo-ring"></span><span class="logo-dot"></span></div>
+        <div>
+          <span class="logo-text">TouchAI</span>
+          <span class="logo-tagline">Hardware-aware AI runtime</span>
+        </div>
+      </div>
+
+      <nav class="site-nav" aria-label="Main">
+        <button class="nav-link interactive active" data-view="platform">Platform</button>
+        <button class="nav-link interactive" data-view="solutions">Solutions</button>
+        <button class="nav-link interactive" data-view="demo">Live Demo</button>
+      </nav>
+
+      <div class="header-right">
+        <span class="header-stat" id="navCompanyCount">34 AI companies</span>
+        <span class="egress-badge" id="egressBadge">0 bytes sent</span>
+      </div>
+    </header>
+
+    <div class="view-container">
+      <div id="viewPlatform" class="view"></div>
+      <div id="viewSolutions" class="view hidden"></div>
+      <div id="viewDemo" class="view hidden">
+        <header class="demo-topbar">
+          <div class="demo-topbar-left">
+            <h1 id="demoTitle">Your Machine</h1>
+            <span class="topbar-badge hidden" id="demoVerticalBadge">Live</span>
+            <span class="topbar-badge" id="modelBadge">Pulse</span>
+          </div>
+          <div class="stats-bar">
+            <div class="stat"><span class="stat-label">Last</span><span class="stat-val" id="statLast">—</span></div>
+            <div class="stat"><span class="stat-label">Avg</span><span class="stat-val" id="statAvg">—</span></div>
+            <div class="stat"><span class="stat-label">Queries</span><span class="stat-val" id="statQueries">0</span></div>
+            <div class="stat"><span class="stat-label">Tokens</span><span class="stat-val" id="statTokens">0</span></div>
+          </div>
+        </header>
+        <div id="demoRoot" class="demo-root"></div>
+      </div>
+    </div>
+
+    <footer class="site-footer">
+      <div class="status-dot online"></div>
+      <span id="statusText">Zero egress · scanning hardware</span>
+      <span class="footer-sep">·</span>
+      <span>7 verticals · Foundation Models to Creative AI</span>
+    </footer>
+  </div>
+
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>

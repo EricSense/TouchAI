@@ -48,7 +48,7 @@ function parseHash() {
 function updateFocusBar(view, hw) {
   const bar = document.getElementById('focusBar');
   if (!bar) return;
-  const labels = { platform: 'Platform · thesis & stack', solutions: 'Solutions · 7 verticals · 34 companies', demo: 'Live Demo · on-device inference' };
+  const labels = { platform: 'Platform · vision & five surfaces', solutions: 'Solutions · 7 verticals · 34 companies', demo: 'Live Demo · situated inference' };
   bar.querySelector('.focus-view').textContent = labels[view] ?? '';
   bar.querySelector('.focus-device').textContent = focusLine(hw);
 }

@@ -1,6 +1,6 @@
 import { hardwareSummary } from './hardware.js';
 import { MODELS, MODEL_ORDER, getModel } from './models.js';
-import { getCategory, getCompany } from './ecosystem.js';
+import { getCategory, getCompany, companyGap } from './ecosystem.js';
 import { THESIS } from './focus.js';
 import { MemoryStore } from './memory.js';
 import { SessionStats } from './stats.js';
@@ -74,7 +74,7 @@ export function mountDemoPanel(root) {
       <section class="intel-panel">
         <div id="chatMessages" class="chat-messages"></div>
         <div class="chat-input-area">
-          <div class="input-label" id="inputLabel">Processed on this device — not a datacenter</div>
+          <div class="input-label" id="inputLabel">Adapted to this device — situated inference</div>
           <div class="input-wrap">
             <textarea id="chatInput" class="chat-input" placeholder="Touch or speak — intelligence runs here…" rows="1"></textarea>
             <button id="voiceBtn" class="icon-btn voice-btn interactive" aria-label="Voice">
@@ -101,7 +101,7 @@ export function mountDemoPanel(root) {
           <button id="clearMemory" class="text-btn interactive">Clear</button>
         </div>
         <ul id="memoryList" class="memory-list"></ul>
-        <div id="memoryEmpty" class="memory-empty">Local session only.<br/>Nothing leaves this device.</div>
+        <div id="memoryEmpty" class="memory-empty">Local session memory.<br/>Enriched with your hardware profile.</div>
         <div class="stats-mini" id="statsMini"></div>
       </aside>
     </div>
@@ -148,7 +148,7 @@ function renderDemoContext() {
   if (!activeVertical) {
     el.innerHTML = `
       <div class="nav-label">Get started</div>
-      <p class="ctx-hint">Pick a company in Solutions, or try a prompt below. Everything runs on your hardware — 0 bytes sent.</p>
+      <p class="ctx-hint">Pick a company in Solutions, or try a prompt below. Inference adapts to your hardware in real time.</p>
     `;
     return;
   }
@@ -162,8 +162,8 @@ function renderDemoContext() {
     <div class="ctx-vertical">${activeVertical.name}</div>
     ${activeCompany ? `<div class="ctx-company">${activeCompany}</div>` : ''}
     ${co ? `
-      <div class="ctx-block ctx-problem"><span class="co-label">Cloud problem</span><p>${co.problem}</p></div>
-      <div class="ctx-block ctx-solution"><span class="co-label co-label-accent">TouchAI layer</span><p>${co.touchai}</p></div>
+      <div class="ctx-block ctx-problem"><span class="co-label">Hardware gap</span><p>${companyGap(co)}</p></div>
+      <div class="ctx-block ctx-solution"><span class="co-label co-label-accent">With TouchAI</span><p>${co.touchai}</p></div>
     ` : `<p class="ctx-role">${activeVertical.touchaiRole}</p>`}
     <div class="ctx-metrics">
       ${Object.entries(activeVertical.metrics).map(([k, v]) => `<span><em>${k}</em> ${v}</span>`).join('')}
@@ -174,15 +174,15 @@ function renderDemoContext() {
 const STARTER_PROMPTS = {
   default: [
     'What hardware am I running on?',
-    'How is TouchAI different from cloud AI?',
-    'Explain the zero egress policy',
+    'What does hardware-aware AI mean?',
+    'How does TouchAI adapt to my machine?',
   ],
-  foundation: ['How would OpenAI deploy on my NPU?', 'Route a model to my GPU', 'Why not send prompts to a server?'],
+  foundation: ['How would OpenAI deploy on my NPU?', 'Route a model to my GPU', 'Adapt model size to my RAM'],
   infrastructure: ['How does TouchAI sit in an ML pipeline?', 'Select WASM vs CoreML for this device'],
-  productivity: ['Run a local RAG query without network', 'How does Harvey work on-device?'],
+  productivity: ['Run a local RAG query on this hardware', 'How does Harvey adapt to my machine?'],
   coding: ['Complete code using my hardware budget', 'How does Cursor use TouchAI locally?'],
   robotics: ['What latency can this hardware achieve?', 'Run inference under 100ms'],
-  healthcare: ['Keep PHI on this device', 'How is TouchAI HIPAA-aligned?'],
+  healthcare: ['Adapt clinical models to this device', 'How does TouchAI attestation work?'],
   creative: ['Scale video quality to my GPU', 'What can my VRAM handle?'],
 };
 
@@ -238,13 +238,13 @@ function showWelcome(hw) {
     : '';
   chatMessages.innerHTML = `
     <div class="chat-welcome">
-      <h2>AI that knows your hardware</h2>
+      <h2>Situated intelligence on your hardware</h2>
       ${verticalLine}
-      <p class="welcome-thesis">${THESIS.problem.split('.')[0]}. TouchAI runs on <strong>${hw.platform}</strong> (${hw.arch}, ${hw.cores ?? '?'} cores) — 0 bytes egress.</p>
+      <p class="welcome-thesis">${THESIS.bet.split('.')[0]}. TouchAI adapts to <strong>${hw.platform}</strong> (${hw.arch}, ${hw.cores ?? '?'} cores) in real time.</p>
       <div class="welcome-hw">
         <div class="welcome-hw-item"><span>GPU</span><span>${esc(hw.gpu)}</span></div>
         <div class="welcome-hw-item"><span>Accelerator</span><span>${esc(hw.npu)}</span></div>
-        <div class="welcome-hw-item"><span>Network</span><span>0 bytes sent</span></div>
+        <div class="welcome-hw-item"><span>Runtime</span><span>Hardware-adaptive</span></div>
       </div>
     </div>
   `;
@@ -277,20 +277,20 @@ async function sendQuery(text) {
   const thinking = document.createElement('div');
   thinking.className = 'msg assistant thinking';
   thinking.id = 'thinkingMsg';
-  thinking.innerHTML = '<div class="msg-bubble">Running on your hardware</div>';
+  thinking.innerHTML = '<div class="msg-bubble">Adapting to your hardware…</div>';
   chatMessages.appendChild(thinking);
 
   const ctx = { vertical: activeVertical, company: activeCompany };
-  const { response, latency, tokens, network } = await generate(
+  const { response, latency, tokens } = await generate(
     query, hardware, activeModel, memory.getConversationHistory(), ctx,
   );
 
   thinking.remove();
   memory.addTurn('assistant', response);
-  appendMessage('assistant', response, `${Math.round(latency)}ms · ~${tokens} tok · ${network.bytesSent}B sent`);
+  appendMessage('assistant', response, `${Math.round(latency)}ms · ~${tokens} tok · ${getModel(activeModel).name}`);
 
-  const egress = document.getElementById('egressBadge');
-  if (egress) egress.textContent = `${network.bytesSent} bytes sent`;
+  const runtimeBadge = document.getElementById('runtimeBadge');
+  if (runtimeBadge) runtimeBadge.textContent = `${hardware.platform} · ${getModel(activeModel).name}`;
   stats.record(latency, tokens);
   isGenerating = false;
   sendBtn.disabled = false;
@@ -342,5 +342,5 @@ export function preloadDemoModel(onProgress) {
 }
 
 export function getDemoStatus(hw) {
-  return `${hardwareSummary(hw)} · zero egress`;
+  return `${hardwareSummary(hw)} · hardware-adaptive runtime`;
 }

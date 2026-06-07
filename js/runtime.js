@@ -6,7 +6,7 @@ export function renderRuntimeSection() {
   return `
     <section class="runtime-section" id="runtime">
       <h2 class="section-title">Runtime SDK</h2>
-      <p class="section-sub">Embed TouchAI in any AI product. Every API maps to a focus pillar.</p>
+      <p class="section-sub">The foundation. Plug TouchAI into any model — instantly gain full hardware awareness and adaptive execution.</p>
       <div class="runtime-grid">
         ${RUNTIME_API.map((api) => `
           <div class="runtime-card">
@@ -20,8 +20,8 @@ export function renderRuntimeSection() {
         `).join('')}
       </div>
       <div class="runtime-policy">
-        <span class="runtime-policy-label">Network policy</span>
-        <code>zero-egress · no fetch() during inference · WASM on local silicon</code>
+        <span class="runtime-policy-label">Integration model</span>
+        <code>Cloud trains · TouchAI adapts · Inference matches silicon · Models come and go, runtime endures</code>
       </div>
     </section>
   `;

@@ -1,4 +1,4 @@
-import { CATEGORIES, getCategory, totalCompanies, searchCompanies } from './ecosystem.js';
+import { CATEGORIES, getCategory, totalCompanies, searchCompanies, companyGap, categoryWithoutTouchai } from './ecosystem.js';
 import { THESIS } from './focus.js';
 
 let activeCategory = 'foundation';
@@ -31,7 +31,7 @@ function buildShell() {
         <div class="solutions-header-top">
           <div>
             <h1>Solutions</h1>
-            <p>How TouchAI applies across ${CATEGORIES.length} AI verticals and ${totalCompanies()} companies — ${THESIS.insight.toLowerCase()}</p>
+            <p>Hardware-aware runtime across ${CATEGORIES.length} AI verticals and ${totalCompanies()} companies — ${THESIS.insight.toLowerCase()}</p>
           </div>
           <div class="solutions-search-wrap">
             <input type="search" id="solutionsSearch" class="solutions-search interactive" placeholder="Search companies…" aria-label="Search companies" />
@@ -147,9 +147,9 @@ function renderDetail(el, cat) {
     </div>
 
     <div class="vd-contrast">
-      <div class="vd-contrast-col cloud">
+      <div class="vd-contrast-col without">
         <span class="vd-contrast-label">Without TouchAI</span>
-        <p>${cat.cloudProblem}</p>
+        <p>${categoryWithoutTouchai(cat)}</p>
       </div>
       <div class="vd-contrast-col touchai">
         <span class="vd-contrast-label">With TouchAI</span>
@@ -203,11 +203,11 @@ function renderCompanyCard(co, categoryId) {
         <span class="co-badge">Partner fit</span>
       </div>
       <div class="co-problem">
-        <span class="co-label">Cloud problem</span>
-        <p>${co.problem}</p>
+        <span class="co-label">Hardware gap</span>
+        <p>${companyGap(co)}</p>
       </div>
       <div class="co-solution">
-        <span class="co-label co-label-accent">TouchAI layer</span>
+        <span class="co-label co-label-accent">With TouchAI</span>
         <p>${co.touchai}</p>
       </div>
       <p class="co-fit">${co.fit}</p>
@@ -250,8 +250,8 @@ function renderSearchResults(container) {
             <div class="co-name">${co.name}</div>
             <span class="co-vertical-tag">${co.categoryName}</span>
           </div>
-          <div class="co-problem"><span class="co-label">Cloud problem</span><p>${co.problem}</p></div>
-          <div class="co-solution"><span class="co-label co-label-accent">TouchAI layer</span><p>${co.touchai}</p></div>
+          <div class="co-problem"><span class="co-label">Hardware gap</span><p>${companyGap(co)}</p></div>
+          <div class="co-solution"><span class="co-label co-label-accent">With TouchAI</span><p>${co.touchai}</p></div>
           <button class="co-demo-btn interactive" data-company="${co.name}" data-category="${co.categoryId}">Demo on your hardware →</button>
         </article>
       `).join('')}
@@ -282,7 +282,7 @@ function renderComparisonMatrix(el) {
             <th>Vertical</th>
             <th>Cos</th>
             <th>Latency</th>
-            <th>Egress</th>
+            <th>Adaptation</th>
             <th>Top capability</th>
             <th></th>
           </tr>
@@ -293,7 +293,7 @@ function renderComparisonMatrix(el) {
               <td><strong>${shortVerticalName(cat.name)}</strong><span class="matrix-tag">${cat.tagline}</span></td>
               <td>${cat.companies.length}</td>
               <td>${cat.metrics.latency}</td>
-              <td class="matrix-zero">${cat.metrics.egress}</td>
+              <td class="matrix-adapt">${cat.metrics.adaptation}</td>
               <td>${cat.capabilities[0]}</td>
               <td><span class="matrix-link">Explore →</span></td>
             </tr>

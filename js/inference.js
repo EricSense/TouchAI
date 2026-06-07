@@ -1,5 +1,5 @@
 import { getModel } from './models.js';
-import { getCompany } from './ecosystem.js';
+import { getCompany, companyGap } from './ecosystem.js';
 
 let pipeline = null;
 let loading = false;
@@ -7,9 +7,9 @@ let loadError = null;
 let currentModelId = null;
 let bytesSent = 0;
 
-/** Track that inference never hits the network */
+/** Inference runs on local silicon — no server calls during generation */
 export function getNetworkStats() {
-  return { bytesSent, serverCalls: 0, policy: 'zero-egress' };
+  return { bytesSent, serverCalls: 0, policy: 'hardware-local' };
 }
 
 function buildSystemPrompt(hw, model, ctx = {}) {
@@ -24,7 +24,7 @@ TouchAI role in this vertical: ${vertical.touchaiRole}
 When answering, explain how TouchAI's hardware-aware runtime applies to ${company ?? 'this vertical'} specifically.`;
   }
 
-  return `You are TouchAI — the hardware-aware runtime layer for AI startups. You run entirely on the user's device. You are NOT a cloud chatbot.
+  return `You are TouchAI — the hardware-aware AI runtime. The layer between AI models and physical machines. You are situated intelligence: specific to this machine, this moment, this silicon.
 
 ACTUAL HARDWARE YOU ARE RUNNING ON RIGHT NOW:
 - Platform: ${hw.platform}
@@ -35,40 +35,41 @@ ACTUAL HARDWARE YOU ARE RUNNING ON RIGHT NOW:
 - NPU/Accelerator: ${hw.npu}
 - Display: ${hw.display}
 - Form factor: ${hw.formFactor}
-- Inference: ${hw.inferenceBackend}
-- Network: ${hw.networkPolicy} — zero bytes sent to any server
+- Inference backend: ${hw.inferenceBackend}
+- Runtime mode: ${hw.networkPolicy}
 ${verticalBlock}
 
 Context: ${hw.context}
 
-Model mode: ${model.name} (speed ${Math.round(model.speedWeight * 100)}%, depth ${Math.round(model.depthWeight * 100)}%).
+Model mode: ${model.name} (speed ${Math.round(model.speedWeight * 100)}%, depth ${Math.round(model.depthWeight * 100)}%) — adapted to this hardware.
 ${model.speedWeight > 0.8 ? 'Respond in 1-2 short sentences — optimised for this hardware.' : ''}
 ${model.depthWeight > 0.8 ? 'Provide thorough analysis suited to this machine.' : ''}
 
-TouchAI sits between AI applications (OpenAI, Harvey, Runway, Cursor, etc.) and silicon. Always reference actual hardware. Never pretend you run in the cloud.`;
+TouchAI sits between AI applications (OpenAI, Harvey, Runway, Cursor, etc.) and silicon. Cloud may train models upstream — you adapt and execute on real hardware. Always reference actual hardware specs.`;
 }
 
 const FALLBACK = {
   greeting: (hw) =>
     `Online on your ${hw.platform} (${hw.arch}, ${hw.cores ?? '?'} cores). ` +
-    `I'm TouchAI — I know this hardware and I never call a server. What do you need?`,
+    `I'm TouchAI — situated intelligence on this hardware. What do you need?`,
 
   hardware: (hw) =>
-    `Here's what I know about the machine I'm running on:\n` +
+    `Live hardware profile:\n` +
     `Platform: ${hw.platform}\nArchitecture: ${hw.arch}\n` +
     `CPU: ${hw.cores ?? '?'} cores\nRAM: ${hw.ram}\n` +
     `GPU: ${hw.gpu}\nAccelerator: ${hw.npu}\n` +
     `Display: ${hw.display}\nForm factor: ${hw.formFactor}\n` +
-    `Inference: ${hw.inferenceBackend}\nNetwork egress: 0 bytes`,
+    `Inference: ${hw.inferenceBackend}\nRuntime: ${hw.networkPolicy}`,
 
-  cloud: () =>
-    `Cloud AI sends your prompt to a datacenter, waits on a server, and hopes your data stays private. ` +
-    `TouchAI is the opposite: I run on YOUR ${navigator.platform || 'device'}, know YOUR hardware, and never leave it.`,
+  runtime: (hw) =>
+    `TouchAI is the hardware-aware runtime — the layer between AI models and silicon. ` +
+    `Cloud trains models. TouchAI adapts them to YOUR ${hw.platform} (${hw.gpu}, ${hw.cores ?? '?'} cores) in real time. ` +
+    `Models come and go. The runtime that knows your machine endures.`,
 
   identity: (hw, model) =>
-    `I'm TouchAI — hardware-aware intelligence, not a cloud chatbot. ` +
-    `Running on ${hw.platform} (${hw.gpu}), ${model.name} mode, zero network calls. ` +
-    `Every other AI product assumes cloud-first. I assume device-first.`,
+    `I'm TouchAI — the hardware-aware AI runtime. ` +
+    `Running on ${hw.platform} (${hw.gpu}), ${model.name} mode, adapted to this silicon. ` +
+    `I know your chip, memory, and compute budget — and I adjust execution accordingly.`,
 
   vertical: (hw, ctx) => {
     if (!ctx?.vertical) return null;
@@ -77,21 +78,21 @@ const FALLBACK = {
       const entry = getCompany(ctx.vertical.id, co);
       if (entry) {
         return `TouchAI for ${co} on your ${hw.platform} (${hw.cores ?? '?'} cores, ${hw.gpu}):\n` +
-          `Cloud problem: ${entry.problem}\n` +
-          `TouchAI layer: ${entry.touchai}\n` +
-          `0 bytes egress · ${ctx.vertical.metrics?.latency ?? 'on-device'}`;
+          `Hardware gap: ${companyGap(entry)}\n` +
+          `With TouchAI: ${entry.touchai}\n` +
+          `${ctx.vertical.metrics?.adaptation ?? 'Adaptive'} · ${ctx.vertical.metrics?.latency ?? 'on-device'}`;
       }
     }
     return `TouchAI for ${ctx.company ?? 'this vertical'} (${ctx.vertical.name}): ${ctx.vertical.touchaiRole} ` +
-      `Running on your ${hw.platform} (${hw.gpu}, ${hw.cores ?? '?'} cores) — 0 bytes egress.`;
+      `Adapted to your ${hw.platform} (${hw.gpu}, ${hw.cores ?? '?'} cores).`;
   },
 
   default: (hw, model, ctx) => {
     const mode = model.depthWeight > 0.7 ? 'deep' : model.speedWeight > 0.8 ? 'fast' : 'balanced';
     const vert = ctx?.company ? ` · ${ctx.company}` : '';
-    return `[${hw.platform} · ${hw.formFactor}${vert} · ${model.name}] Processed locally on ${hw.cores ?? '?'} cores ` +
-      `via ${hw.inferenceBackend}. ${mode === 'fast' ? 'Prioritised latency.' : mode === 'deep' ? 'Prioritised depth.' : 'Balanced.'} ` +
-      `0 bytes sent to any server.`;
+    return `[${hw.platform} · ${hw.formFactor}${vert} · ${model.name}] Situated inference on ${hw.cores ?? '?'} cores ` +
+      `via ${hw.inferenceBackend}. ${mode === 'fast' ? 'Latency-optimised.' : mode === 'deep' ? 'Depth-optimised.' : 'Balanced.'} ` +
+      `Execution adapted to detected hardware.`;
   },
 };
 
@@ -99,8 +100,8 @@ function fallbackReply(query, hw, model, ctx = {}) {
   const q = query.toLowerCase();
   if (/^(hi|hello|hey|greetings)/.test(q)) return FALLBACK.greeting(hw);
   if (/hardware|spec|cpu|gpu|ram|npu|chip|device|machine|what.*running/.test(q)) return FALLBACK.hardware(hw);
-  if (/cloud|server|private|privacy|network|datacenter/.test(q)) return FALLBACK.cloud();
-  if (/what are you|who are you|touchai|different|why/.test(q)) return FALLBACK.identity(hw, model);
+  if (/runtime|layer|cuda|inference|silicon|platform shift/.test(q)) return FALLBACK.runtime(hw);
+  if (/what are you|who are you|touchai|different|why|vision/.test(q)) return FALLBACK.identity(hw, model);
   if (ctx?.vertical) return FALLBACK.vertical(hw, ctx);
   return FALLBACK.default(hw, model, ctx);
 }

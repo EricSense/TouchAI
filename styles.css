@@ -577,9 +577,175 @@ body {
 
 .platform-hw-item span:first-child { color: var(--text-dim); }
 .platform-hw-item span:last-child { color: var(--text); text-align: right; max-width: 60%; word-break: break-word; }
-.hw-zero { color: var(--green) !important; font-weight: 500; }
+.hw-accent { color: var(--accent) !important; font-weight: 500; }
 
 .pillars-section { margin: 48px 0; }
+
+/* Analogy stack */
+.analogy-section { margin: 48px 0; }
+
+.analogy-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-2);
+}
+
+.analogy-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+
+.analogy-table th,
+.analogy-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.analogy-table th {
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.analogy-table tr:last-child td { border-bottom: none; }
+
+.analogy-highlight {
+  background: rgba(139, 92, 246, 0.08);
+}
+
+.analogy-highlight td { color: var(--text); }
+
+/* Hardware awareness layers */
+.awareness-section { margin: 48px 0; }
+
+.awareness-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.awareness-card {
+  padding: 14px 16px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.awareness-layer {
+  display: block;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.awareness-card p {
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+/* Five product surfaces */
+.surfaces-section { margin: 48px 0; }
+
+.surfaces-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.surface-card {
+  padding: 20px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.surface-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.surface-num {
+  font-size: 0.58rem;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+}
+
+.surface-tag {
+  font-size: 0.55rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.surface-card h3 {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  font-weight: 400;
+  margin-bottom: 8px;
+}
+
+.surface-desc {
+  font-size: 0.74rem;
+  line-height: 1.55;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
+.surface-buyers {
+  font-size: 0.68rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.surface-buyers span {
+  display: block;
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 4px;
+}
+
+/* Competitive moat */
+.moat-section { margin: 48px 0; }
+
+.moat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.moat-card {
+  padding: 20px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.moat-card h3 {
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  font-weight: 400;
+  margin-bottom: 8px;
+}
+
+.moat-card p {
+  font-size: 0.74rem;
+  line-height: 1.55;
+  color: var(--text-dim);
+}
 
 .pillars-grid {
   display: grid;
@@ -804,6 +970,7 @@ body {
 .matrix-row:hover { background: var(--bg-3); }
 .matrix-row strong { display: block; color: var(--text); font-weight: 500; }
 .matrix-tag { font-size: 0.58rem; color: var(--text-dim); display: block; margin-top: 2px; }
+.matrix-adapt { color: var(--accent); font-weight: 500; }
 .matrix-zero { color: var(--green); font-weight: 500; }
 .matrix-link { color: var(--accent); font-size: 0.65rem; }
 
@@ -1036,6 +1203,7 @@ body {
   border: 1px solid var(--border);
 }
 
+.vd-contrast-col.without { background: rgba(248, 113, 113, 0.04); border-color: rgba(248, 113, 113, 0.15); }
 .vd-contrast-col.cloud { background: rgba(248, 113, 113, 0.04); border-color: rgba(248, 113, 113, 0.15); }
 .vd-contrast-col.touchai { background: rgba(52, 211, 153, 0.04); border-color: rgba(52, 211, 153, 0.15); }
 
@@ -1048,6 +1216,7 @@ body {
   margin-bottom: 8px;
 }
 
+.vd-contrast-col.without .vd-contrast-label { color: var(--red); }
 .vd-contrast-col.cloud .vd-contrast-label { color: var(--red); }
 .vd-contrast-col.touchai .vd-contrast-label { color: var(--green); }
 
@@ -1545,6 +1714,16 @@ body {
   color: var(--accent);
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.runtime-badge {
+  font-size: 0.62rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(139, 92, 246, 0.12);
+  color: var(--accent);
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
 }
 
 .egress-badge {

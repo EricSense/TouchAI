@@ -1,24 +1,27 @@
 import { CATEGORIES, totalCompanies } from './ecosystem.js';
-import { THESIS, PILLARS, FLOW, focusLine, FOCUS_CHECKLIST } from './focus.js';
+import {
+  THESIS, PILLARS, FLOW, focusLine, FOCUS_CHECKLIST,
+  HARDWARE_LAYERS, PRODUCT_SURFACES, PLATFORM_WINS, MOAT,
+} from './focus.js';
 import { renderRuntimeSection } from './runtime.js';
 
 export function renderPlatformView(container, hw) {
   container.innerHTML = `
     <div class="platform-view">
       <section class="hero">
-        <div class="hero-eyebrow">The hardware-aware runtime for AI</div>
-        <h1 class="hero-title">Every AI company builds for the cloud.<br/>TouchAI builds for the <em>device</em>.</h1>
+        <div class="hero-eyebrow">The hardware-aware AI runtime</div>
+        <h1 class="hero-title">The layer between every AI model<br/>and every machine on earth.</h1>
         <p class="hero-sub">${THESIS.promise}</p>
         <div class="hero-actions">
-          <button class="btn btn-primary interactive" data-nav="demo">Try live demo</button>
-          <button class="btn btn-ghost interactive" data-nav="solutions">Explore solutions</button>
+          <button class="btn btn-primary interactive" data-nav="demo">Run on your hardware</button>
+          <button class="btn btn-ghost interactive" data-nav="solutions">Explore verticals</button>
         </div>
       </section>
 
       <section class="metrics-row">
-        <div class="metric"><span class="metric-val">${CATEGORIES.length}</span><span class="metric-label">AI verticals</span></div>
-        <div class="metric"><span class="metric-val">${totalCompanies()}</span><span class="metric-label">Companies served</span></div>
-        <div class="metric"><span class="metric-val">0</span><span class="metric-label">Bytes egress</span></div>
+        <div class="metric"><span class="metric-val">${PRODUCT_SURFACES.length}</span><span class="metric-label">Product surfaces</span></div>
+        <div class="metric"><span class="metric-val">${HARDWARE_LAYERS.length}</span><span class="metric-label">Awareness layers</span></div>
+        <div class="metric"><span class="metric-val">${totalCompanies()}</span><span class="metric-label">AI companies served</span></div>
         <div class="metric"><span class="metric-val">${hw?.cores ?? '—'}</span><span class="metric-label">Cores on this device</span></div>
       </section>
 
@@ -26,9 +29,44 @@ export function renderPlatformView(container, hw) {
 
       <section class="thesis-section">
         <blockquote>
-          ${THESIS.problem}
-          <strong>${THESIS.insight}</strong>
+          ${THESIS.founding}
+          <strong>${THESIS.bet}</strong>
+          ${THESIS.insight}
         </blockquote>
+      </section>
+
+      <section class="analogy-section">
+        <h2 class="section-title">The analogy stack</h2>
+        <p class="section-sub">Every era has a layer that won. AI inference is next.</p>
+        <div class="analogy-table-wrap">
+          <table class="analogy-table">
+            <thead>
+              <tr><th>Era</th><th>Layer that won</th><th>Who owned it</th></tr>
+            </thead>
+            <tbody>
+              ${PLATFORM_WINS.map((row) => `
+                <tr class="${row.owner === 'TouchAI' ? 'analogy-highlight' : ''}">
+                  <td>${row.era}</td>
+                  <td>${row.layer}</td>
+                  <td><strong>${row.owner}</strong></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="awareness-section">
+        <h2 class="section-title">What hardware-aware actually means</h2>
+        <p class="section-sub">Not just "runs on device." A live, dynamic understanding of the machine — this moment, this context.</p>
+        <div class="awareness-grid">
+          ${HARDWARE_LAYERS.map((row) => `
+            <div class="awareness-card">
+              <span class="awareness-layer">${row.layer}</span>
+              <p>${row.knows}</p>
+            </div>
+          `).join('')}
+        </div>
       </section>
 
       <section class="pillars-section">
@@ -44,12 +82,30 @@ export function renderPlatformView(container, hw) {
         </div>
       </section>
 
+      <section class="surfaces-section">
+        <h2 class="section-title">Five product surfaces</h2>
+        <p class="section-sub">From SDK to OEM to industrial OS — one runtime, multiple go-to-market paths.</p>
+        <div class="surfaces-grid">
+          ${PRODUCT_SURFACES.map((s) => `
+            <article class="surface-card">
+              <div class="surface-head">
+                <span class="surface-num">${s.num}</span>
+                <span class="surface-tag">${s.tagline}</span>
+              </div>
+              <h3>${s.title}</h3>
+              <p class="surface-desc">${s.desc}</p>
+              <p class="surface-buyers"><span>Who pays</span> ${s.buyers}</p>
+            </article>
+          `).join('')}
+        </div>
+      </section>
+
       <section class="layer-section">
         <h2 class="section-title">Where TouchAI sits</h2>
         <div class="stack-diagram">
           <div class="stack-row muted">Application layer · OpenAI, Harvey, Runway, Cursor…</div>
           <div class="stack-row muted">Model layer · GPT, Claude, Mistral, Llama…</div>
-          <div class="stack-row accent">TouchAI runtime · hardware scan · inference routing · zero egress</div>
+          <div class="stack-row accent">TouchAI runtime · hardware scan · adaptive execution · situated inference</div>
           <div class="stack-row muted">Silicon · NPU · GPU · CPU · ${hw ? hw.platform + ' ' + hw.arch : 'your device'}</div>
         </div>
         <div class="vd-flow platform-flow">
@@ -66,15 +122,27 @@ export function renderPlatformView(container, hw) {
 
       <section class="category-preview">
         <h2 class="section-title">One runtime. Every vertical.</h2>
-        <p class="section-sub">Each vertical has cloud problems, integration flows, and company-specific TouchAI layers — explore in Solutions.</p>
+        <p class="section-sub">Each vertical has hardware gaps, integration flows, and company-specific TouchAI capabilities — explore in Solutions.</p>
         <div class="category-grid" id="categoryPreview"></div>
       </section>
 
       ${renderRuntimeSection()}
 
+      <section class="moat-section">
+        <h2 class="section-title">The competitive moat</h2>
+        <div class="moat-grid">
+          ${MOAT.map((m) => `
+            <div class="moat-card">
+              <h3>${m.title}</h3>
+              <p>${m.desc}</p>
+            </div>
+          `).join('')}
+        </div>
+      </section>
+
       <section class="focus-check-section">
         <h2 class="section-title">Built in focus</h2>
-        <p class="section-sub">Every feature in TouchAI maps to one of three pillars — if it doesn't, it doesn't ship.</p>
+        <p class="section-sub">Every feature maps to a pillar — if it doesn't, it doesn't ship.</p>
         <div class="focus-check-grid">
           ${FOCUS_CHECKLIST.map((label) => `<div class="focus-check-item"><span class="focus-check-dot"></span>${label}</div>`).join('')}
         </div>
@@ -85,19 +153,21 @@ export function renderPlatformView(container, hw) {
         <div class="company-grid">
           <div class="company-block">
             <h3>What we sell</h3>
-            <p>Runtime infrastructure — not another chatbot. The hardware-aware layer AI companies embed for on-device deployment.</p>
+            <p>The hardware-aware runtime layer — not another chatbot. Infrastructure that makes any AI model work optimally on any physical machine.</p>
           </div>
           <div class="company-block">
             <h3>Who pays</h3>
             <ul class="company-list">
-              <li><strong>Foundation model cos</strong> — edge deployment SDK</li>
-              <li><strong>Enterprise AI</strong> — air-gapped, zero-egress inference</li>
-              <li><strong>Device OEMs</strong> — pre-installed NPU-aware runtime</li>
+              <li><strong>AI companies</strong> — Runtime SDK integration</li>
+              <li><strong>Device OEMs</strong> — Pre-installed runtime licensing</li>
+              <li><strong>Industrial & defense</strong> — Edge OS enterprise contracts</li>
+              <li><strong>Regulated enterprises</strong> — Trust & identity layer</li>
+              <li><strong>Power users</strong> — Situated AI agent subscription</li>
             </ul>
           </div>
           <div class="company-block">
             <h3>Why now</h3>
-            <p>Every phone, laptop, and robot ships with an NPU. Every AI company still routes inference to a datacenter. TouchAI closes that gap.</p>
+            <p>Every device ships with an NPU. Every AI company ships models trained in the cloud. Nobody owns the layer that connects them on real hardware — yet.</p>
           </div>
         </div>
         <div class="company-cta">
@@ -143,7 +213,7 @@ function renderHardwareCard(hw) {
         <div class="platform-hw-item"><span>GPU</span><span>${hw.gpu}</span></div>
         <div class="platform-hw-item"><span>NPU</span><span>${hw.npu}</span></div>
         <div class="platform-hw-item"><span>Form factor</span><span>${hw.formFactor}</span></div>
-        <div class="platform-hw-item"><span>Network</span><span class="hw-zero">0 bytes egress</span></div>
+        <div class="platform-hw-item"><span>Runtime</span><span class="hw-accent">Hardware-aware · active</span></div>
       </div>
     </section>
   `;

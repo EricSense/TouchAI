@@ -108,7 +108,7 @@ export async function scanHardware() {
     touchPoints: navigator.maxTouchPoints,
     wasm: detectWasmFeatures(),
     inferenceBackend: 'ONNX Web Runtime · WASM',
-    networkPolicy: 'zero-egress',
+    networkPolicy: 'hardware-adaptive',
     language: navigator.language,
     online: navigator.onLine,
     context: buildContext(platform, arch, ramGb, cores, gpu.renderer),
@@ -124,7 +124,7 @@ function buildContext(platform, arch, ramGb, cores, gpu) {
   if (cores) parts.push(`${cores} CPU cores available.`);
   if (ramGb) parts.push(`${ramGb} GB addressable RAM.`);
   parts.push(`GPU: ${gpu}.`);
-  parts.push('All inference stays on this machine — no cloud, no API calls.');
+  parts.push('TouchAI adapts inference to this machine — model tier, backend, and compute budget matched to detected silicon.');
   return parts.join(' ');
 }
 

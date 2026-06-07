@@ -48,11 +48,12 @@ function buildBootLines(hw) {
   };
 
   return [
-    line('TouchAI v2.0 — hardware-aware intelligence kernel', 'info'),
-    line('Philosophy: no cloud. no server. know your machine.', 'info'),
-    line('Initialising zero-egress network policy…', ''),
-    line('  outbound API calls: BLOCKED', 'ok'),
-    line('  telemetry endpoints: NONE', 'ok'),
+    line('TouchAI v3.0 — hardware-aware AI runtime kernel', 'info'),
+    line('The layer between every AI model and every machine on earth.', 'info'),
+    line('Initialising hardware awareness stack…', ''),
+    line('  silicon layer      → ONLINE', 'ok'),
+    line('  memory layer       → ONLINE', 'ok'),
+    line('  sensor layer       → ONLINE', 'ok'),
     line('Scanning local hardware…', ''),
     line(`  platform   → ${hw.platform}`, 'ok'),
     line(`  arch       → ${hw.arch}`, 'ok'),
@@ -63,11 +64,11 @@ function buildBootLines(hw) {
     line(`  display    → ${hw.display}`, 'ok'),
     line(`  form factor→ ${hw.formFactor}${hw.touch ? ' · touch' : ''}`, 'ok'),
     line(`  wasm       → ${hw.wasm}`, 'ok'),
-    line('Mounting ONNX Web Runtime (WASM backend)…', ''),
-    line('  inference target: this device, not a datacenter', 'ok'),
-    line('Loading quantised model weights to IndexedDB…', 'warn'),
+    line('Mounting adaptive inference runtime (WASM backend)…', ''),
+    line('  execution target: this device — situated intelligence', 'ok'),
+    line('Loading model weights to local cache…', 'warn'),
     line('Touch input · voice · memory · stats: online', 'ok'),
     line(`Hardware profile locked — ${hw.platform} ${hw.arch}`, 'info'),
-    line('TouchAI ready. Intelligence runs where you touch.', 'info'),
+    line('TouchAI ready. AI that knows your hardware.', 'info'),
   ];
 }

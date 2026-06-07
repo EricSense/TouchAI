@@ -1,26 +1,36 @@
 # TouchAI
 
-**The hardware-aware runtime layer for every AI company.**
+**The hardware-aware AI runtime — the layer between every AI model and every physical machine on earth.**
 
-Every AI product today assumes cloud-first: type a prompt, wait for a server, hope your data stays private. TouchAI is the infrastructure layer that sits between AI applications and silicon — profiling hardware, routing inference locally, and guaranteeing zero egress.
+Every major platform shift in computing has been won by whoever controlled the layer everything else runs on. Intel owned the chip. Microsoft owned the OS. AWS owned the cloud. CUDA owned AI training compute. **TouchAI's bet: the next layer to own is the hardware-aware AI runtime.**
 
-## Product focus
+## The founding insight
 
-Three pillars — everything we build serves these:
+That layer doesn't exist yet. Not really. TouchAI gives AI a live, dynamic understanding of silicon, thermal, power, memory, sensors, peripherals, history, and user context — and adapts execution in real time.
 
-1. **Knows your hardware** — scans CPU, GPU, RAM, NPU, form factor at runtime
-2. **Zero egress** — no API calls, no datacenter hop, 0 bytes sent
-3. **One runtime, every vertical** — 7 verticals, 34 companies, one layer
+## Three pillars
+
+1. **Full hardware awareness** — not just "runs on device," but situated intelligence specific to this machine
+2. **Adaptive execution** — model size, backend, memory budget, and latency matched to detected silicon
+3. **The inference layer** — models come and go; the runtime that runs them on real hardware endures
+
+## Five product surfaces
+
+| Surface | Play | Who pays |
+|---------|------|----------|
+| **Runtime SDK** | The CUDA play | AI companies, app developers |
+| **OEM Partnership** | The Dolby play | Device manufacturers |
+| **Situated AI Agent** | Intelligence in your machine | Prosumers, developers |
+| **Industrial & Edge OS** | The operating layer | Industrial, defense, automotive |
+| **Trust & Identity** | Physical root of trust | Regulated enterprises, government |
 
 ## Three views + focus path
 
 | Step | View | Purpose |
 |------|------|---------|
-| 1 | **Platform** | Thesis, pillars, live hardware, Runtime SDK |
-| 2 | **Solutions** | 7 verticals · 34 companies · comparison matrix |
-| 3 | **Live Demo** | On-device WASM inference with vertical context |
-
-A guided journey strip tracks progress: Platform → Solutions → Demo.
+| 1 | **Platform** | Vision, analogy stack, five surfaces, Runtime SDK |
+| 2 | **Solutions** | 7 verticals · 34 companies · hardware gap → With TouchAI |
+| 3 | **Live Demo** | Situated inference adapted to this machine |
 
 ## Deep links
 
@@ -43,10 +53,10 @@ Deploy via Vercel (`vercel.json` → `dist/`).
 
 - Real hardware scan (CPU, GPU, RAM, NPU, arch)
 - Transformers.js / ONNX WASM (Qwen2.5-0.5B)
+- Adaptive model modes (Flash / Pulse / Depth)
 - Vertical-aware system prompts
-- Zero egress inference
 - Touch-native UX (ripples, cursor, voice, memory, stats)
 
 ## Positioning
 
-TouchAI is not competing with OpenAI or Harvey — it's the runtime they deploy on. The layer every AI startup is missing between their model and the user's device.
+TouchAI is not competing with OpenAI or Harvey — it's the runtime they integrate. Cloud trains models. TouchAI adapts them to any physical machine.

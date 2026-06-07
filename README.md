@@ -2,11 +2,10 @@
 
 **The hardware-aware AI runtime — the layer between every AI model and every physical machine on earth.**
 
-Every major platform shift in computing has been won by whoever controlled the layer everything else runs on. Intel owned the chip. Microsoft owned the OS. AWS owned the cloud. CUDA owned AI training compute. **TouchAI's bet: the next layer to own is the hardware-aware AI runtime.**
 
 ## The founding insight
 
-That layer doesn't exist yet. Not really. TouchAI gives AI a live, dynamic understanding of silicon, thermal, power, memory, sensors, peripherals, history, and user context — and adapts execution in real time.
+ TouchAI gives AI a live, dynamic understanding of silicon, thermal, power, memory, sensors, peripherals, history, and user context — and adapts execution in real time.
 
 ## Three pillars
 

@@ -1,4 +1,5 @@
 import { getModel } from './models.js';
+import { getCompany } from './ecosystem.js';
 
 let pipeline = null;
 let loading = false;
@@ -71,9 +72,18 @@ const FALLBACK = {
 
   vertical: (hw, ctx) => {
     if (!ctx?.vertical) return null;
-    const co = ctx.company ?? 'this vertical';
-    return `TouchAI for ${co} (${ctx.vertical.name}): ${ctx.vertical.touchaiRole} ` +
-      `Running now on your ${hw.platform} (${hw.gpu}, ${hw.cores ?? '?'} cores) — 0 bytes egress.`;
+    const co = ctx.company;
+    if (co && ctx.vertical.id) {
+      const entry = getCompany(ctx.vertical.id, co);
+      if (entry) {
+        return `TouchAI for ${co} on your ${hw.platform} (${hw.cores ?? '?'} cores, ${hw.gpu}):\n` +
+          `Cloud problem: ${entry.problem}\n` +
+          `TouchAI layer: ${entry.touchai}\n` +
+          `0 bytes egress · ${ctx.vertical.metrics?.latency ?? 'on-device'}`;
+      }
+    }
+    return `TouchAI for ${ctx.company ?? 'this vertical'} (${ctx.vertical.name}): ${ctx.vertical.touchaiRole} ` +
+      `Running on your ${hw.platform} (${hw.gpu}, ${hw.cores ?? '?'} cores) — 0 bytes egress.`;
   },
 
   default: (hw, model, ctx) => {
@@ -91,8 +101,7 @@ function fallbackReply(query, hw, model, ctx = {}) {
   if (/hardware|spec|cpu|gpu|ram|npu|chip|device|machine|what.*running/.test(q)) return FALLBACK.hardware(hw);
   if (/cloud|server|private|privacy|network|datacenter/.test(q)) return FALLBACK.cloud();
   if (/what are you|who are you|touchai|different|why/.test(q)) return FALLBACK.identity(hw, model);
-  const vert = FALLBACK.vertical(hw, ctx);
-  if (vert && ctx?.vertical) return vert;
+  if (ctx?.vertical) return FALLBACK.vertical(hw, ctx);
   return FALLBACK.default(hw, model, ctx);
 }
 

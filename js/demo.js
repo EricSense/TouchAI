@@ -36,7 +36,7 @@ export function setDemoContext(categoryId, companyName) {
 function updateDemoHeader() {
   const title = document.getElementById('demoTitle');
   const badge = document.getElementById('demoVerticalBadge');
-  if (!title) return;
+  if (!title || !badge) return;
 
   if (activeCompany && activeVertical) {
     title.textContent = `${activeCompany} · on your hardware`;
@@ -44,7 +44,7 @@ function updateDemoHeader() {
     badge.classList.remove('hidden');
   } else {
     title.textContent = `${hardware?.platform ?? 'Your'} · ${hardware?.formFactor ?? 'Device'}`;
-    badge.textContent = 'Live';
+    badge.classList.add('hidden');
   }
 }
 
@@ -191,7 +191,9 @@ function renderPromptChips() {
   if (!el) return;
 
   const key = activeVertical?.id ?? 'default';
-  const prompts = STARTER_PROMPTS[key] ?? STARTER_PROMPTS.default;
+  let prompts = [...(STARTER_PROMPTS[key] ?? STARTER_PROMPTS.default)];
+  if (activeCompany) prompts.unshift(`How does TouchAI work for ${activeCompany}?`);
+  prompts = prompts.slice(0, 4);
   const label = activeCompany
     ? `Try with ${activeCompany}`
     : 'Focused prompts';

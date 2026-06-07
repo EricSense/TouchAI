@@ -65,12 +65,14 @@ export function navigate(view, opts = {}) {
   if (view === 'solutions') renderSolutionsView(views.solutions, opts.category);
   if (view === 'demo') {
     const root = document.getElementById('demoRoot');
-    if (opts.category || opts.company) setDemoContext(opts.category, opts.company);
     if (!demoMounted && root) {
       mountDemoPanel(root);
       demoMounted = true;
-    } else if (opts.category || opts.company) {
+    }
+    if (opts.category || opts.company) {
       setDemoContext(opts.category, opts.company);
+    } else {
+      setDemoContext(null, null);
     }
   }
 

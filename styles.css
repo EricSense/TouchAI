@@ -1606,6 +1606,8 @@ body {
   gap: 6px;
 }
 
+.hw-item.hw-layer .hw-key { color: var(--accent); font-weight: 500; }
+
 .hw-item {
   display: flex;
   justify-content: space-between;

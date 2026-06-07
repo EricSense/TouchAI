@@ -111,10 +111,10 @@ function initApp(hw) {
   });
 
   preloadDemoModel((msg) => {
-    document.getElementById('statusText').textContent = msg;
-  }).then(() => {
-    document.getElementById('statusText').textContent = getDemoStatus(hw);
+    const el = document.getElementById('statusText');
+    if (el) el.textContent = msg;
   });
+  document.getElementById('statusText').textContent = getDemoStatus(hw);
 
   const route = parseHash();
   navigate(route.view, route);

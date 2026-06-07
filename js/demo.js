@@ -53,16 +53,9 @@ export function mountDemoPanel(root) {
     <div class="demo-layout">
       <aside class="demo-sidebar">
         <div class="hardware-panel">
-          <div class="nav-label">Your Hardware</div>
-          <div class="hw-scan-badge live" id="hwScanBadge">Live scan</div>
-          <div class="hw-grid">
-            <div class="hw-item"><span class="hw-key">Platform</span><span class="hw-val" id="hwPlatform">—</span></div>
-            <div class="hw-item"><span class="hw-key">Arch</span><span class="hw-val" id="hwArch">—</span></div>
-            <div class="hw-item"><span class="hw-key">CPU</span><span class="hw-val" id="hwCores">—</span></div>
-            <div class="hw-item"><span class="hw-key">RAM</span><span class="hw-val" id="hwRam">—</span></div>
-            <div class="hw-item"><span class="hw-key">GPU</span><span class="hw-val hw-val-wrap" id="hwGpu">—</span></div>
-            <div class="hw-item"><span class="hw-key">NPU</span><span class="hw-val hw-val-wrap" id="hwNpu">—</span></div>
-          </div>
+          <div class="nav-label">8-Layer Awareness</div>
+          <div class="hw-scan-badge live" id="hwScanBadge">8/8 layers active</div>
+          <div class="hw-grid" id="hwAwarenessGrid"></div>
         </div>
         <div class="model-panel">
           <div class="nav-label">Inference Mode</div>
@@ -131,13 +124,19 @@ export function mountDemoPanel(root) {
 }
 
 function renderHardware(hw) {
-  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-  set('hwPlatform', hw.platform);
-  set('hwArch', hw.arch);
-  set('hwCores', hw.cores != null ? `${hw.cores} cores` : 'Not exposed');
-  set('hwRam', hw.ram);
-  set('hwGpu', hw.gpu);
-  set('hwNpu', hw.npu);
+  const badge = document.getElementById('hwScanBadge');
+  if (badge) badge.textContent = `${hw.layersActive}/${hw.layersTotal} layers active`;
+
+  const grid = document.getElementById('hwAwarenessGrid');
+  if (grid && hw.layers) {
+    grid.innerHTML = hw.layers.map((l) => `
+      <div class="hw-item hw-layer">
+        <span class="hw-key">${l.name}</span>
+        <span class="hw-val hw-val-wrap">${esc(l.summary)}</span>
+      </div>
+    `).join('');
+  }
+
   updateDemoHeader();
   renderDemoContext();
 }
@@ -174,7 +173,7 @@ function renderDemoContext() {
 const STARTER_PROMPTS = {
   default: [
     'What hardware am I running on?',
-    'What does hardware-aware AI mean?',
+    'Show all 8 awareness layers',
     'How does TouchAI adapt to my machine?',
   ],
   foundation: ['How would OpenAI deploy on my NPU?', 'Route a model to my GPU', 'Adapt model size to my RAM'],
@@ -240,11 +239,11 @@ function showWelcome(hw) {
     <div class="chat-welcome">
       <h2>Situated intelligence on your hardware</h2>
       ${verticalLine}
-      <p class="welcome-thesis">${THESIS.bet.split('.')[0]}. TouchAI adapts to <strong>${hw.platform}</strong> (${hw.arch}, ${hw.cores ?? '?'} cores) in real time.</p>
+      <p class="welcome-thesis">${THESIS.bet.split('.')[0]}. All <strong>${hw.layersActive} awareness layers</strong> active on <strong>${hw.platform}</strong>.</p>
       <div class="welcome-hw">
-        <div class="welcome-hw-item"><span>GPU</span><span>${esc(hw.gpu)}</span></div>
-        <div class="welcome-hw-item"><span>Accelerator</span><span>${esc(hw.npu)}</span></div>
-        <div class="welcome-hw-item"><span>Runtime</span><span>Hardware-adaptive</span></div>
+        <div class="welcome-hw-item"><span>Thermal</span><span>${esc(hw.awareness.thermal.state)}</span></div>
+        <div class="welcome-hw-item"><span>Power</span><span>${esc(hw.awareness.power.level)}</span></div>
+        <div class="welcome-hw-item"><span>Runtime</span><span>${hw.layersActive}/${hw.layersTotal} layers</span></div>
       </div>
     </div>
   `;
@@ -290,7 +289,7 @@ async function sendQuery(text) {
   appendMessage('assistant', response, `${Math.round(latency)}ms · ~${tokens} tok · ${getModel(activeModel).name}`);
 
   const runtimeBadge = document.getElementById('runtimeBadge');
-  if (runtimeBadge) runtimeBadge.textContent = `${hardware.platform} · ${getModel(activeModel).name}`;
+  if (runtimeBadge) runtimeBadge.textContent = `${hardware.layersActive}/${hardware.layersTotal} layers`;
   stats.record(latency, tokens);
   isGenerating = false;
   sendBtn.disabled = false;
@@ -342,5 +341,5 @@ export function preloadDemoModel(onProgress) {
 }
 
 export function getDemoStatus(hw) {
-  return `${hardwareSummary(hw)} · hardware-adaptive runtime`;
+  return `${hardwareSummary(hw)} · runtime active`;
 }

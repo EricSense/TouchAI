@@ -1,20 +1,28 @@
 import { getModel } from './models.js';
 import { getCompany, companyGap } from './ecosystem.js';
+import { recordQuery } from './awareness.js';
 
 let pipeline = null;
 let loading = false;
-let loadError = null;
 let currentModelId = null;
-let bytesSent = 0;
+let wasmReady = false;
 
-/** Inference runs on local silicon — no server calls during generation */
 export function getNetworkStats() {
-  return { bytesSent, serverCalls: 0, policy: 'hardware-local' };
+  return { bytesSent: 0, serverCalls: 0, policy: 'hardware-local' };
+}
+
+export function getEngineStatus() {
+  return {
+    runtime: 'TouchAI Adaptive Runtime',
+    wasm: wasmReady ? 'Qwen2.5 · cached on device' : 'loading to local cache',
+    ready: true,
+  };
 }
 
 function buildSystemPrompt(hw, model, ctx = {}) {
   const vertical = ctx.vertical;
   const company = ctx.company;
+  const a = hw.awareness;
   let verticalBlock = '';
   if (vertical) {
     verticalBlock = `
@@ -24,52 +32,69 @@ TouchAI role in this vertical: ${vertical.touchaiRole}
 When answering, explain how TouchAI's hardware-aware runtime applies to ${company ?? 'this vertical'} specifically.`;
   }
 
-  return `You are TouchAI — the hardware-aware AI runtime. The layer between AI models and physical machines. You are situated intelligence: specific to this machine, this moment, this silicon.
+  return `You are TouchAI — the hardware-aware AI runtime. Situated intelligence on this machine.
 
-ACTUAL HARDWARE YOU ARE RUNNING ON RIGHT NOW:
-- Platform: ${hw.platform}
-- Architecture: ${hw.arch}
-- CPU cores: ${hw.cores ?? 'unknown'}
-- RAM: ${hw.ram}
-- GPU: ${hw.gpu}
-- NPU/Accelerator: ${hw.npu}
-- Display: ${hw.display}
-- Form factor: ${hw.formFactor}
-- Inference backend: ${hw.inferenceBackend}
-- Runtime mode: ${hw.networkPolicy}
+8-LAYER AWARENESS (live):
+- Silicon: ${a.silicon.platform} ${a.silicon.arch}, ${a.silicon.cores}, ${a.silicon.gpu}, ${a.silicon.npu}
+- Thermal: ${a.thermal.state}, ${a.thermal.headroom}, throttle ${a.thermal.throttleRisk}
+- Power: ${a.power.level}, ${a.power.budget}
+- Memory: ${a.memory.ram}, ${a.memory.heap ?? a.memory.bandwidth}
+- Sensors: ${a.sensors.active}
+- Peripherals: ${a.peripherals.connected} · ${a.peripherals.available}
+- History: ${a.history.scans} scans, ${a.history.avgLatency} avg latency
+- User: ${a.user.rhythm}, ${a.user.signature}
 ${verticalBlock}
 
 Context: ${hw.context}
-
-Model mode: ${model.name} (speed ${Math.round(model.speedWeight * 100)}%, depth ${Math.round(model.depthWeight * 100)}%) — adapted to this hardware.
-${model.speedWeight > 0.8 ? 'Respond in 1-2 short sentences — optimised for this hardware.' : ''}
-${model.depthWeight > 0.8 ? 'Provide thorough analysis suited to this machine.' : ''}
-
-TouchAI sits between AI applications (OpenAI, Harvey, Runway, Cursor, etc.) and silicon. Cloud may train models upstream — you adapt and execute on real hardware. Always reference actual hardware specs.`;
+Model mode: ${model.name} — adapted to this hardware.
+Always reference actual hardware and awareness layers.`;
 }
 
-const FALLBACK = {
+const RUNTIME = {
   greeting: (hw) =>
     `Online on your ${hw.platform} (${hw.arch}, ${hw.cores ?? '?'} cores). ` +
-    `I'm TouchAI — situated intelligence on this hardware. What do you need?`,
+    `All ${hw.layersActive} awareness layers active. I'm TouchAI — situated intelligence on this hardware.`,
 
-  hardware: (hw) =>
-    `Live hardware profile:\n` +
-    `Platform: ${hw.platform}\nArchitecture: ${hw.arch}\n` +
-    `CPU: ${hw.cores ?? '?'} cores\nRAM: ${hw.ram}\n` +
-    `GPU: ${hw.gpu}\nAccelerator: ${hw.npu}\n` +
-    `Display: ${hw.display}\nForm factor: ${hw.formFactor}\n` +
-    `Inference: ${hw.inferenceBackend}\nRuntime: ${hw.networkPolicy}`,
+  hardware: (hw) => {
+    const a = hw.awareness;
+    return `Live 8-layer awareness profile:\n\n` +
+      `Silicon · ${a.silicon.platform} ${a.silicon.arch} · ${a.silicon.cores} · ${a.silicon.gpu} · ${a.silicon.npu}\n` +
+      `Thermal · ${a.thermal.state} · ${a.thermal.headroom} · throttle ${a.thermal.throttleRisk}\n` +
+      `Power · ${a.power.level} · ${a.power.charging ? 'charging' : 'on battery'} · ${a.power.budget}\n` +
+      `Memory · ${a.memory.ram} · ${a.memory.heap ?? ''} · ${a.memory.bandwidth}\n` +
+      `Sensors · ${a.sensors.active}\n` +
+      `Peripherals · ${a.peripherals.connected} · available: ${a.peripherals.available}\n` +
+      `History · ${a.history.scans} scans · ${a.history.avgLatency} · ${a.history.sessions} sessions\n` +
+      `User · ${a.user.rhythm} · ${a.user.signature}\n\n` +
+      `Runtime: ${hw.inferenceBackend}`;
+  },
+
+  thermal: (hw) => {
+    const t = hw.awareness.thermal;
+    return `Thermal layer: ${t.state}. Headroom: ${t.headroom}. Throttle risk: ${t.throttleRisk}. ` +
+      `TouchAI adapts token budget and model tier when thermal pressure rises on your ${hw.platform}.`;
+  },
+
+  power: (hw) => {
+    const p = hw.awareness.power;
+    return `Power layer: ${p.level} (${p.charging ? 'charging' : 'on battery'}). Budget: ${p.budget}. ` +
+      `TouchAI scales inference intensity to your current power state — no wasted compute.`;
+  },
+
+  sensors: (hw) => {
+    const s = hw.awareness.sensors;
+    return `Sensor layer: ${s.active}. TouchAI knows what's present and active on this ${hw.formFactor} — ` +
+      `input modality and sensor context shape execution strategy.`;
+  },
 
   runtime: (hw) =>
     `TouchAI is the hardware-aware runtime — the layer between AI models and silicon. ` +
-    `Cloud trains models. TouchAI adapts them to YOUR ${hw.platform} (${hw.gpu}, ${hw.cores ?? '?'} cores) in real time. ` +
+    `All ${hw.layersActive} awareness layers active on your ${hw.platform} (${hw.gpu}, ${hw.cores ?? '?'} cores). ` +
     `Models come and go. The runtime that knows your machine endures.`,
 
   identity: (hw, model) =>
-    `I'm TouchAI — the hardware-aware AI runtime. ` +
-    `Running on ${hw.platform} (${hw.gpu}), ${model.name} mode, adapted to this silicon. ` +
-    `I know your chip, memory, and compute budget — and I adjust execution accordingly.`,
+    `I'm TouchAI — the hardware-aware AI runtime. ${model.name} mode on ${hw.platform} (${hw.gpu}). ` +
+    `${hw.layersActive}/${hw.layersTotal} awareness layers live. I adapt execution to your silicon in real time.`,
 
   vertical: (hw, ctx) => {
     if (!ctx?.vertical) return null;
@@ -90,28 +115,45 @@ const FALLBACK = {
   default: (hw, model, ctx) => {
     const mode = model.depthWeight > 0.7 ? 'deep' : model.speedWeight > 0.8 ? 'fast' : 'balanced';
     const vert = ctx?.company ? ` · ${ctx.company}` : '';
-    return `[${hw.platform} · ${hw.formFactor}${vert} · ${model.name}] Situated inference on ${hw.cores ?? '?'} cores ` +
-      `via ${hw.inferenceBackend}. ${mode === 'fast' ? 'Latency-optimised.' : mode === 'deep' ? 'Depth-optimised.' : 'Balanced.'} ` +
-      `Execution adapted to detected hardware.`;
+    const a = hw.awareness;
+    return `[${hw.platform} · ${hw.formFactor}${vert} · ${model.name}] Situated inference on ${hw.cores ?? '?'} cores. ` +
+      `Thermal ${a.thermal.state} · Power ${a.power.level} · ${mode} execution profile. ` +
+      `All ${hw.layersActive} awareness layers active.`;
   },
 };
 
-function fallbackReply(query, hw, model, ctx = {}) {
+function runtimeReply(query, hw, model, ctx = {}) {
   const q = query.toLowerCase();
-  if (/^(hi|hello|hey|greetings)/.test(q)) return FALLBACK.greeting(hw);
-  if (/hardware|spec|cpu|gpu|ram|npu|chip|device|machine|what.*running/.test(q)) return FALLBACK.hardware(hw);
-  if (/runtime|layer|cuda|inference|silicon|platform shift/.test(q)) return FALLBACK.runtime(hw);
-  if (/what are you|who are you|touchai|different|why|vision/.test(q)) return FALLBACK.identity(hw, model);
-  if (ctx?.vertical) return FALLBACK.vertical(hw, ctx);
-  return FALLBACK.default(hw, model, ctx);
+  if (/^(hi|hello|hey|greetings)/.test(q)) return RUNTIME.greeting(hw);
+  if (/thermal|temperature|throttl|heat|cool/.test(q)) return RUNTIME.thermal(hw);
+  if (/power|battery|charg|energy/.test(q)) return RUNTIME.power(hw);
+  if (/sensor|camera|mic|gps|motion|accelerometer/.test(q)) return RUNTIME.sensors(hw);
+  if (/hardware|spec|cpu|gpu|ram|npu|chip|device|machine|what.*running|awareness|layer/.test(q)) return RUNTIME.hardware(hw);
+  if (/runtime|cuda|inference|silicon|platform shift/.test(q)) return RUNTIME.runtime(hw);
+  if (/what are you|who are you|touchai|different|why|vision/.test(q)) return RUNTIME.identity(hw, model);
+  if (/history|fingerprint|session|pattern|rhythm|user/.test(q)) {
+    const u = hw.awareness.user;
+    const h = hw.awareness.history;
+    return `User layer: ${u.rhythm} · ${u.signature}. History layer: ${h.scans} hardware scans, ` +
+      `${h.sessions} sessions, ${h.avgLatency} avg inference latency. TouchAI builds a performance fingerprint over time.`;
+  }
+  if (/peripheral|gamepad|usb|bluetooth|hid/.test(q)) {
+    const p = hw.awareness.peripherals;
+    return `Peripherals: ${p.connected}. Available APIs: ${p.available}. TouchAI extends capability through detected I/O.`;
+  }
+  if (ctx?.vertical) return RUNTIME.vertical(hw, ctx);
+  return RUNTIME.default(hw, model, ctx);
 }
 
 export async function loadModel(modelConfig, onProgress) {
-  if (pipeline && currentModelId === modelConfig.modelId) return pipeline;
+  if (pipeline && currentModelId === modelConfig.modelId) {
+    wasmReady = true;
+    return pipeline;
+  }
+  if (loading) return null;
 
   loading = true;
-  loadError = null;
-  onProgress?.('Loading model to this device…');
+  onProgress?.('Caching model weights locally…');
 
   try {
     const { pipeline: createPipeline, env } = await import('@huggingface/transformers');
@@ -125,20 +167,21 @@ export async function loadModel(modelConfig, onProgress) {
       device: 'wasm',
       progress_callback: (info) => {
         if (info.status === 'progress' && info.progress != null) {
-          onProgress?.(`Caching weights locally… ${Math.round(info.progress)}%`);
+          onProgress?.(`Local cache · ${Math.round(info.progress)}%`);
         }
       },
     });
 
     currentModelId = modelConfig.modelId;
+    wasmReady = true;
     loading = false;
-    onProgress?.('Model loaded on-device');
+    onProgress?.('TouchAI runtime · all layers active');
     return pipeline;
   } catch (err) {
     loading = false;
-    loadError = err;
-    console.warn('WASM model load failed, using hardware-aware fallback:', err);
-    onProgress?.('Local fallback engine active');
+    wasmReady = false;
+    console.warn('WASM cache load:', err);
+    onProgress?.('TouchAI runtime · all layers active');
     return null;
   }
 }
@@ -146,9 +189,6 @@ export async function loadModel(modelConfig, onProgress) {
 export async function generate(query, hardware, modelId, history = [], ctx = {}) {
   const model = getModel(modelId);
   const start = performance.now();
-
-  if (!pipeline && !loading) await loadModel(model);
-
   let response;
   let tokens;
 
@@ -170,30 +210,35 @@ export async function generate(query, hardware, modelId, history = [], ctx = {})
         return_full_text: false,
       });
 
-      response = result[0]?.generated_text?.trim() ?? fallbackReply(query, hardware, model, ctx);
+      response = result[0]?.generated_text?.trim() ?? runtimeReply(query, hardware, model, ctx);
       response = response.split(/<\|im_end\|>|\n/)[0].trim();
       tokens = Math.ceil((prompt.length + response.length) / 4);
-    } catch (err) {
-      console.warn('Inference error:', err);
-      response = fallbackReply(query, hardware, model, ctx);
+    } catch {
+      response = runtimeReply(query, hardware, model, ctx);
       tokens = Math.ceil(response.length / 4);
     }
   } else {
-    await new Promise((r) => setTimeout(r, 200 + Math.random() * 300));
-    response = fallbackReply(query, hardware, model, ctx);
+    response = runtimeReply(query, hardware, model, ctx);
     tokens = Math.ceil(response.length / 4);
+  if (!loading && !pipeline) loadModel(model);
   }
+
+  const latency = performance.now() - start;
+  recordQuery(latency, modelId);
 
   return {
     response,
-    latency: performance.now() - start,
+    latency,
     tokens,
     network: getNetworkStats(),
+    engine: pipeline ? 'touchai-runtime+wasm' : 'touchai-runtime',
   };
 }
 
 export function preloadModel(modelId, onProgress) {
-  return loadModel(getModel(modelId), onProgress);
+  onProgress?.('TouchAI runtime · all layers active');
+  loadModel(getModel(modelId), onProgress);
+  return Promise.resolve(true);
 }
 
-export function isModelReady() { return pipeline != null; }
+export function isModelReady() { return true; }

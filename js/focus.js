@@ -112,7 +112,8 @@ export const FLOW = ['Model arrives', 'Hardware scan', 'Runtime adapts', 'Situat
 
 export function focusLine(hw) {
   const machine = hw ? `${hw.platform} · ${hw.cores ?? '?'} cores` : 'your device';
-  return `Situated intelligence on ${machine}`;
+  const layers = hw?.layersActive ? `${hw.layersActive}/${hw.layersTotal} layers · ` : '';
+  return `${layers}situated intelligence on ${machine}`;
 }
 
 export const JOURNEY = [

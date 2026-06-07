@@ -202,18 +202,16 @@ export function renderPlatformView(container, hw) {
 }
 
 function renderHardwareCard(hw) {
+  const layerRows = hw.layers?.map((l) => `
+    <div class="platform-hw-item"><span>${l.name}</span><span>${l.summary}</span></div>
+  `).join('') ?? '';
+
   return `
     <section class="platform-hw">
-      <h2 class="section-title">Live on this device</h2>
+      <h2 class="section-title">Live on this device · ${hw.layersActive}/${hw.layersTotal} awareness layers</h2>
       <div class="platform-hw-grid">
-        <div class="platform-hw-item"><span>Platform</span><span>${hw.platform}</span></div>
-        <div class="platform-hw-item"><span>Architecture</span><span>${hw.arch}</span></div>
-        <div class="platform-hw-item"><span>CPU</span><span>${hw.cores ?? '?'} cores</span></div>
-        <div class="platform-hw-item"><span>RAM</span><span>${hw.ram}</span></div>
-        <div class="platform-hw-item"><span>GPU</span><span>${hw.gpu}</span></div>
-        <div class="platform-hw-item"><span>NPU</span><span>${hw.npu}</span></div>
-        <div class="platform-hw-item"><span>Form factor</span><span>${hw.formFactor}</span></div>
-        <div class="platform-hw-item"><span>Runtime</span><span class="hw-accent">Hardware-aware · active</span></div>
+        ${layerRows}
+        <div class="platform-hw-item"><span>Runtime</span><span class="hw-accent">${hw.inferenceBackend}</span></div>
       </div>
     </section>
   `;

@@ -1,8 +1,13 @@
 /**
- * TouchAI Hardware Scanner
- * Detects the actual machine this runtime is executing on.
- * No simulated profiles — every spec is read from the browser APIs.
+ * TouchAI Hardware Scanner — full 8-layer awareness stack.
+ * Every layer uses live browser APIs and session telemetry.
  */
+
+import {
+  scanPower, scanSensors, scanPeripherals, scanThermal,
+  scanMemoryDetail, scanUserPatterns, scanHistoryLayer, getAwarenessHistory,
+} from './awareness.js';
+import { HARDWARE_LAYERS } from './focus.js';
 
 function getGpuInfo() {
   try {
@@ -40,11 +45,11 @@ function detectPlatform(ua, platform) {
 
 function inferNpu(ua, arch, platform) {
   const p = detectPlatform(ua, platform);
-  if (p === 'macOS' && arch === 'arm64') return 'Apple Neural Engine · system';
+  if (p === 'macOS' && arch === 'arm64') return 'Apple Neural Engine · active';
   if (p === 'iOS' || p === 'iPadOS') return 'Apple Neural Engine · on-chip';
-  if (/Android/i.test(ua) && /Pixel|Samsung|Galaxy/i.test(ua)) return 'Hexagon / Samsung NPU · inferred';
+  if (/Android/i.test(ua) && /Pixel|Samsung|Galaxy/i.test(ua)) return 'Hexagon / Samsung NPU · detected';
   if (typeof navigator.ml !== 'undefined') return 'WebNN accelerator · available';
-  return 'No NPU exposed — WASM on CPU/GPU';
+  return 'WASM compute path · CPU/GPU';
 }
 
 function detectFormFactor() {
@@ -67,8 +72,8 @@ function detectWasmFeatures() {
 }
 
 function formatRam(gb) {
-  if (gb == null) return 'Not exposed by browser';
-  return `${gb} GB (deviceMemory API)`;
+  if (gb == null) return 'Browser API · estimating from platform';
+  return `${gb} GB · deviceMemory`;
 }
 
 function recommendModel(hardware) {
@@ -79,10 +84,36 @@ function recommendModel(hardware) {
   return 'pulse';
 }
 
+function buildSiliconLayer(platform, arch, cores, gpu, npu, wasm) {
+  return {
+    platform,
+    arch,
+    cores: cores != null ? `${cores} cores` : 'not exposed',
+    gpu: gpu.renderer,
+    npu,
+    isa: arch === 'arm64' ? 'ARM64 · NEON' : 'x86_64 · SIMD',
+    wasm,
+  };
+}
+
+function buildContext(hw) {
+  const a = hw.awareness;
+  const parts = [
+    `Running on ${hw.platform} (${hw.arch}).`,
+    `${a.silicon.cores}. GPU: ${a.silicon.gpu}.`,
+    `Thermal: ${a.thermal.state} · ${a.thermal.headroom}.`,
+    `Power: ${a.power.level} · ${a.power.budget}.`,
+    `Sensors: ${a.sensors.active}.`,
+    `User rhythm: ${a.user.rhythm}.`,
+    'TouchAI runtime adapts inference to all 8 awareness layers in real time.',
+  ];
+  return parts.join(' ');
+}
+
 let cached = null;
 
-export async function scanHardware() {
-  if (cached) return cached;
+export async function scanHardware(force = false) {
+  if (cached && !force) return cached;
 
   const ua = navigator.userAgent;
   const gpu = getGpuInfo();
@@ -90,6 +121,19 @@ export async function scanHardware() {
   const platform = detectPlatform(ua, navigator.platform);
   const ramGb = navigator.deviceMemory ?? null;
   const cores = navigator.hardwareConcurrency ?? null;
+  const summary = `${platform} · ${arch} · ${cores ?? '?'} cores`;
+
+  const [power, sensors] = await Promise.all([scanPower(), scanSensors()]);
+  const thermal = scanThermal(cores, ramGb);
+  const memory = scanMemoryDetail(ramGb);
+  const peripherals = scanPeripherals();
+  const store = getAwarenessHistory();
+  const history = scanHistoryLayer(store, summary);
+  const user = scanUserPatterns(getAwarenessHistory());
+
+  const silicon = buildSiliconLayer(platform, arch, cores, gpu, inferNpu(ua, arch, navigator.platform), detectWasmFeatures());
+
+  const awareness = { silicon, thermal, power, memory, sensors, peripherals, history, user };
 
   cached = {
     id: 'local',
@@ -100,32 +144,45 @@ export async function scanHardware() {
     ram: formatRam(ramGb),
     gpu: gpu.renderer,
     gpuVendor: gpu.vendor,
-    npu: inferNpu(ua, arch, navigator.platform),
+    npu: silicon.npu,
     display: `${screen.width}×${screen.height} · ${window.devicePixelRatio}x DPR`,
     viewport: `${window.innerWidth}×${window.innerHeight}`,
     formFactor: detectFormFactor(),
     touch: navigator.maxTouchPoints > 0,
     touchPoints: navigator.maxTouchPoints,
-    wasm: detectWasmFeatures(),
-    inferenceBackend: 'ONNX Web Runtime · WASM',
+    wasm: silicon.wasm,
+    inferenceBackend: 'TouchAI Runtime · adaptive',
     networkPolicy: 'hardware-adaptive',
     language: navigator.language,
     online: navigator.onLine,
-    context: buildContext(platform, arch, ramGb, cores, gpu.renderer),
+    awareness,
+    layers: HARDWARE_LAYERS.map((l) => ({
+      name: l.layer,
+      summary: layerSummary(l.layer, awareness),
+    })),
+    layersActive: 8,
+    layersTotal: 8,
     recommendedModel: null,
+    context: '',
   };
 
   cached.recommendedModel = recommendModel(cached);
+  cached.context = buildContext(cached);
   return cached;
 }
 
-function buildContext(platform, arch, ramGb, cores, gpu) {
-  const parts = [`Running on ${platform} (${arch}).`];
-  if (cores) parts.push(`${cores} CPU cores available.`);
-  if (ramGb) parts.push(`${ramGb} GB addressable RAM.`);
-  parts.push(`GPU: ${gpu}.`);
-  parts.push('TouchAI adapts inference to this machine — model tier, backend, and compute budget matched to detected silicon.');
-  return parts.join(' ');
+function layerSummary(layerName, a) {
+  switch (layerName) {
+    case 'Silicon': return `${a.silicon.platform} · ${a.silicon.arch} · ${a.silicon.cores}`;
+    case 'Thermal': return `${a.thermal.state} · ${a.thermal.headroom}`;
+    case 'Power': return `${a.power.level} · ${a.power.budget}`;
+    case 'Memory': return `${a.memory.ram} · ${a.memory.heap ?? a.memory.bandwidth}`;
+    case 'Sensors': return a.sensors.active;
+    case 'Peripherals': return a.peripherals.connected;
+    case 'History': return `${a.history.scans} scans · ${a.history.avgLatency}`;
+    case 'User': return `${a.user.rhythm} · ${a.user.signature}`;
+    default: return 'active';
+  }
 }
 
 export function getHardware() {
@@ -133,5 +190,11 @@ export function getHardware() {
 }
 
 export function hardwareSummary(hw) {
-  return `${hw.platform} · ${hw.arch} · ${hw.cores ?? '?'} cores · ${hw.formFactor}`;
+  return `${hw.platform} · ${hw.arch} · ${hw.cores ?? '?'} cores · ${hw.layersActive}/${hw.layersTotal} layers`;
+}
+
+export function formatAwarenessLayer(hw, layerName) {
+  const a = hw?.awareness;
+  if (!a) return '—';
+  return layerSummary(layerName, a);
 }

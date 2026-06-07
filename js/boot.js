@@ -40,6 +40,7 @@ export async function runBootSequence(onComplete) {
 
 function buildBootLines(hw) {
   const pad = (n, w = 3) => String(n).padStart(w, '0');
+  const a = hw.awareness;
   let t = 0;
   const line = (msg, cls = '') => {
     const entry = { text: `[${pad(t, 4)}.${String(Math.floor(Math.random() * 999)).padStart(3, '0')}] ${msg}`, cls };
@@ -50,25 +51,21 @@ function buildBootLines(hw) {
   return [
     line('TouchAI v3.0 — hardware-aware AI runtime kernel', 'info'),
     line('The layer between every AI model and every machine on earth.', 'info'),
-    line('Initialising hardware awareness stack…', ''),
-    line('  silicon layer      → ONLINE', 'ok'),
-    line('  memory layer       → ONLINE', 'ok'),
-    line('  sensor layer       → ONLINE', 'ok'),
-    line('Scanning local hardware…', ''),
-    line(`  platform   → ${hw.platform}`, 'ok'),
-    line(`  arch       → ${hw.arch}`, 'ok'),
-    line(`  cpu cores  → ${hw.cores ?? 'unknown'}`, 'ok'),
-    line(`  ram        → ${hw.ram}`, 'ok'),
+    line('Mounting 8-layer awareness stack…', ''),
+    line(`  [1/8] Silicon    → ${a.silicon.platform} ${a.silicon.arch} · ${a.silicon.cores}`, 'ok'),
+    line(`  [2/8] Thermal    → ${a.thermal.state} · ${a.thermal.headroom}`, 'ok'),
+    line(`  [3/8] Power      → ${a.power.level} · ${a.power.budget}`, 'ok'),
+    line(`  [4/8] Memory     → ${a.memory.ram}`, 'ok'),
+    line(`  [5/8] Sensors    → ${a.sensors.active}`, 'ok'),
+    line(`  [6/8] Peripherals→ ${a.peripherals.connected}`, 'ok'),
+    line(`  [7/8] History    → ${a.history.scans} scans · ${a.history.avgLatency}`, 'ok'),
+    line(`  [8/8] User       → ${a.user.rhythm}`, 'ok'),
     line(`  gpu        → ${hw.gpu}`, 'ok'),
-    line(`  npu        → ${hw.npu}`, hw.npu.includes('No NPU') ? 'warn' : 'ok'),
-    line(`  display    → ${hw.display}`, 'ok'),
+    line(`  npu        → ${hw.npu}`, hw.npu.includes('WASM') ? 'warn' : 'ok'),
     line(`  form factor→ ${hw.formFactor}${hw.touch ? ' · touch' : ''}`, 'ok'),
-    line(`  wasm       → ${hw.wasm}`, 'ok'),
-    line('Mounting adaptive inference runtime (WASM backend)…', ''),
-    line('  execution target: this device — situated intelligence', 'ok'),
-    line('Loading model weights to local cache…', 'warn'),
+    line('TouchAI Adaptive Runtime online — all layers active', 'ok'),
     line('Touch input · voice · memory · stats: online', 'ok'),
-    line(`Hardware profile locked — ${hw.platform} ${hw.arch}`, 'info'),
+    line(`Hardware profile locked — ${hw.layersActive}/${hw.layersTotal} layers`, 'info'),
     line('TouchAI ready. AI that knows your hardware.', 'info'),
   ];
 }

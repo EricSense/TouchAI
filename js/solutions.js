@@ -1,5 +1,6 @@
 import { CATEGORIES, getCategory, totalCompanies, searchCompanies, companyGap, categoryWithoutTouchai } from './ecosystem.js';
 import { THESIS } from './focus.js';
+import { renderPillarStrip, renderVerticalFocus } from './focus-ui.js';
 
 let activeCategory = 'foundation';
 let searchQuery = '';
@@ -16,6 +17,7 @@ export function renderSolutionsView(container, categoryId) {
     container.innerHTML = buildShell();
     wireShellEvents(container);
     renderComparisonMatrix(container.querySelector('#matrixSection'));
+    renderPillarStrip(container.querySelector('#solutionsPillarStrip'));
     mounted = true;
   }
 
@@ -38,6 +40,7 @@ function buildShell() {
           </div>
         </div>
         <div class="ecosystem-strip" id="ecosystemStrip"></div>
+        <div id="solutionsPillarStrip" class="solutions-pillar-strip"></div>
         <div class="matrix-section" id="matrixSection"></div>
       </header>
 
@@ -138,6 +141,7 @@ function renderDetail(el, cat) {
     <div class="vd-header">
       <h2>${cat.name}</h2>
       <p class="vd-tagline">${cat.tagline}</p>
+      <div id="verticalFocusMap"></div>
     </div>
 
     <div class="vd-metrics">
@@ -193,6 +197,8 @@ function renderDetail(el, cat) {
       }));
     });
   });
+
+  renderVerticalFocus(el.querySelector('#verticalFocusMap'), cat.id);
 }
 
 function renderCompanyCard(co, categoryId) {

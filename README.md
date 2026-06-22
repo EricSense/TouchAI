@@ -9,9 +9,21 @@
 
 ## Three pillars
 
-1. **Full hardware awareness** — not just "runs on device," but situated intelligence specific to this machine
-2. **Adaptive execution** — model size, backend, memory budget, and latency matched to detected silicon
-3. **The inference layer** — models come and go; the runtime that runs them on real hardware endures
+Every view traces back to `js/focus.js`. Live pillar audit shows what's active on your device.
+
+1. **Full hardware awareness** — 8 live layers (Silicon → User)
+2. **Adaptive execution** — `adaptExecution()` routes backend, quant, tokens to hardware
+3. **The inference layer** — Runtime SDK between models and silicon
+
+## Runtime SDK (`js/runtime-api.js`)
+
+Implements every API in `RUNTIME_API`:
+
+- `scanHardware()` — 8-layer awareness scan
+- `adaptExecution(model, hw)` — backend, quant, token budget
+- `runInference()` — hardware-aware generation (`inference.js`)
+- `attestIntegrity()` — trust layer attestation
+- `loadVertical()` — vertical + company metadata
 
 ## Five product surfaces
 

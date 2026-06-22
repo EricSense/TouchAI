@@ -1,3 +1,4 @@
+import { adaptExecution, attestIntegrity } from './runtime-api.js';
 import { getModel } from './models.js';
 import { getCompany, companyGap } from './ecosystem.js';
 import { recordQuery } from './awareness.js';
@@ -122,7 +123,7 @@ const RUNTIME = {
   },
 };
 
-function runtimeReply(query, hw, model, ctx = {}) {
+async function runtimeReply(query, hw, model, ctx = {}) {
   const q = query.toLowerCase();
   if (/^(hi|hello|hey|greetings)/.test(q)) return RUNTIME.greeting(hw);
   if (/thermal|temperature|throttl|heat|cool/.test(q)) return RUNTIME.thermal(hw);
@@ -140,6 +141,21 @@ function runtimeReply(query, hw, model, ctx = {}) {
   if (/peripheral|gamepad|usb|bluetooth|hid/.test(q)) {
     const p = hw.awareness.peripherals;
     return `Peripherals: ${p.connected}. Available APIs: ${p.available}. TouchAI extends capability through detected I/O.`;
+  }
+  if (/attest|integrity|trust|enclave|signature/.test(q)) {
+    const proof = await attestIntegrity(hw);
+    return `Trust layer attestation:\n` +
+      `Device ID: ${proof.deviceId}\n` +
+      `Enclave: ${proof.enclave}\n` +
+      `Signature: ${proof.signature}\n` +
+      `Layers: ${proof.layers}/8 · Policy: ${proof.policy}\n` +
+      `Timestamp: ${proof.timestamp}`;
+  }
+  if (/adapt|execution|backend|quant/.test(q)) {
+    const plan = adaptExecution(model.id, hw);
+    return `Adaptive execution plan (${plan.mode}):\n` +
+      `Backend: ${plan.backend}\nQuant: ${plan.quant}\nMax tokens: ${plan.maxTokens}\n` +
+      `Latency target: ${plan.latencyTarget}\nThermal: ${plan.thermal}\nPower: ${plan.powerBudget}`;
   }
   if (ctx?.vertical) return RUNTIME.vertical(hw, ctx);
   return RUNTIME.default(hw, model, ctx);
@@ -188,6 +204,7 @@ export async function loadModel(modelConfig, onProgress) {
 
 export async function generate(query, hardware, modelId, history = [], ctx = {}) {
   const model = getModel(modelId);
+  const plan = adaptExecution(modelId, hardware);
   const start = performance.now();
   let response;
   let tokens;
@@ -204,23 +221,23 @@ export async function generate(query, hardware, modelId, history = [], ctx = {})
         '\n<|im_start|>assistant\n';
 
       const result = await pipeline(prompt, {
-        max_new_tokens: model.maxTokens,
+        max_new_tokens: plan.maxTokens,
         temperature: model.temperature,
         do_sample: true,
         return_full_text: false,
       });
 
-      response = result[0]?.generated_text?.trim() ?? runtimeReply(query, hardware, model, ctx);
+      response = result[0]?.generated_text?.trim() ?? await runtimeReply(query, hardware, model, ctx);
       response = response.split(/<\|im_end\|>|\n/)[0].trim();
       tokens = Math.ceil((prompt.length + response.length) / 4);
     } catch {
-      response = runtimeReply(query, hardware, model, ctx);
+      response = await runtimeReply(query, hardware, model, ctx);
       tokens = Math.ceil(response.length / 4);
     }
   } else {
-    response = runtimeReply(query, hardware, model, ctx);
+    response = await runtimeReply(query, hardware, model, ctx);
     tokens = Math.ceil(response.length / 4);
-  if (!loading && !pipeline) loadModel(model);
+    if (!loading && !pipeline) loadModel(model);
   }
 
   const latency = performance.now() - start;
@@ -232,8 +249,11 @@ export async function generate(query, hardware, modelId, history = [], ctx = {})
     tokens,
     network: getNetworkStats(),
     engine: pipeline ? 'touchai-runtime+wasm' : 'touchai-runtime',
+    plan,
   };
 }
+
+export const runInference = generate;
 
 export function preloadModel(modelId, onProgress) {
   onProgress?.('TouchAI runtime · all layers active');

@@ -5,7 +5,7 @@ import { initDemo, mountDemoPanel, setDemoContext, preloadDemoModel, getDemoStat
 import { initRipples } from './ripple.js';
 import { initCursor } from './cursor.js';
 import { totalCompanies, getCompanyBySlug, slugify } from './ecosystem.js';
-import { focusLine } from './focus.js';
+import { focusLine, getViewLabel, focusScore } from './focus.js';
 import { markJourneyStep, initJourney, renderJourneyStrip } from './onboarding.js';
 
 let hardware = null;
@@ -48,9 +48,11 @@ function parseHash() {
 function updateFocusBar(view, hw) {
   const bar = document.getElementById('focusBar');
   if (!bar) return;
-  const labels = { platform: 'Platform · vision & five surfaces', solutions: 'Solutions · 7 verticals · 34 companies', demo: 'Live Demo · situated inference' };
-  bar.querySelector('.focus-view').textContent = labels[view] ?? '';
+  bar.querySelector('.focus-view').textContent = getViewLabel(view);
   bar.querySelector('.focus-device').textContent = focusLine(hw);
+  const score = focusScore(view, hw);
+  const badge = document.getElementById('runtimeBadge');
+  if (badge && hw) badge.textContent = `${score.active}/${score.total} pillars`;
 }
 
 export function navigate(view, opts = {}) {

@@ -1,7 +1,8 @@
 import { hardwareSummary } from './hardware.js';
 import { MODELS, MODEL_ORDER, getModel } from './models.js';
 import { getCategory, getCompany, companyGap } from './ecosystem.js';
-import { THESIS } from './focus.js';
+import { THESIS, focusScore } from './focus.js';
+import { renderAdaptPanel, renderFocusCheck } from './focus-ui.js';
 import { MemoryStore } from './memory.js';
 import { SessionStats } from './stats.js';
 import { generate, preloadModel } from './inference.js';
@@ -61,6 +62,8 @@ export function mountDemoPanel(root) {
           <div class="nav-label">Inference Mode</div>
           <ul id="modelList" class="model-list"></ul>
         </div>
+        <div class="adapt-panel" id="adaptPanel"></div>
+        <div class="demo-focus" id="demoFocusCheck"></div>
         <div class="demo-context" id="demoContext"></div>
       </aside>
 
@@ -112,6 +115,8 @@ export function mountDemoPanel(root) {
   if (hardware) {
     renderHardware(hardware);
     renderModels();
+    renderAdaptPanel(root.querySelector('#adaptPanel'), hardware, activeModel);
+    renderFocusCheck(root.querySelector('#demoFocusCheck'), 'demo', hardware);
     showWelcome(hardware);
     renderPromptChips();
     stats.renderMini(root.querySelector('#statsMini'));
@@ -223,6 +228,7 @@ function renderModels() {
     li.addEventListener('click', () => {
       activeModel = id;
       renderModels();
+      renderAdaptPanel(document.getElementById('adaptPanel'), hardware, id);
       const badge = document.getElementById('modelBadge');
       if (badge) badge.textContent = getModel(id).name;
     });
@@ -289,7 +295,10 @@ async function sendQuery(text) {
   appendMessage('assistant', response, `${Math.round(latency)}ms · ~${tokens} tok · ${getModel(activeModel).name}`);
 
   const runtimeBadge = document.getElementById('runtimeBadge');
-  if (runtimeBadge) runtimeBadge.textContent = `${hardware.layersActive}/${hardware.layersTotal} layers`;
+  if (runtimeBadge && hardware) {
+    const score = focusScore('demo', hardware);
+    runtimeBadge.textContent = `${score.active}/${score.total} pillars`;
+  }
   stats.record(latency, tokens);
   isGenerating = false;
   sendBtn.disabled = false;

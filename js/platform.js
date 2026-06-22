@@ -1,9 +1,10 @@
 import { CATEGORIES, totalCompanies } from './ecosystem.js';
 import {
-  THESIS, PILLARS, FLOW, focusLine, FOCUS_CHECKLIST,
+  THESIS, PILLARS, FLOW, focusLine,
   HARDWARE_LAYERS, PRODUCT_SURFACES, PLATFORM_WINS, MOAT,
 } from './focus.js';
 import { renderRuntimeSection } from './runtime.js';
+import { renderFocusCheck } from './focus-ui.js';
 
 export function renderPlatformView(container, hw) {
   container.innerHTML = `
@@ -126,7 +127,7 @@ export function renderPlatformView(container, hw) {
         <div class="category-grid" id="categoryPreview"></div>
       </section>
 
-      ${renderRuntimeSection()}
+      ${renderRuntimeSection(hw)}
 
       <section class="moat-section">
         <h2 class="section-title">The competitive moat</h2>
@@ -142,10 +143,8 @@ export function renderPlatformView(container, hw) {
 
       <section class="focus-check-section">
         <h2 class="section-title">Built in focus</h2>
-        <p class="section-sub">Every feature maps to a pillar — if it doesn't, it doesn't ship.</p>
-        <div class="focus-check-grid">
-          ${FOCUS_CHECKLIST.map((label) => `<div class="focus-check-item"><span class="focus-check-dot"></span>${label}</div>`).join('')}
-        </div>
+        <p class="section-sub">Every feature maps to a pillar — live audit of what's active on this device.</p>
+        <div id="platformFocusCheck"></div>
       </section>
 
       <section class="company-section">
@@ -199,6 +198,8 @@ export function renderPlatformView(container, hw) {
       document.dispatchEvent(new CustomEvent('touchai:nav', { detail: { view: btn.dataset.nav } }));
     });
   });
+
+  renderFocusCheck(container.querySelector('#platformFocusCheck'), 'platform', hw);
 }
 
 function renderHardwareCard(hw) {

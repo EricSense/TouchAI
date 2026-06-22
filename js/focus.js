@@ -156,3 +156,62 @@ export const RUNTIME_API = [
 ];
 
 export const FOCUS_CHECKLIST = PILLARS.map((p) => p.label);
+
+/** Which product surface + pillar each vertical maps to */
+export const VERTICAL_FOCUS = {
+  foundation: { surface: 'sdk', pillar: 'adaptation' },
+  infrastructure: { surface: 'sdk', pillar: 'runtime' },
+  productivity: { surface: 'agent', pillar: 'awareness' },
+  coding: { surface: 'agent', pillar: 'adaptation' },
+  robotics: { surface: 'industrial', pillar: 'adaptation' },
+  healthcare: { surface: 'trust', pillar: 'awareness' },
+  creative: { surface: 'sdk', pillar: 'adaptation' },
+};
+
+export const VIEW_FOCUS = {
+  platform: { label: 'Platform · vision & five surfaces', checks: ['awareness', 'adaptation', 'runtime'] },
+  solutions: { label: 'Solutions · 7 verticals · 34 companies', checks: ['runtime', 'adaptation'] },
+  demo: { label: 'Live Demo · situated inference', checks: ['awareness', 'adaptation', 'runtime'] },
+};
+
+export function getViewLabel(view) {
+  return VIEW_FOCUS[view]?.label ?? view;
+}
+
+export function getSurface(id) {
+  return PRODUCT_SURFACES.find((s) => s.id === id) ?? null;
+}
+
+export function getPillar(id) {
+  return PILLARS.find((p) => p.id === id) ?? null;
+}
+
+export function getVerticalFocus(categoryId) {
+  const f = VERTICAL_FOCUS[categoryId] ?? { surface: 'sdk', pillar: 'runtime' };
+  return { ...f, surfaceMeta: getSurface(f.surface), pillarMeta: getPillar(f.pillar) };
+}
+
+/** Live pillar audit — every check must pass for "built in focus" */
+export function assessFocus(view, hw) {
+  const checks = VIEW_FOCUS[view]?.checks ?? PILLARS.map((p) => p.id);
+  return PILLARS.filter((p) => checks.includes(p.id)).map((p) => ({
+    ...p,
+    active: pillarActive(p.id, hw),
+  }));
+}
+
+function pillarActive(id, hw) {
+  if (!hw) return id === 'runtime';
+  switch (id) {
+    case 'awareness': return hw.layersActive === hw.layersTotal;
+    case 'adaptation': return Boolean(hw.recommendedModel && hw.awareness);
+    case 'runtime': return true;
+    default: return false;
+  }
+}
+
+export function focusScore(view, hw) {
+  const items = assessFocus(view, hw);
+  const active = items.filter((i) => i.active).length;
+  return { active, total: items.length, complete: active === items.length };
+}

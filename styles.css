@@ -904,19 +904,146 @@ body {
   align-items: center;
   gap: 8px;
   font-size: 0.75rem;
-  color: var(--text);
+  color: var(--text-dim);
   padding: 10px 16px;
   background: var(--bg-2);
   border: 1px solid var(--border);
   border-radius: 8px;
 }
 
+.focus-check-item.active {
+  color: var(--text);
+  border-color: rgba(52, 211, 153, 0.3);
+  background: rgba(52, 211, 153, 0.06);
+}
+
+.focus-check-item.active .focus-check-dot {
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+}
+
+.focus-check-item:not(.active) .focus-check-dot {
+  background: var(--text-dim);
+  box-shadow: none;
+}
+
+.focus-score {
+  font-size: 0.68rem;
+  color: var(--green);
+  letter-spacing: 0.06em;
+  margin-bottom: 12px;
+}
+
+.pillar-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+}
+
+.pillar-strip-item em {
+  font-style: normal;
+  color: var(--accent);
+  margin-right: 4px;
+}
+
+.pillar-strip-sep { color: var(--border); }
+
+.solutions-pillar-strip {
+  padding: 0 0 8px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+
+.vd-focus-map {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.vd-focus-chip {
+  font-size: 0.62rem;
+  padding: 4px 10px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+}
+
+.vd-focus-chip.surface {
+  background: rgba(139, 92, 246, 0.12);
+  color: var(--accent);
+}
+
+.vd-focus-chip.pillar {
+  background: rgba(52, 211, 153, 0.1);
+  color: var(--green);
+}
+
+.runtime-live {
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: rgba(139, 92, 246, 0.08);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: var(--radius);
+}
+
+.runtime-live-label {
+  display: block;
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.runtime-live code { font-size: 0.68rem; color: var(--text); }
+
+.adapt-panel {
+  padding: 0 16px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.adapt-plan {
+  display: grid;
+  gap: 4px;
+  margin: 8px 0;
+}
+
+.adapt-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  gap: 8px;
+}
+
+.adapt-row span:first-child { color: var(--text-dim); flex-shrink: 0; }
+.adapt-row span:last-child { color: var(--text); text-align: right; word-break: break-word; }
+
+.adapt-code {
+  display: block;
+  font-size: 0.6rem;
+  color: var(--accent);
+  word-break: break-word;
+}
+
+.demo-focus {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.demo-focus .focus-check-grid { gap: 6px; }
+.demo-focus .focus-check-item { padding: 6px 10px; font-size: 0.62rem; }
+.demo-focus .focus-score { margin-bottom: 8px; }
 .focus-check-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   background: var(--green);
   box-shadow: 0 0 6px var(--green);
+  flex-shrink: 0;
 }
 
 /* Solutions matrix */

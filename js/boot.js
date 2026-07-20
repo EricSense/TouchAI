@@ -43,14 +43,17 @@ function buildBootLines(hw) {
   const a = hw.awareness;
   let t = 0;
   const line = (msg, cls = '') => {
-    const entry = { text: `[${pad(t, 4)}.${String(Math.floor(Math.random() * 999)).padStart(3, '0')}] ${msg}`, cls };
+    const entry = {
+      text: `[${pad(t, 4)}.${String(Math.floor(Math.random() * 999)).padStart(3, '0')}] ${msg}`,
+      cls,
+    };
     t += 1;
     return entry;
   };
 
   return [
-    line('TouchAI v3.0 — hardware-aware AI runtime kernel', 'info'),
-    line('The layer between every AI model and every machine on earth.', 'info'),
+    line('TouchAI — hardware-aware AI', 'info'),
+    line('Axis: situational intelligence — not capability benchmarks', 'info'),
     line('Mounting 8-layer awareness stack…', ''),
     line(`  [1/8] Silicon    → ${a.silicon.platform} ${a.silicon.arch} · ${a.silicon.cores}`, 'ok'),
     line(`  [2/8] Thermal    → ${a.thermal.state} · ${a.thermal.headroom}`, 'ok'),
@@ -63,9 +66,8 @@ function buildBootLines(hw) {
     line(`  gpu        → ${hw.gpu}`, 'ok'),
     line(`  npu        → ${hw.npu}`, hw.npu.includes('WASM') ? 'warn' : 'ok'),
     line(`  form factor→ ${hw.formFactor}${hw.touch ? ' · touch' : ''}`, 'ok'),
-    line('TouchAI Adaptive Runtime online — all layers active', 'ok'),
-    line('Touch input · voice · memory · stats: online', 'ok'),
-    line(`Hardware profile locked — ${hw.layersActive}/${hw.layersTotal} layers`, 'info'),
-    line('TouchAI ready. AI that knows your hardware.', 'info'),
+    line('SDK surface ready · Device agent profile locked', 'ok'),
+    line(`Situation locked — ${hw.layersActive}/${hw.layersTotal} layers on ${hw.platform}`, 'info'),
+    line('TouchAI ready. AI that knows where it is.', 'info'),
   ];
 }

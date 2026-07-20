@@ -1,6 +1,5 @@
 import { hardwareSummary } from './hardware.js';
 import { MODELS, MODEL_ORDER, getModel } from './models.js';
-import { getCategory, getCompany, companyGap } from './ecosystem.js';
 import { THESIS, focusScore } from './focus.js';
 import { renderAdaptPanel, renderFocusCheck } from './focus-ui.js';
 import { MemoryStore } from './memory.js';
@@ -10,8 +9,6 @@ import { initVoice, isVoiceSupported } from './voice.js';
 
 let hardware = null;
 let activeModel = 'pulse';
-let activeVertical = null;
-let activeCompany = null;
 let isGenerating = false;
 
 const memory = new MemoryStore();
@@ -20,33 +17,16 @@ const stats = new SessionStats();
 let chatMessages, chatInput, sendBtn, voiceBtn, voiceStatus;
 let memoryList, memoryEmpty, modelList;
 
+const STARTER_PROMPTS = [
+  'What hardware am I running on?',
+  'Show all 8 awareness layers',
+  'How does TouchAI adapt to my machine?',
+  'Why does situational intelligence matter?',
+];
+
 export function initDemo(hw) {
   hardware = hw;
   activeModel = hw.recommendedModel;
-}
-
-export function setDemoContext(categoryId, companyName) {
-  activeVertical = categoryId ? getCategory(categoryId) : null;
-  activeCompany = companyName ?? null;
-  updateDemoHeader();
-  renderDemoContext();
-  renderPromptChips();
-  if (hardware && chatMessages) showWelcome(hardware);
-}
-
-function updateDemoHeader() {
-  const title = document.getElementById('demoTitle');
-  const badge = document.getElementById('demoVerticalBadge');
-  if (!title || !badge) return;
-
-  if (activeCompany && activeVertical) {
-    title.textContent = `${activeCompany} · on your hardware`;
-    badge.textContent = activeVertical.name.split(' ')[0];
-    badge.classList.remove('hidden');
-  } else {
-    title.textContent = `${hardware?.platform ?? 'Your'} · ${hardware?.formFactor ?? 'Device'}`;
-    badge.classList.add('hidden');
-  }
 }
 
 export function mountDemoPanel(root) {
@@ -54,12 +34,12 @@ export function mountDemoPanel(root) {
     <div class="demo-layout">
       <aside class="demo-sidebar">
         <div class="hardware-panel">
-          <div class="nav-label">8-Layer Awareness</div>
+          <div class="nav-label">Situated awareness</div>
           <div class="hw-scan-badge live" id="hwScanBadge">8/8 layers active</div>
           <div class="hw-grid" id="hwAwarenessGrid"></div>
         </div>
         <div class="model-panel">
-          <div class="nav-label">Inference Mode</div>
+          <div class="nav-label">Inference mode</div>
           <ul id="modelList" class="model-list"></ul>
         </div>
         <div class="adapt-panel" id="adaptPanel"></div>
@@ -70,9 +50,9 @@ export function mountDemoPanel(root) {
       <section class="intel-panel">
         <div id="chatMessages" class="chat-messages"></div>
         <div class="chat-input-area">
-          <div class="input-label" id="inputLabel">Adapted to this device — situated inference</div>
+          <div class="input-label" id="inputLabel">Situated Agent — adapted to this device</div>
           <div class="input-wrap">
-            <textarea id="chatInput" class="chat-input" placeholder="Touch or speak — intelligence runs here…" rows="1"></textarea>
+            <textarea id="chatInput" class="chat-input" placeholder="Ask your machine-aware agent…" rows="1"></textarea>
             <button id="voiceBtn" class="icon-btn voice-btn interactive" aria-label="Voice">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
@@ -93,11 +73,11 @@ export function mountDemoPanel(root) {
 
       <aside class="memory-panel">
         <div class="panel-header">
-          <span class="panel-title">Session Memory</span>
+          <span class="panel-title">Device memory</span>
           <button id="clearMemory" class="text-btn interactive">Clear</button>
         </div>
         <ul id="memoryList" class="memory-list"></ul>
-        <div id="memoryEmpty" class="memory-empty">Local session memory.<br/>Enriched with your hardware profile.</div>
+        <div id="memoryEmpty" class="memory-empty">Local session memory.<br/>Grounded in your hardware profile.</div>
         <div class="stats-mini" id="statsMini"></div>
       </aside>
     </div>
@@ -116,16 +96,24 @@ export function mountDemoPanel(root) {
     renderHardware(hardware);
     renderModels();
     renderAdaptPanel(root.querySelector('#adaptPanel'), hardware, activeModel);
-    renderFocusCheck(root.querySelector('#demoFocusCheck'), 'demo', hardware);
+    renderFocusCheck(root.querySelector('#demoFocusCheck'), 'live', hardware);
     showWelcome(hardware);
     renderPromptChips();
+    renderAgentContext();
     stats.renderMini(root.querySelector('#statsMini'));
     const badge = document.getElementById('modelBadge');
     if (badge) badge.textContent = getModel(activeModel).name;
+    updateDemoHeader();
   }
 
   wireDemoEvents(root);
   setupVoice();
+}
+
+function updateDemoHeader() {
+  const title = document.getElementById('demoTitle');
+  if (!title) return;
+  title.textContent = `Situated Agent · ${hardware?.platform ?? 'Device'}`;
 }
 
 function renderHardware(hw) {
@@ -141,71 +129,30 @@ function renderHardware(hw) {
       </div>
     `).join('');
   }
-
-  updateDemoHeader();
-  renderDemoContext();
 }
 
-function renderDemoContext() {
+function renderAgentContext() {
   const el = document.getElementById('demoContext');
-  if (!el) return;
-  if (!activeVertical) {
-    el.innerHTML = `
-      <div class="nav-label">Get started</div>
-      <p class="ctx-hint">Pick a company in Solutions, or try a prompt below. Inference adapts to your hardware in real time.</p>
-    `;
-    return;
-  }
-
-  const co = activeCompany && activeVertical
-    ? getCompany(activeVertical.id, activeCompany)
-    : null;
-
+  if (!el || !hardware) return;
   el.innerHTML = `
-    <div class="nav-label">Active vertical</div>
-    <div class="ctx-vertical">${activeVertical.name}</div>
-    ${activeCompany ? `<div class="ctx-company">${activeCompany}</div>` : ''}
-    ${co ? `
-      <div class="ctx-block ctx-problem"><span class="co-label">Hardware gap</span><p>${companyGap(co)}</p></div>
-      <div class="ctx-block ctx-solution"><span class="co-label co-label-accent">With TouchAI</span><p>${co.touchai}</p></div>
-    ` : `<p class="ctx-role">${activeVertical.touchaiRole}</p>`}
+    <div class="nav-label">TouchAI Device</div>
+    <p class="ctx-hint">The Situated Agent on this machine. Not the smartest model — the one with context no cloud model can acquire.</p>
     <div class="ctx-metrics">
-      ${Object.entries(activeVertical.metrics).map(([k, v]) => `<span><em>${k}</em> ${v}</span>`).join('')}
+      <span><em>Platform</em> ${esc(hardware.platform)}</span>
+      <span><em>Form</em> ${esc(hardware.formFactor)}</span>
+      <span><em>NPU</em> ${esc(hardware.npu)}</span>
     </div>
   `;
 }
-
-const STARTER_PROMPTS = {
-  default: [
-    'What hardware am I running on?',
-    'Show all 8 awareness layers',
-    'How does TouchAI adapt to my machine?',
-  ],
-  foundation: ['How would OpenAI deploy on my NPU?', 'Route a model to my GPU', 'Adapt model size to my RAM'],
-  infrastructure: ['How does TouchAI sit in an ML pipeline?', 'Select WASM vs CoreML for this device'],
-  productivity: ['Run a local RAG query on this hardware', 'How does Harvey adapt to my machine?'],
-  coding: ['Complete code using my hardware budget', 'How does Cursor use TouchAI locally?'],
-  robotics: ['What latency can this hardware achieve?', 'Run inference under 100ms'],
-  healthcare: ['Adapt clinical models to this device', 'How does TouchAI attestation work?'],
-  creative: ['Scale video quality to my GPU', 'What can my VRAM handle?'],
-};
 
 function renderPromptChips() {
   const el = document.getElementById('promptChips');
   if (!el) return;
 
-  const key = activeVertical?.id ?? 'default';
-  let prompts = [...(STARTER_PROMPTS[key] ?? STARTER_PROMPTS.default)];
-  if (activeCompany) prompts.unshift(`How does TouchAI work for ${activeCompany}?`);
-  prompts = prompts.slice(0, 4);
-  const label = activeCompany
-    ? `Try with ${activeCompany}`
-    : 'Focused prompts';
-
   el.innerHTML = `
-    <div class="prompt-chips-label">${label}</div>
+    <div class="prompt-chips-label">Ask the Situated Agent</div>
     <div class="prompt-chips-row">
-      ${prompts.map((p) => `<button type="button" class="prompt-chip interactive">${esc(p)}</button>`).join('')}
+      ${STARTER_PROMPTS.map((p) => `<button type="button" class="prompt-chip interactive">${esc(p)}</button>`).join('')}
     </div>
   `;
 
@@ -238,14 +185,10 @@ function renderModels() {
 
 function showWelcome(hw) {
   if (!chatMessages) return;
-  const verticalLine = activeCompany
-    ? `<p class="welcome-vertical">Demonstrating TouchAI for <strong>${activeCompany}</strong> (${activeVertical?.name}) on your ${hw.platform} hardware.</p>`
-    : '';
   chatMessages.innerHTML = `
     <div class="chat-welcome">
-      <h2>Situated intelligence on your hardware</h2>
-      ${verticalLine}
-      <p class="welcome-thesis">${THESIS.bet.split('.')[0]}. All <strong>${hw.layersActive} awareness layers</strong> active on <strong>${hw.platform}</strong>.</p>
+      <h2>Situated Agent on your hardware</h2>
+      <p class="welcome-thesis">${THESIS.question} All <strong>${hw.layersActive} awareness layers</strong> active on <strong>${hw.platform}</strong>.</p>
       <div class="welcome-hw">
         <div class="welcome-hw-item"><span>Thermal</span><span>${esc(hw.awareness.thermal.state)}</span></div>
         <div class="welcome-hw-item"><span>Power</span><span>${esc(hw.awareness.power.level)}</span></div>
@@ -255,7 +198,11 @@ function showWelcome(hw) {
   `;
 }
 
-function esc(t) { const s = document.createElement('span'); s.textContent = t; return s.innerHTML; }
+function esc(t) {
+  const s = document.createElement('span');
+  s.textContent = t;
+  return s.innerHTML;
+}
 
 function appendMessage(role, content, meta) {
   chatMessages.querySelector('.chat-welcome')?.remove();
@@ -282,12 +229,11 @@ async function sendQuery(text) {
   const thinking = document.createElement('div');
   thinking.className = 'msg assistant thinking';
   thinking.id = 'thinkingMsg';
-  thinking.innerHTML = '<div class="msg-bubble">Adapting to your hardware…</div>';
+  thinking.innerHTML = '<div class="msg-bubble">Reading situation on this machine…</div>';
   chatMessages.appendChild(thinking);
 
-  const ctx = { vertical: activeVertical, company: activeCompany };
   const { response, latency, tokens } = await generate(
-    query, hardware, activeModel, memory.getConversationHistory(), ctx,
+    query, hardware, activeModel, memory.getConversationHistory(), {},
   );
 
   thinking.remove();
@@ -296,8 +242,8 @@ async function sendQuery(text) {
 
   const runtimeBadge = document.getElementById('runtimeBadge');
   if (runtimeBadge && hardware) {
-    const score = focusScore('demo', hardware);
-    runtimeBadge.textContent = `${score.active}/${score.total} pillars`;
+    const score = focusScore('live', hardware);
+    runtimeBadge.textContent = `${score.active}/${score.total} active`;
   }
   stats.record(latency, tokens);
   isGenerating = false;
@@ -306,13 +252,19 @@ async function sendQuery(text) {
 
 function wireDemoEvents(root) {
   chatInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendQuery(chatInput.value); }
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendQuery(chatInput.value);
+    }
   });
   sendBtn.addEventListener('click', () => sendQuery(chatInput.value));
   memory.onUpdate = () => memory.render(memoryList, memoryEmpty);
   memoryList.addEventListener('click', (e) => {
     const item = e.target.closest('.memory-item');
-    if (item) { chatInput.value = memory.recall(item.dataset.id) ?? ''; chatInput.focus(); }
+    if (item) {
+      chatInput.value = memory.recall(item.dataset.id) ?? '';
+      chatInput.focus();
+    }
   });
   root.querySelector('#clearMemory')?.addEventListener('click', () => {
     memory.clear();
@@ -321,7 +273,10 @@ function wireDemoEvents(root) {
 }
 
 function setupVoice() {
-  if (!isVoiceSupported()) { voiceBtn.style.opacity = '0.3'; return; }
+  if (!isVoiceSupported()) {
+    voiceBtn.style.opacity = '0.3';
+    return;
+  }
   let listening = false;
   const recognition = initVoice(
     (text) => { chatInput.value = text; },
@@ -333,7 +288,10 @@ function setupVoice() {
     },
   );
   voiceBtn.addEventListener('click', () => {
-    if (listening) { recognition.stop(); return; }
+    if (listening) {
+      recognition.stop();
+      return;
+    }
     listening = true;
     voiceBtn.classList.add('listening');
     voiceStatus.classList.remove('hidden');
@@ -341,14 +299,10 @@ function setupVoice() {
   });
 }
 
-export function getDemoContext() {
-  return { vertical: activeVertical, company: activeCompany };
-}
-
 export function preloadDemoModel(onProgress) {
   return preloadModel(activeModel, onProgress);
 }
 
 export function getDemoStatus(hw) {
-  return `${hardwareSummary(hw)} · runtime active`;
+  return `${hardwareSummary(hw)} · Situated Agent online`;
 }

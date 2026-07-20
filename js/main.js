@@ -1,10 +1,10 @@
 import { runBootSequence } from './boot.js';
-import { renderPlatformView } from './platform.js';
-import { renderSolutionsView } from './solutions.js';
-import { initDemo, mountDemoPanel, setDemoContext, preloadDemoModel, getDemoStatus, getDemoContext } from './demo.js';
+import { renderVisionView } from './vision.js';
+import { renderSdkView } from './sdk.js';
+import { renderDeviceView } from './device.js';
+import { initDemo, mountDemoPanel, preloadDemoModel, getDemoStatus } from './demo.js';
 import { initRipples } from './ripple.js';
 import { initCursor } from './cursor.js';
-import { totalCompanies, getCompanyBySlug, slugify } from './ecosystem.js';
 import { focusLine, getViewLabel, focusScore } from './focus.js';
 import { markJourneyStep, initJourney, renderJourneyStrip } from './onboarding.js';
 
@@ -12,37 +12,22 @@ let hardware = null;
 let demoMounted = false;
 
 const views = {
-  platform: document.getElementById('viewPlatform'),
-  solutions: document.getElementById('viewSolutions'),
-  demo: document.getElementById('viewDemo'),
+  vision: () => document.getElementById('viewVision'),
+  sdk: () => document.getElementById('viewSdk'),
+  device: () => document.getElementById('viewDevice'),
+  live: () => document.getElementById('viewLive'),
 };
 
-function updateHash(view, opts = {}) {
-  let hash = view;
-  if (view === 'solutions' && opts.category) hash += `/${opts.category}`;
-  if (view === 'demo') {
-    if (opts.company && opts.category) hash += `/${opts.category}/${slug(opts.company)}`;
-    else if (opts.category) hash += `/${opts.category}`;
-  }
-  if (location.hash !== `#${hash}`) location.hash = hash;
-}
+const VALID = ['vision', 'sdk', 'device', 'live'];
 
-function slug(name) {
-  return slugify(name);
+function updateHash(view) {
+  if (location.hash !== `#${view}`) location.hash = view;
 }
 
 function parseHash() {
-  const parts = location.hash.slice(1).split('/').filter(Boolean);
-  if (!parts.length) return { view: 'platform' };
-  const view = parts[0];
-  if (view === 'solutions') return { view: 'solutions', category: parts[1] };
-  if (view === 'demo') {
-    const category = parts[1];
-    const co = parts[2] && category ? getCompanyBySlug(category, parts[2]) : null;
-    return { view: 'demo', category, company: co?.name };
-  }
-  if (['platform', 'solutions', 'demo'].includes(view)) return { view };
-  return { view: 'platform' };
+  const view = location.hash.slice(1).split('/')[0];
+  if (VALID.includes(view)) return { view };
+  return { view: 'vision' };
 }
 
 function updateFocusBar(view, hw) {
@@ -52,36 +37,34 @@ function updateFocusBar(view, hw) {
   bar.querySelector('.focus-device').textContent = focusLine(hw);
   const score = focusScore(view, hw);
   const badge = document.getElementById('runtimeBadge');
-  if (badge && hw) badge.textContent = `${score.active}/${score.total} pillars`;
+  if (badge && hw) badge.textContent = `${score.active}/${score.total} active`;
 }
 
-export function navigate(view, opts = {}) {
+export function navigate(view) {
+  if (!VALID.includes(view)) view = 'vision';
+
   document.querySelectorAll('.nav-link').forEach((l) => {
     l.classList.toggle('active', l.dataset.view === view);
   });
-  Object.entries(views).forEach(([id, el]) => {
+
+  VALID.forEach((id) => {
+    const el = views[id]();
     if (el) el.classList.toggle('hidden', id !== view);
   });
 
-  if (view === 'platform' && hardware) renderPlatformView(views.platform, hardware);
-  if (view === 'solutions') renderSolutionsView(views.solutions, opts.category);
-  if (view === 'demo') {
+  if (view === 'vision' && hardware) renderVisionView(views.vision(), hardware);
+  if (view === 'sdk' && hardware) renderSdkView(views.sdk(), hardware);
+  if (view === 'device' && hardware) renderDeviceView(views.device(), hardware);
+  if (view === 'live') {
     const root = document.getElementById('demoRoot');
     if (!demoMounted && root) {
       mountDemoPanel(root);
       demoMounted = true;
     }
-    if (opts.category || opts.company) {
-      setDemoContext(opts.category, opts.company);
-    } else {
-      setDemoContext(null, null);
-    }
   }
 
-  const ctx = getDemoContext();
-  document.getElementById('demoVerticalBadge')?.classList.toggle('hidden', view !== 'demo' || !ctx.company);
   updateFocusBar(view, hardware);
-  updateHash(view, opts);
+  updateHash(view);
   markJourneyStep(view);
   renderJourneyStrip();
 }
@@ -94,22 +77,22 @@ function initApp(hw) {
   initRipples(document.getElementById('rippleLayer'));
   initJourney();
 
-  document.getElementById('navCompanyCount').textContent = `${totalCompanies()} AI companies`;
-  updateFocusBar('platform', hw);
+  const sit = document.getElementById('navSituation');
+  if (sit && hw) sit.textContent = `${hw.platform} · ${hw.layersActive}/${hw.layersTotal} layers`;
+  updateFocusBar('vision', hw);
 
   document.querySelectorAll('.nav-link').forEach((link) => {
     link.addEventListener('click', () => navigate(link.dataset.view));
   });
 
-  document.addEventListener('touchai:nav', (e) => navigate(e.detail.view, e.detail));
-
-  document.addEventListener('touchai:vertical', (e) => {
-    setDemoContext(e.detail.category);
+  document.querySelectorAll('[data-nav]').forEach((btn) => {
+    btn.addEventListener('click', () => navigate(btn.dataset.nav));
   });
 
+  document.addEventListener('touchai:nav', (e) => navigate(e.detail.view));
+
   window.addEventListener('hashchange', () => {
-    const route = parseHash();
-    navigate(route.view, route);
+    navigate(parseHash().view);
   });
 
   preloadDemoModel((msg) => {
@@ -118,8 +101,7 @@ function initApp(hw) {
   });
   document.getElementById('statusText').textContent = getDemoStatus(hw);
 
-  const route = parseHash();
-  navigate(route.view, route);
+  navigate(parseHash().view);
 }
 
 runBootSequence(initApp);

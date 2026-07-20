@@ -1,55 +1,55 @@
 # TouchAI
 
-**The hardware-aware AI runtime — the layer between every AI model and every physical machine on earth.**
+**Hardware-aware AI.** Situational intelligence — not smarter models.
 
+TouchAI gives every AI model deep knowledge of the hardware it runs on.
 
-## The founding insight
+## The problem
 
- TouchAI gives AI a live, dynamic understanding of silicon, thermal, power, memory, sensors, peripherals, history, and user context — and adapts execution in real time.
+Every AI company positions around capability. Smarter models. Faster responses. More parameters. Better benchmarks.
 
-## Three pillars
+That race has one destination — commodity. When every model is smart enough, smart enough stops being a differentiator.
 
-Every view traces back to `js/focus.js`. Live pillar audit shows what's active on your device.
+TouchAI doesn't play that game.
 
-1. **Full hardware awareness** — 8 live layers (Silicon → User)
-2. **Adaptive execution** — `adaptExecution()` routes backend, quant, tokens to hardware
-3. **The inference layer** — Runtime SDK between models and silicon
+TouchAI positions around a different axis entirely: **situational intelligence**.
 
-## Runtime SDK (`js/runtime-api.js`)
+Not how smart is the AI — but how well does the AI understand where it is.
 
-Implements every API in `RUNTIME_API`:
+## The market
 
-- `scanHardware()` — 8-layer awareness scan
-- `adaptExecution(model, hw)` — backend, quant, token budget
-- `runInference()` — hardware-aware generation (`inference.js`)
-- `attestIntegrity()` — trust layer attestation
-- `loadVertical()` — vertical + company metadata
+As foundation models commoditize, the value shifts to the layer around them — deployment. TouchAI is positioned exactly at that inflection point.
 
-## Five product surfaces
+## Product roadmap
 
-| Surface | Play | Who pays |
-|---------|------|----------|
-| **Runtime SDK** | The CUDA play | AI companies, app developers |
-| **OEM Partnership** | The Dolby play | Device manufacturers |
-| **Situated AI Agent** | Intelligence in your machine | Prosumers, developers |
-| **Industrial & Edge OS** | The operating layer | Industrial, defense, automotive |
-| **Trust & Identity** | Physical root of trust | Regulated enterprises, government |
+### TouchAI SDK
 
-## Three views + focus path
+The developer-facing product. The interface through which AI developers integrate hardware awareness into their applications.
 
-| Step | View | Purpose |
-|------|------|---------|
-| 1 | **Platform** | Vision, analogy stack, five surfaces, Runtime SDK |
-| 2 | **Solutions** | 7 verticals · 34 companies · hardware gap → With TouchAI |
-| 3 | **Live Demo** | Situated inference adapted to this machine |
-
-## Deep links
-
+```js
+const hw = await scanHardware()
+const plan = adaptExecution(model, hw)
+const { response } = await runInference(query, hw, model, history)
+const proof = await attestIntegrity(hw)
 ```
-#platform
-#solutions/foundation
-#demo/healthcare/tempus
-```
+
+### TouchAI Device — The Situated Agent
+
+The consumer and prosumer product. An AI agent that lives on your specific machine and develops a genuine understanding of it over time.
+
+- **What it does:** The intelligence that manages all assistants
+- **The long arc:** As the situated agent learns more about the machine and the user's patterns, it becomes the most capable AI interface on that device — not because it's the smartest model, but because it has context no cloud model can acquire.
+
+## Site map
+
+| View | Purpose |
+|------|---------|
+| **Vision** | Problem, axis, market, eight awareness layers, roadmap |
+| **SDK** | Developer product + live `adaptExecution` / attestation |
+| **Device** | Situated Agent story + live machine profile |
+| **Live** | Hardware-aware inference on this device |
+
+Deep links: `#vision` · `#sdk` · `#device` · `#live`
 
 ## Quick start
 
@@ -62,12 +62,7 @@ Deploy via Vercel (`vercel.json` → `dist/`).
 
 ## Tech
 
-- Real hardware scan (CPU, GPU, RAM, NPU, arch)
+- Live 8-layer hardware scan (silicon → user)
+- Adaptive execution (`adaptExecution`)
 - Transformers.js / ONNX WASM (Qwen2.5-0.5B)
-- Adaptive model modes (Flash / Pulse / Depth)
-- Vertical-aware system prompts
-- Touch-native UX (ripples, cursor, voice, memory, stats)
-
-## Positioning
-
-TouchAI is not competing with OpenAI or Harvey — it's the runtime they integrate. Cloud trains models. TouchAI adapts them to any physical machine.
+- Touch-native UX (cursor, ripples, voice, memory)

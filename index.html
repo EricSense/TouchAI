@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="TouchAI — the hardware-aware AI runtime. The layer between every AI model and every physical machine on earth." />
-  <meta property="og:title" content="TouchAI — Hardware-Aware AI Runtime" />
-  <meta property="og:description" content="Situated intelligence. Five product surfaces. One runtime between AI models and silicon." />
+  <meta name="description" content="TouchAI — hardware-aware AI. Situational intelligence that gives every model deep knowledge of the hardware it runs on." />
+  <meta property="og:title" content="TouchAI — Hardware-Aware AI" />
+  <meta property="og:description" content="Not how smart is the AI — how well does it understand where it is. SDK + Situated Agent." />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='none' stroke='%238b5cf6' stroke-width='2'/><circle cx='16' cy='16' r='4' fill='%238b5cf6'/></svg>" />
-  <title>TouchAI — Hardware-Aware AI Runtime</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='none' stroke='%230B8F8C' stroke-width='2'/><circle cx='16' cy='16' r='4' fill='%230B8F8C'/></svg>" />
+  <title>TouchAI — Hardware-Aware AI</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
@@ -20,7 +20,7 @@
     <div class="boot-inner">
       <div class="boot-logo"><span class="boot-ring"></span><span class="boot-dot"></span></div>
       <div class="boot-title">TouchAI</div>
-      <div class="boot-sub">Hardware-Aware AI Runtime</div>
+      <div class="boot-sub">Hardware-aware AI · Situational intelligence</div>
       <div id="bootLog" class="boot-log" role="log" aria-live="polite"></div>
       <div class="boot-bar"><div id="bootProgress" class="boot-bar-fill"></div></div>
     </div>
@@ -34,42 +34,43 @@
 
   <div id="app" class="app hidden">
     <header class="site-header">
-      <div class="header-left">
+      <button class="header-left interactive" data-nav="vision" type="button" aria-label="TouchAI home">
         <div class="logo-mark"><span class="logo-ring"></span><span class="logo-dot"></span></div>
         <div>
           <span class="logo-text">TouchAI</span>
-          <span class="logo-tagline">Hardware-aware AI runtime</span>
+          <span class="logo-tagline">Hardware-aware AI</span>
         </div>
-      </div>
+      </button>
 
       <nav class="site-nav" aria-label="Main">
-        <button class="nav-link interactive active" data-view="platform">Platform</button>
-        <button class="nav-link interactive" data-view="solutions">Solutions</button>
-        <button class="nav-link interactive" data-view="demo">Live Demo</button>
+        <button class="nav-link interactive active" data-view="vision">Vision</button>
+        <button class="nav-link interactive" data-view="sdk">SDK</button>
+        <button class="nav-link interactive" data-view="device">Device</button>
+        <button class="nav-link interactive" data-view="live">Live</button>
       </nav>
 
       <div class="header-right">
-        <span class="header-stat" id="navCompanyCount">34 AI companies</span>
-        <span class="runtime-badge" id="runtimeBadge">8/8 layers</span>
+        <span class="header-stat" id="navSituation">Situational intelligence</span>
+        <span class="runtime-badge" id="runtimeBadge">—</span>
       </div>
     </header>
 
     <div class="focus-bar" id="focusBar">
-      <span class="focus-view">Platform · vision & five surfaces</span>
+      <span class="focus-view">Vision · situational intelligence</span>
       <span class="focus-sep">·</span>
-      <span class="focus-device">Situated intelligence on your device</span>
+      <span class="focus-device">Hardware-aware AI on your device</span>
     </div>
 
     <div class="journey-strip" id="journeyStrip"></div>
 
     <div class="view-container">
-      <div id="viewPlatform" class="view"></div>
-      <div id="viewSolutions" class="view hidden"></div>
-      <div id="viewDemo" class="view hidden">
+      <div id="viewVision" class="view"></div>
+      <div id="viewSdk" class="view hidden"></div>
+      <div id="viewDevice" class="view hidden"></div>
+      <div id="viewLive" class="view hidden">
         <header class="demo-topbar">
           <div class="demo-topbar-left">
-            <h1 id="demoTitle">Your Machine</h1>
-            <span class="topbar-badge hidden" id="demoVerticalBadge">Live</span>
+            <h1 id="demoTitle">Situated Agent</h1>
             <span class="topbar-badge" id="modelBadge">Pulse</span>
           </div>
           <div class="stats-bar">
@@ -85,9 +86,9 @@
 
     <footer class="site-footer">
       <div class="status-dot online"></div>
-      <span id="statusText">8/8 awareness layers · runtime active</span>
+      <span id="statusText">Situational intelligence · scanning</span>
       <span class="footer-sep">·</span>
-      <span>7 verticals · Foundation Models to Creative AI</span>
+      <span>SDK · Device · hardware-aware deployment</span>
     </footer>
   </div>
 

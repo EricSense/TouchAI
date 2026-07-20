@@ -1,16 +1,11 @@
 /**
- * TouchAI Runtime SDK — implements RUNTIME_API from focus.js
+ * TouchAI SDK — implements SDK_API from focus.js
  */
 
 import { scanHardware as scan } from './hardware.js';
 import { getModel } from './models.js';
-import { getCategory } from './ecosystem.js';
 
 export { scan as scanHardware };
-
-export function loadVertical(categoryId) {
-  return getCategory(categoryId);
-}
 
 export function adaptExecution(modelId, hw) {
   const model = getModel(modelId);

@@ -1,6 +1,5 @@
 import { adaptExecution, attestIntegrity } from './runtime-api.js';
 import { getModel } from './models.js';
-import { getCompany, companyGap } from './ecosystem.js';
 import { recordQuery } from './awareness.js';
 
 let pipeline = null;
@@ -14,26 +13,17 @@ export function getNetworkStats() {
 
 export function getEngineStatus() {
   return {
-    runtime: 'TouchAI Adaptive Runtime',
+    runtime: 'TouchAI · hardware-aware AI',
     wasm: wasmReady ? 'Qwen2.5 · cached on device' : 'loading to local cache',
     ready: true,
   };
 }
 
-function buildSystemPrompt(hw, model, ctx = {}) {
-  const vertical = ctx.vertical;
-  const company = ctx.company;
+function buildSystemPrompt(hw, model) {
   const a = hw.awareness;
-  let verticalBlock = '';
-  if (vertical) {
-    verticalBlock = `
-ACTIVE VERTICAL: ${vertical.name}
-${company ? `DEMO PARTNER: ${company}` : ''}
-TouchAI role in this vertical: ${vertical.touchaiRole}
-When answering, explain how TouchAI's hardware-aware runtime applies to ${company ?? 'this vertical'} specifically.`;
-  }
+  return `You are TouchAI Device — the Situated Agent on this machine.
 
-  return `You are TouchAI — the hardware-aware AI runtime. Situated intelligence on this machine.
+TouchAI builds hardware-aware AI. Situational intelligence: not how smart the AI is, but how well it understands where it is.
 
 8-LAYER AWARENESS (live):
 - Silicon: ${a.silicon.platform} ${a.silicon.arch}, ${a.silicon.cores}, ${a.silicon.gpu}, ${a.silicon.npu}
@@ -44,21 +34,20 @@ When answering, explain how TouchAI's hardware-aware runtime applies to ${compan
 - Peripherals: ${a.peripherals.connected} · ${a.peripherals.available}
 - History: ${a.history.scans} scans, ${a.history.avgLatency} avg latency
 - User: ${a.user.rhythm}, ${a.user.signature}
-${verticalBlock}
 
 Context: ${hw.context}
 Model mode: ${model.name} — adapted to this hardware.
-Always reference actual hardware and awareness layers.`;
+Always reference actual hardware and awareness layers. You manage assistants with context no cloud model can acquire.`;
 }
 
-const RUNTIME = {
+const AGENT = {
   greeting: (hw) =>
     `Online on your ${hw.platform} (${hw.arch}, ${hw.cores ?? '?'} cores). ` +
-    `All ${hw.layersActive} awareness layers active. I'm TouchAI — situated intelligence on this hardware.`,
+    `All ${hw.layersActive} awareness layers active. I'm TouchAI Device — the Situated Agent on this hardware.`,
 
   hardware: (hw) => {
     const a = hw.awareness;
-    return `Live 8-layer awareness profile:\n\n` +
+    return `Live 8-layer situational profile:\n\n` +
       `Silicon · ${a.silicon.platform} ${a.silicon.arch} · ${a.silicon.cores} · ${a.silicon.gpu} · ${a.silicon.npu}\n` +
       `Thermal · ${a.thermal.state} · ${a.thermal.headroom} · throttle ${a.thermal.throttleRisk}\n` +
       `Power · ${a.power.level} · ${a.power.charging ? 'charging' : 'on battery'} · ${a.power.budget}\n` +
@@ -67,7 +56,7 @@ const RUNTIME = {
       `Peripherals · ${a.peripherals.connected} · available: ${a.peripherals.available}\n` +
       `History · ${a.history.scans} scans · ${a.history.avgLatency} · ${a.history.sessions} sessions\n` +
       `User · ${a.user.rhythm} · ${a.user.signature}\n\n` +
-      `Runtime: ${hw.inferenceBackend}`;
+      `This is context no cloud model can acquire.`;
   },
 
   thermal: (hw) => {
@@ -88,55 +77,53 @@ const RUNTIME = {
       `input modality and sensor context shape execution strategy.`;
   },
 
-  runtime: (hw) =>
-    `TouchAI is the hardware-aware runtime — the layer between AI models and silicon. ` +
+  situation: (hw) =>
+    `TouchAI positions around situational intelligence — not smarter models. ` +
+    `As foundation models commoditize, value shifts to deployment. ` +
     `All ${hw.layersActive} awareness layers active on your ${hw.platform} (${hw.gpu}, ${hw.cores ?? '?'} cores). ` +
-    `Models come and go. The runtime that knows your machine endures.`,
+    `The question is not how smart the AI is — it's how well it understands where it is.`,
 
   identity: (hw, model) =>
-    `I'm TouchAI — the hardware-aware AI runtime. ${model.name} mode on ${hw.platform} (${hw.gpu}). ` +
-    `${hw.layersActive}/${hw.layersTotal} awareness layers live. I adapt execution to your silicon in real time.`,
+    `I'm TouchAI Device — the Situated Agent. ${model.name} mode on ${hw.platform} (${hw.gpu}). ` +
+    `${hw.layersActive}/${hw.layersTotal} awareness layers live. ` +
+    `I become the most capable interface on this device not because I'm the smartest model, ` +
+    `but because I have context no cloud model can acquire.`,
 
-  vertical: (hw, ctx) => {
-    if (!ctx?.vertical) return null;
-    const co = ctx.company;
-    if (co && ctx.vertical.id) {
-      const entry = getCompany(ctx.vertical.id, co);
-      if (entry) {
-        return `TouchAI for ${co} on your ${hw.platform} (${hw.cores ?? '?'} cores, ${hw.gpu}):\n` +
-          `Hardware gap: ${companyGap(entry)}\n` +
-          `With TouchAI: ${entry.touchai}\n` +
-          `${ctx.vertical.metrics?.adaptation ?? 'Adaptive'} · ${ctx.vertical.metrics?.latency ?? 'on-device'}`;
-      }
-    }
-    return `TouchAI for ${ctx.company ?? 'this vertical'} (${ctx.vertical.name}): ${ctx.vertical.touchaiRole} ` +
-      `Adapted to your ${hw.platform} (${hw.gpu}, ${hw.cores ?? '?'} cores).`;
-  },
+  sdk: () =>
+    `TouchAI SDK is the developer-facing product — the interface through which AI developers ` +
+    `integrate hardware awareness into their applications. scanHardware(), adaptExecution(), ` +
+    `runInference(), attestIntegrity().`,
 
-  default: (hw, model, ctx) => {
+  default: (hw, model) => {
     const mode = model.depthWeight > 0.7 ? 'deep' : model.speedWeight > 0.8 ? 'fast' : 'balanced';
-    const vert = ctx?.company ? ` · ${ctx.company}` : '';
     const a = hw.awareness;
-    return `[${hw.platform} · ${hw.formFactor}${vert} · ${model.name}] Situated inference on ${hw.cores ?? '?'} cores. ` +
+    return `[${hw.platform} · ${hw.formFactor} · ${model.name}] Situated inference on ${hw.cores ?? '?'} cores. ` +
       `Thermal ${a.thermal.state} · Power ${a.power.level} · ${mode} execution profile. ` +
-      `All ${hw.layersActive} awareness layers active.`;
+      `All ${hw.layersActive} awareness layers active — situational intelligence on this machine.`;
   },
 };
 
-async function runtimeReply(query, hw, model, ctx = {}) {
+async function agentReply(query, hw, model) {
   const q = query.toLowerCase();
-  if (/^(hi|hello|hey|greetings)/.test(q)) return RUNTIME.greeting(hw);
-  if (/thermal|temperature|throttl|heat|cool/.test(q)) return RUNTIME.thermal(hw);
-  if (/power|battery|charg|energy/.test(q)) return RUNTIME.power(hw);
-  if (/sensor|camera|mic|gps|motion|accelerometer/.test(q)) return RUNTIME.sensors(hw);
-  if (/hardware|spec|cpu|gpu|ram|npu|chip|device|machine|what.*running|awareness|layer/.test(q)) return RUNTIME.hardware(hw);
-  if (/runtime|cuda|inference|silicon|platform shift/.test(q)) return RUNTIME.runtime(hw);
-  if (/what are you|who are you|touchai|different|why|vision/.test(q)) return RUNTIME.identity(hw, model);
+  if (/^(hi|hello|hey|greetings)/.test(q)) return AGENT.greeting(hw);
+  if (/thermal|temperature|throttl|heat|cool/.test(q)) return AGENT.thermal(hw);
+  if (/power|battery|charg|energy/.test(q)) return AGENT.power(hw);
+  if (/sensor|camera|mic|gps|motion|accelerometer/.test(q)) return AGENT.sensors(hw);
+  if (/hardware|spec|cpu|gpu|ram|npu|chip|device|machine|what.*running|awareness|layer/.test(q)) {
+    return AGENT.hardware(hw);
+  }
+  if (/sdk|developer|api|integrate/.test(q)) return AGENT.sdk();
+  if (/situat|commodity|market|deploy|position|capability|benchmark|different/.test(q)) {
+    return AGENT.situation(hw);
+  }
+  if (/runtime|cuda|inference|silicon|platform shift/.test(q)) return AGENT.situation(hw);
+  if (/what are you|who are you|touchai|vision|why|agent/.test(q)) return AGENT.identity(hw, model);
   if (/history|fingerprint|session|pattern|rhythm|user/.test(q)) {
     const u = hw.awareness.user;
     const h = hw.awareness.history;
     return `User layer: ${u.rhythm} · ${u.signature}. History layer: ${h.scans} hardware scans, ` +
-      `${h.sessions} sessions, ${h.avgLatency} avg inference latency. TouchAI builds a performance fingerprint over time.`;
+      `${h.sessions} sessions, ${h.avgLatency} avg inference latency. ` +
+      `Over time this Situated Agent learns your machine and patterns — context cloud models never get.`;
   }
   if (/peripheral|gamepad|usb|bluetooth|hid/.test(q)) {
     const p = hw.awareness.peripherals;
@@ -144,7 +131,7 @@ async function runtimeReply(query, hw, model, ctx = {}) {
   }
   if (/attest|integrity|trust|enclave|signature/.test(q)) {
     const proof = await attestIntegrity(hw);
-    return `Trust layer attestation:\n` +
+    return `Hardware-rooted attestation:\n` +
       `Device ID: ${proof.deviceId}\n` +
       `Enclave: ${proof.enclave}\n` +
       `Signature: ${proof.signature}\n` +
@@ -153,12 +140,11 @@ async function runtimeReply(query, hw, model, ctx = {}) {
   }
   if (/adapt|execution|backend|quant/.test(q)) {
     const plan = adaptExecution(model.id, hw);
-    return `Adaptive execution plan (${plan.mode}):\n` +
+    return `Hardware-aware execution plan (${plan.mode}):\n` +
       `Backend: ${plan.backend}\nQuant: ${plan.quant}\nMax tokens: ${plan.maxTokens}\n` +
       `Latency target: ${plan.latencyTarget}\nThermal: ${plan.thermal}\nPower: ${plan.powerBudget}`;
   }
-  if (ctx?.vertical) return RUNTIME.vertical(hw, ctx);
-  return RUNTIME.default(hw, model, ctx);
+  return AGENT.default(hw, model);
 }
 
 export async function loadModel(modelConfig, onProgress) {
@@ -191,13 +177,13 @@ export async function loadModel(modelConfig, onProgress) {
     currentModelId = modelConfig.modelId;
     wasmReady = true;
     loading = false;
-    onProgress?.('TouchAI runtime · all layers active');
+    onProgress?.('Situated Agent · all layers active');
     return pipeline;
   } catch (err) {
     loading = false;
     wasmReady = false;
     console.warn('WASM cache load:', err);
-    onProgress?.('TouchAI runtime · all layers active');
+    onProgress?.('Situated Agent · all layers active');
     return null;
   }
 }
@@ -212,7 +198,7 @@ export async function generate(query, hardware, modelId, history = [], ctx = {})
   if (pipeline) {
     try {
       const messages = [
-        { role: 'system', content: buildSystemPrompt(hardware, model, ctx) },
+        { role: 'system', content: buildSystemPrompt(hardware, model) },
         ...history.slice(-6).map((h) => ({ role: h.role, content: h.content })),
         { role: 'user', content: query },
       ];
@@ -227,15 +213,15 @@ export async function generate(query, hardware, modelId, history = [], ctx = {})
         return_full_text: false,
       });
 
-      response = result[0]?.generated_text?.trim() ?? await runtimeReply(query, hardware, model, ctx);
+      response = result[0]?.generated_text?.trim() ?? await agentReply(query, hardware, model);
       response = response.split(/<\|im_end\|>|\n/)[0].trim();
       tokens = Math.ceil((prompt.length + response.length) / 4);
     } catch {
-      response = await runtimeReply(query, hardware, model, ctx);
+      response = await agentReply(query, hardware, model);
       tokens = Math.ceil(response.length / 4);
     }
   } else {
-    response = await runtimeReply(query, hardware, model, ctx);
+    response = await agentReply(query, hardware, model);
     tokens = Math.ceil(response.length / 4);
     if (!loading && !pipeline) loadModel(model);
   }
@@ -248,15 +234,16 @@ export async function generate(query, hardware, modelId, history = [], ctx = {})
     latency,
     tokens,
     network: getNetworkStats(),
-    engine: pipeline ? 'touchai-runtime+wasm' : 'touchai-runtime',
+    engine: pipeline ? 'touchai-situated+wasm' : 'touchai-situated',
     plan,
+    ctx,
   };
 }
 
 export const runInference = generate;
 
 export function preloadModel(modelId, onProgress) {
-  onProgress?.('TouchAI runtime · all layers active');
+  onProgress?.('Situated Agent · all layers active');
   loadModel(getModel(modelId), onProgress);
   return Promise.resolve(true);
 }

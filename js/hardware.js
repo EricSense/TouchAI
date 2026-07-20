@@ -105,7 +105,7 @@ function buildContext(hw) {
     `Power: ${a.power.level} · ${a.power.budget}.`,
     `Sensors: ${a.sensors.active}.`,
     `User rhythm: ${a.user.rhythm}.`,
-    'TouchAI runtime adapts inference to all 8 awareness layers in real time.',
+    'TouchAI situates inference with all 8 awareness layers — hardware-aware AI on this machine.',
   ];
   return parts.join(' ');
 }

@@ -1,6 +1,6 @@
 import { JOURNEY } from './focus.js';
 
-const KEY = 'touchai-journey';
+const KEY = 'touchai-journey-v2';
 
 function loadVisited() {
   try {

@@ -1,5 +1,10 @@
 import { PRODUCTS, SDK_API, HARDWARE_LAYERS, PILLARS } from './focus.js';
-import { adaptExecution, formatAdaptPlan, attestIntegrity } from './runtime-api.js';
+import {
+  adaptExecution,
+  formatAdaptPlan,
+  attestIntegrity,
+  SDK_VERSION,
+} from 'touchai-sdk';
 import { renderFocusCheck } from './focus-ui.js';
 
 const product = () => PRODUCTS.find((p) => p.id === 'sdk');
@@ -12,13 +17,35 @@ export function renderSdkView(container, hw) {
     <div class="product-view sdk-view">
       <section class="product-hero">
         <p class="brand-mark compact">TouchAI</p>
-        <p class="section-kicker">${p.num} · ${p.audience}</p>
+        <p class="section-kicker">${p.num} · ${p.audience} · v${SDK_VERSION}</p>
         <h1 class="product-hero-title">${p.title}</h1>
         <p class="product-hero-tag">${p.tagline}</p>
         <p class="product-hero-lead">${p.what}</p>
         <div class="hero-actions">
-          <button class="btn btn-primary interactive" data-nav="live">Try hardware-aware inference</button>
-          <button class="btn btn-ghost interactive" data-scroll="sdkApi">See the API</button>
+          <button class="btn btn-primary interactive" data-scroll="sdkInstall">Install the SDK</button>
+          <button class="btn btn-ghost interactive" data-nav="live">Try on this machine</button>
+        </div>
+      </section>
+
+      <section class="section" id="sdkInstall">
+        <p class="section-kicker">Install</p>
+        <h2 class="section-title">Add hardware awareness in one package.</h2>
+        <p class="section-lead">The developer-facing product. Integrate situational intelligence into any AI application.</p>
+        <div class="install-block">
+          <pre class="api-code"><code>npm install touchai-sdk
+# optional — WASM on-device generation
+npm install @huggingface/transformers</code></pre>
+          <pre class="api-code"><code>import {
+  scanHardware,
+  adaptExecution,
+  runInference,
+  attestIntegrity,
+  createTouchAI,
+} from 'touchai-sdk'
+
+const touch = await createTouchAI()
+const plan = touch.adaptExecution('pulse')
+const { response } = await touch.runInference('What hardware am I on?')</code></pre>
         </div>
       </section>
 
@@ -62,7 +89,7 @@ export function renderSdkView(container, hw) {
       <section class="section">
         <p class="section-kicker">Live adaptation</p>
         <h2 class="section-title">Already running on this browser.</h2>
-        <p class="section-lead">The SDK is not a slide. Below is a real <code>adaptExecution()</code> plan for your machine.</p>
+        <p class="section-lead">The SDK is not a slide. Below is a real <code>adaptExecution()</code> plan for your machine — from <code>touchai-sdk</code> v${SDK_VERSION}.</p>
         ${hw && plan ? renderLivePlan(hw, plan) : '<p class="section-lead">Hardware scan pending…</p>'}
         <div id="sdkAttest" class="attest-panel"></div>
       </section>

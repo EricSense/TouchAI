@@ -22,31 +22,39 @@ As foundation models commoditize, the value shifts to the layer around them — 
 
 ## Product roadmap
 
-### TouchAI SDK
+### TouchAI SDK (`touchai-sdk`)
 
-The developer-facing product. The interface through which AI developers integrate hardware awareness into their applications.
+The developer-facing product. Installable package in `/sdk`.
+
+```bash
+npm install touchai-sdk
+```
 
 ```js
-const hw = await scanHardware()
-const plan = adaptExecution(model, hw)
-const { response } = await runInference(query, hw, model, history)
-const proof = await attestIntegrity(hw)
+import { createTouchAI } from 'touchai-sdk'
+
+const touch = await createTouchAI()
+const plan = touch.adaptExecution('pulse')
+const { response } = await touch.runInference('What hardware am I on?')
 ```
+
+See [`sdk/README.md`](./sdk/README.md) for the full API.
 
 ### TouchAI Device — The Situated Agent
 
 The consumer and prosumer product. An AI agent that lives on your specific machine and develops a genuine understanding of it over time.
 
-- **What it does:** The intelligence that manages all assistants
-- **The long arc:** As the situated agent learns more about the machine and the user's patterns, it becomes the most capable AI interface on that device — not because it's the smartest model, but because it has context no cloud model can acquire.
+- Persistent device profile (sightings, preferred model, query history)
+- Persistent conversation memory across visits
+- Live 8-layer awareness on this machine
 
 ## Site map
 
 | View | Purpose |
 |------|---------|
 | **Vision** | Problem, axis, market, eight awareness layers, roadmap |
-| **SDK** | Developer product + live `adaptExecution` / attestation |
-| **Device** | Situated Agent story + live machine profile |
+| **SDK** | Install docs + live `adaptExecution` / attestation |
+| **Device** | Situated Agent + compounding machine profile |
 | **Live** | Hardware-aware inference on this device |
 
 Deep links: `#vision` · `#sdk` · `#device` · `#live`
@@ -58,11 +66,18 @@ npm install
 npm run dev
 ```
 
+Monorepo workspaces: site + `touchai-sdk`.
+
+```bash
+npm run sdk:pack   # pack the SDK tarball
+```
+
 Deploy via Vercel (`vercel.json` → `dist/`).
 
 ## Tech
 
+- `touchai-sdk` — scan · adapt · infer · attest
 - Live 8-layer hardware scan (silicon → user)
-- Adaptive execution (`adaptExecution`)
 - Transformers.js / ONNX WASM (Qwen2.5-0.5B)
-- Touch-native UX (cursor, ripples, voice, memory)
+- Persistent Device profile + memory
+- Touch-native UX (cursor, ripples, voice)

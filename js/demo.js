@@ -2,7 +2,7 @@ import { hardwareSummary } from './hardware.js';
 import { MODELS, MODEL_ORDER, getModel } from './models.js';
 import { THESIS, focusScore } from './focus.js';
 import { renderAdaptPanel, renderFocusCheck } from './focus-ui.js';
-import { MemoryStore } from './memory.js';
+import { MemoryStore, recordDeviceVisit, situatedSummary } from 'touchai-sdk';
 import { SessionStats } from './stats.js';
 import { generate, preloadModel } from './inference.js';
 import { initVoice, isVoiceSupported } from './voice.js';
@@ -11,7 +11,7 @@ let hardware = null;
 let activeModel = 'pulse';
 let isGenerating = false;
 
-const memory = new MemoryStore();
+const memory = new MemoryStore({ persist: true });
 const stats = new SessionStats();
 
 let chatMessages, chatInput, sendBtn, voiceBtn, voiceStatus;
@@ -27,6 +27,7 @@ const STARTER_PROMPTS = [
 export function initDemo(hw) {
   hardware = hw;
   activeModel = hw.recommendedModel;
+  recordDeviceVisit(hw);
 }
 
 export function mountDemoPanel(root) {
@@ -77,7 +78,7 @@ export function mountDemoPanel(root) {
           <button id="clearMemory" class="text-btn interactive">Clear</button>
         </div>
         <ul id="memoryList" class="memory-list"></ul>
-        <div id="memoryEmpty" class="memory-empty">Local session memory.<br/>Grounded in your hardware profile.</div>
+        <div id="memoryEmpty" class="memory-empty">Persistent device memory.<br/>Compounds across visits on this machine.</div>
         <div class="stats-mini" id="statsMini"></div>
       </aside>
     </div>
@@ -100,6 +101,7 @@ export function mountDemoPanel(root) {
     showWelcome(hardware);
     renderPromptChips();
     renderAgentContext();
+    memory.render(memoryList, memoryEmpty);
     stats.renderMini(root.querySelector('#statsMini'));
     const badge = document.getElementById('modelBadge');
     if (badge) badge.textContent = getModel(activeModel).name;
@@ -134,13 +136,15 @@ function renderHardware(hw) {
 function renderAgentContext() {
   const el = document.getElementById('demoContext');
   if (!el || !hardware) return;
+  const situated = situatedSummary(hardware);
   el.innerHTML = `
     <div class="nav-label">TouchAI Device</div>
-    <p class="ctx-hint">The Situated Agent on this machine. Not the smartest model — the one with context no cloud model can acquire.</p>
+    <p class="ctx-hint">The Situated Agent on this machine. ${situated.line}</p>
     <div class="ctx-metrics">
       <span><em>Platform</em> ${esc(hardware.platform)}</span>
       <span><em>Form</em> ${esc(hardware.formFactor)}</span>
       <span><em>NPU</em> ${esc(hardware.npu)}</span>
+      <span><em>Memory</em> ${situated.status}</span>
     </div>
   `;
 }
@@ -185,10 +189,12 @@ function renderModels() {
 
 function showWelcome(hw) {
   if (!chatMessages) return;
+  const situated = situatedSummary(hw);
   chatMessages.innerHTML = `
     <div class="chat-welcome">
       <h2>Situated Agent on your hardware</h2>
       <p class="welcome-thesis">${THESIS.question} All <strong>${hw.layersActive} awareness layers</strong> active on <strong>${hw.platform}</strong>.</p>
+      <p class="welcome-thesis">${situated.line}</p>
       <div class="welcome-hw">
         <div class="welcome-hw-item"><span>Thermal</span><span>${esc(hw.awareness.thermal.state)}</span></div>
         <div class="welcome-hw-item"><span>Power</span><span>${esc(hw.awareness.power.level)}</span></div>

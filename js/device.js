@@ -1,10 +1,14 @@
 import { PRODUCTS, HARDWARE_LAYERS, focusLine } from './focus.js';
+import { recordDeviceVisit, situatedSummary, getDeviceProfile } from 'touchai-sdk';
 import { renderFocusCheck } from './focus-ui.js';
 
 const product = () => PRODUCTS.find((p) => p.id === 'device');
 
 export function renderDeviceView(container, hw) {
   const p = product();
+  if (hw) recordDeviceVisit(hw);
+  const situated = hw ? situatedSummary(hw) : null;
+  const profile = getDeviceProfile();
 
   container.innerHTML = `
     <div class="product-view device-view">
@@ -50,6 +54,17 @@ export function renderDeviceView(container, hw) {
         <p class="section-kicker">This machine</p>
         <h2 class="section-title">Your Situated Agent already has a profile.</h2>
         <p class="section-lead">${focusLine(hw)}</p>
+        ${situated ? `
+          <div class="situated-banner">
+            <span class="live-pill">${situated.status}</span>
+            <p>${situated.line}</p>
+            <div class="situated-stats">
+              <span><em>Visits</em> ${profile.visits}</span>
+              <span><em>Queries</em> ${profile.totalQueries}</span>
+              <span><em>Preferred</em> ${profile.preferredModel ?? 'learning'}</span>
+            </div>
+          </div>
+        ` : ''}
         ${hw ? renderDeviceProfile(hw) : ''}
         <div id="deviceFocusCheck"></div>
         <div class="closing-cta">
@@ -109,7 +124,7 @@ function renderDeviceProfile(hw) {
           <p>${a.history.scans} scans · ${a.history.avgLatency}</p>
         </div>
       </div>
-      <p class="device-layers-note">${HARDWARE_LAYERS.length} layers — the context cloud models never get.</p>
+      <p class="device-layers-note">${HARDWARE_LAYERS.length} layers — the context cloud models never get. Profile persists locally and compounds over visits.</p>
     </div>
   `;
 }

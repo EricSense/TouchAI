@@ -3,6 +3,8 @@
  * Hardware-aware AI. Situational intelligence.
  */
 
+import { HARDWARE_LAYERS as SDK_LAYERS } from 'touchai-sdk';
+
 export const BRAND = {
   name: 'TouchAI',
   line: 'Hardware-aware AI',
@@ -30,16 +32,7 @@ export const MARKET = {
 };
 
 /** Eight layers of situational awareness on a machine */
-export const HARDWARE_LAYERS = [
-  { layer: 'Silicon', knows: 'Chip architecture, cores, instruction sets, GPU/NPU availability' },
-  { layer: 'Thermal', knows: 'Temperature state, throttling thresholds, cooling headroom' },
-  { layer: 'Power', knows: 'Battery level, charge state, power draw budget' },
-  { layer: 'Memory', knows: 'RAM available, bandwidth, cache topology' },
-  { layer: 'Sensors', knows: 'Camera, mic, GPS, accelerometer, biometrics — present and active' },
-  { layer: 'Peripherals', knows: "What's connected, what can extend capability" },
-  { layer: 'History', knows: 'Performance fingerprint of this specific machine over time' },
-  { layer: 'User', knows: 'Workload rhythms, usage patterns, behavioral signatures' },
-];
+export const HARDWARE_LAYERS = SDK_LAYERS;
 
 /** Product roadmap — two surfaces */
 export const PRODUCTS = [
@@ -85,6 +78,12 @@ export const PILLARS = [
 ];
 
 export const SDK_API = [
+  {
+    name: 'createTouchAI()',
+    pillar: 'deployment',
+    desc: 'Bound SDK client for one machine session — scan, adapt, infer, attest.',
+    code: `const touch = await createTouchAI();\nconst plan = touch.adaptExecution('pulse');`,
+  },
   {
     name: 'scanHardware()',
     pillar: 'situation',

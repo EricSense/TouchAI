@@ -1077,6 +1077,42 @@ body {
 
 .device-layers-note { margin-top: 14px; }
 
+.install-block {
+  display: grid;
+  gap: 12px;
+  max-width: 720px;
+}
+
+.situated-banner {
+  margin: 0 0 18px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  max-width: 720px;
+}
+
+.situated-banner p {
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 8px 0 12px;
+}
+
+.situated-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 0.75rem;
+  color: var(--ink);
+}
+
+.situated-stats em {
+  font-style: normal;
+  color: var(--muted);
+  margin-right: 6px;
+}
+
 .live-plan,
 .attest-panel {
   margin-top: 16px;

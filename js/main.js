@@ -1,47 +1,51 @@
 import { runBootSequence } from './boot.js';
 import { renderVisionView } from './vision.js';
 import { renderSdkView } from './sdk.js';
-import { renderDeviceView } from './device.js';
 import { initDemo, mountDemoPanel, preloadDemoModel, getDemoStatus } from './demo.js';
 import { initRipples } from './ripple.js';
 import { initCursor } from './cursor.js';
-import { focusLine, getViewLabel, focusScore } from './focus.js';
-import { markJourneyStep, initJourney, renderJourneyStrip } from './onboarding.js';
+import { focusLine, getViewLabel } from './focus.js';
+import { adaptExecution, formatAdaptPlan } from 'touchai-sdk';
 
 let hardware = null;
-let demoMounted = false;
+let productMounted = false;
 
 const views = {
-  vision: () => document.getElementById('viewVision'),
+  use: () => document.getElementById('viewUse'),
   sdk: () => document.getElementById('viewSdk'),
-  device: () => document.getElementById('viewDevice'),
-  live: () => document.getElementById('viewLive'),
+  why: () => document.getElementById('viewWhy'),
 };
 
-const VALID = ['vision', 'sdk', 'device', 'live'];
+const VALID = ['use', 'sdk', 'why'];
 
 function updateHash(view) {
   if (location.hash !== `#${view}`) location.hash = view;
 }
 
 function parseHash() {
-  const view = location.hash.slice(1).split('/')[0];
-  if (VALID.includes(view)) return { view };
-  return { view: 'vision' };
+  const raw = location.hash.slice(1).split('/')[0];
+  // Legacy deep links
+  if (raw === 'live' || raw === 'device' || raw === 'vision') return { view: raw === 'vision' ? 'why' : 'use' };
+  if (VALID.includes(raw)) return { view: raw };
+  return { view: 'use' };
 }
 
-function updateFocusBar(view, hw) {
-  const bar = document.getElementById('focusBar');
-  if (!bar) return;
-  bar.querySelector('.focus-view').textContent = getViewLabel(view);
-  bar.querySelector('.focus-device').textContent = focusLine(hw);
-  const score = focusScore(view, hw);
+async function updateStatusStrip(view, hw) {
+  const label = document.getElementById('statusStripLabel');
+  const detail = document.getElementById('statusStripDetail');
   const badge = document.getElementById('runtimeBadge');
-  if (badge && hw) badge.textContent = `${score.active}/${score.total} active`;
+  if (label) label.textContent = getViewLabel(view);
+  if (detail) detail.textContent = focusLine(hw);
+  if (badge && hw) {
+    const plan = await adaptExecution(hw.recommendedModel, hw);
+    badge.textContent = `${plan.device} · ${plan.dtype}`;
+    const deviceBadge = document.getElementById('deviceBadge');
+    if (deviceBadge) deviceBadge.textContent = plan.device;
+  }
 }
 
 export function navigate(view) {
-  if (!VALID.includes(view)) view = 'vision';
+  if (!VALID.includes(view)) view = 'use';
 
   document.querySelectorAll('.nav-link').forEach((l) => {
     l.classList.toggle('active', l.dataset.view === view);
@@ -52,34 +56,34 @@ export function navigate(view) {
     if (el) el.classList.toggle('hidden', id !== view);
   });
 
-  if (view === 'vision' && hardware) renderVisionView(views.vision(), hardware);
-  if (view === 'sdk' && hardware) renderSdkView(views.sdk(), hardware);
-  if (view === 'device' && hardware) renderDeviceView(views.device(), hardware);
-  if (view === 'live') {
+  if (view === 'use') {
     const root = document.getElementById('demoRoot');
-    if (!demoMounted && root) {
+    if (!productMounted && root) {
       mountDemoPanel(root);
-      demoMounted = true;
+      productMounted = true;
     }
   }
+  if (view === 'sdk' && hardware) renderSdkView(views.sdk(), hardware);
+  if (view === 'why' && hardware) renderVisionView(views.why(), hardware);
 
-  updateFocusBar(view, hardware);
+  updateStatusStrip(view, hardware);
   updateHash(view);
-  markJourneyStep(view);
-  renderJourneyStrip();
 }
 
-function initApp(hw) {
+async function initApp(hw) {
   hardware = hw;
   initDemo(hw);
 
   initCursor(document.getElementById('cursor'));
   initRipples(document.getElementById('rippleLayer'));
-  initJourney();
 
   const sit = document.getElementById('navSituation');
-  if (sit && hw) sit.textContent = `${hw.platform} · ${hw.layersActive}/${hw.layersTotal} layers`;
-  updateFocusBar('vision', hw);
+  if (sit && hw) {
+    const plan = await adaptExecution(hw.recommendedModel, hw);
+    sit.textContent = `${hw.platform} · ${plan.device}/${plan.dtype}`;
+    document.getElementById('statusText').textContent =
+      `${getDemoStatus(hw)} · ${formatAdaptPlan(plan)}`;
+  }
 
   document.querySelectorAll('.nav-link').forEach((link) => {
     link.addEventListener('click', () => navigate(link.dataset.view));
@@ -99,7 +103,6 @@ function initApp(hw) {
     const el = document.getElementById('statusText');
     if (el) el.textContent = msg;
   });
-  document.getElementById('statusText').textContent = getDemoStatus(hw);
 
   navigate(parseHash().view);
 }

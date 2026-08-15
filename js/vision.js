@@ -15,8 +15,8 @@ export function renderVisionView(container, hw) {
           <h1 class="hero-title">Hardware-aware AI.</h1>
           <p class="hero-sub">Situational intelligence — not smarter models. Deep knowledge of the hardware every AI runs on.</p>
           <div class="hero-actions">
-            <button class="btn btn-primary interactive" data-nav="live">Run on this machine</button>
-            <button class="btn btn-ghost interactive" data-nav="sdk">Explore the SDK</button>
+            <button class="btn btn-primary interactive" data-nav="use">Use Hardware-Aware AI</button>
+            <button class="btn btn-ghost interactive" data-nav="sdk">Get the SDK</button>
           </div>
         </div>
       </section>
@@ -112,8 +112,8 @@ export function renderVisionView(container, hw) {
         <h2 class="section-title">Live on this device.</h2>
         <div id="visionFocusCheck"></div>
         <div class="closing-cta">
-          <button class="btn btn-primary interactive" data-nav="live">Prove it on your hardware</button>
-          <button class="btn btn-ghost interactive" data-nav="device">Meet the Situated Agent</button>
+          <button class="btn btn-primary interactive" data-nav="use">Use Hardware-Aware AI</button>
+          <button class="btn btn-ghost interactive" data-nav="sdk">Get the SDK</button>
         </div>
       </section>
     </div>
@@ -127,7 +127,7 @@ export function renderVisionView(container, hw) {
     });
   });
 
-  renderFocusCheck(container.querySelector('#visionFocusCheck'), 'vision', hw);
+  renderFocusCheck(container.querySelector('#visionFocusCheck'), 'why', hw);
 }
 
 function renderLiveSituation(hw) {

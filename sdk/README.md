@@ -1,72 +1,55 @@
 # touchai-sdk
 
-**Hardware-aware AI for developers.** Situational intelligence — not smarter models.
+**Hardware-Aware AI for developers.** Situational intelligence — not smarter models.
 
 Gives every AI model deep knowledge of the hardware it runs on.
 
 ## Install
 
 ```bash
-npm install touchai-sdk
-# optional — for WASM on-device generation
-npm install @huggingface/transformers
+# from a clone of https://github.com/EricSense/TouchAI
+npm install ./sdk
+
+# in your app (after copying or linking the sdk folder)
+npm install ./touchai-sdk
+npm install @huggingface/transformers   # optional — local generation
 ```
-
-Browser apps (Vite / modern bundlers) can also import from the local package in this monorepo:
-
-```js
-import {
-  scanHardware,
-  adaptExecution,
-  runInference,
-  attestIntegrity,
-  createTouchAI,
-} from 'touchai-sdk'
-```
-
-## Quick start
 
 ```js
 import { createTouchAI } from 'touchai-sdk'
 
 const touch = await createTouchAI()
 
-// Live 8-layer hardware profile
-console.log(touch.hardware.platform, touch.hardware.layers)
+// Probed capabilities + adapted plan for THIS machine
+console.log(touch.capabilities.webgpu, touch.plan.device, touch.plan.dtype)
 
-// Adapt a model mode to this machine
-const plan = touch.adaptExecution('pulse')
-// → { backend, quant, maxTokens, latencyTarget, thermal, powerBudget }
-
-// Hardware-aware inference
-const { response, latency, plan: used } = await touch.runInference(
+const { response, plan, engine } = await touch.runInference(
   'What hardware am I on?',
 )
-
-// Prove where inference ran
-const proof = await touch.attestIntegrity()
 ```
+
+## What the runtime actually does
+
+1. **`scanHardware()`** — 8-layer situation (silicon → user) via browser APIs  
+2. **`detectCapabilities()`** — probes WebGPU / WASM / WebNN  
+3. **`adaptExecution()`** — picks `device`, `dtype`, token budget, deferral from situation  
+4. **`runInference()`** — loads the model on that device path (WebGPU → WASM fallback) and generates  
+
+`plan.device` is not a label — `loadModel` passes it to Transformers.js.
 
 ## API
 
 | Call | Purpose |
 |------|---------|
-| `scanHardware(force?)` | Full 8-layer situational profile |
-| `adaptExecution(modelId, hw)` | Backend, quant, token budget for this machine |
-| `runInference(query, hw, modelId, history?)` | Hardware-aware generation |
-| `attestIntegrity(hw)` | Hardware-rooted attestation |
-| `createTouchAI()` | Bound client for one machine session |
-| `MemoryStore` | Persistent Situated Agent memory |
-| `recordDeviceVisit(hw)` / `situatedSummary(hw)` | Device profile that compounds over time |
+| `createTouchAI()` | Bound Hardware-Aware AI client |
+| `scanHardware()` | 8-layer profile |
+| `detectCapabilities()` | Real WebGPU/WASM probe |
+| `adaptExecution(modelId, hw)` | Device + dtype + tokens |
+| `runInference(...)` | Adapted generation |
+| `attestIntegrity(hw)` | Hardware-rooted proof |
+| `canRunLocally(hw, plan)` | Whether local path is viable |
+| `MemoryStore` | Persistent machine memory |
 
-### Model modes
+## Try the product
 
-`flash` · `pulse` · `depth` — selected automatically from RAM/cores, or pass explicitly.
-
-## Browser requirement
-
-`scanHardware` uses browser APIs (`navigator`, WebGL, Battery, etc.). Run in a browser or browser-like runtime.
-
-## Positioning
-
-As foundation models commoditize, value shifts to deployment. TouchAI SDK is the interface that situates models on real silicon.
+Open [touchai-kohl.vercel.app](https://touchai-kohl.vercel.app) → **Use**.

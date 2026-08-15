@@ -1,83 +1,56 @@
 # TouchAI
 
-**Hardware-aware AI.** Situational intelligence — not smarter models.
+**Hardware-Aware AI.** Situational intelligence — not smarter models.
 
 TouchAI gives every AI model deep knowledge of the hardware it runs on.
 
-## The problem
+**Product:** https://touchai-kohl.vercel.app → **Use**
 
-Every AI company positions around capability. Smarter models. Faster responses. More parameters. Better benchmarks.
+## What it is
 
-That race has one destination — commodity. When every model is smart enough, smart enough stops being a differentiator.
+Not a smarter chatbot. Hardware-Aware AI that:
 
-TouchAI doesn't play that game.
+1. Scans the machine (8 layers)
+2. Probes real capabilities (WebGPU / WASM)
+3. Adapts execution (`device`, `dtype`, tokens)
+4. Runs inference on that path
 
-TouchAI positions around a different axis entirely: **situational intelligence**.
-
-Not how smart is the AI — but how well does the AI understand where it is.
-
-## The market
-
-As foundation models commoditize, the value shifts to the layer around them — deployment. TouchAI is positioned exactly at that inflection point.
-
-## Product roadmap
-
-### TouchAI SDK (`touchai-sdk`)
-
-The developer-facing product. Installable package in `/sdk`.
-
-```bash
-npm install touchai-sdk
-```
-
-```js
-import { createTouchAI } from 'touchai-sdk'
-
-const touch = await createTouchAI()
-const plan = touch.adaptExecution('pulse')
-const { response } = await touch.runInference('What hardware am I on?')
-```
-
-See [`sdk/README.md`](./sdk/README.md) for the full API.
-
-### TouchAI Device — The Situated Agent
-
-The consumer and prosumer product. An AI agent that lives on your specific machine and develops a genuine understanding of it over time.
-
-- Persistent device profile (sightings, preferred model, query history)
-- Persistent conversation memory across visits
-- Live 8-layer awareness on this machine
-
-## Site map
-
-| View | Purpose |
-|------|---------|
-| **Vision** | Problem, axis, market, eight awareness layers, roadmap |
-| **SDK** | Install docs + live `adaptExecution` / attestation |
-| **Device** | Situated Agent + compounding machine profile |
-| **Live** | Hardware-aware inference on this device |
-
-Deep links: `#vision` · `#sdk` · `#device` · `#live`
-
-## Quick start
+## Use it
 
 ```bash
 npm install
 npm run dev
 ```
 
-Monorepo workspaces: site + `touchai-sdk`.
+Opens on **Use** — Hardware-Aware AI on your machine.
+
+| Route | What |
+|-------|------|
+| `#use` | Product — Hardware-Aware AI |
+| `#sdk` | Developer SDK + live adapt plan |
+| `#why` | Thesis — situational intelligence |
+
+## SDK
 
 ```bash
-npm run sdk:pack   # pack the SDK tarball
+npm install ./sdk
 ```
 
-Deploy via Vercel (`vercel.json` → `dist/`).
+```js
+import { createTouchAI } from 'touchai-sdk'
 
-## Tech
+const touch = await createTouchAI()
+const { response, plan } = await touch.runInference('What hardware am I on?')
+// plan.device is webgpu|wasm — runtime honors it
+```
 
-- `touchai-sdk` — scan · adapt · infer · attest
-- Live 8-layer hardware scan (silicon → user)
-- Transformers.js / ONNX WASM (Qwen2.5-0.5B)
-- Persistent Device profile + memory
-- Touch-native UX (cursor, ripples, voice)
+See [`sdk/README.md`](./sdk/README.md).
+
+## Products
+
+1. **TouchAI SDK** — Hardware-Aware AI for developers  
+2. **TouchAI Device** — Hardware-Aware AI you open and use on a machine  
+
+## Market
+
+As foundation models commoditize, value shifts to deployment. TouchAI sits at that layer.

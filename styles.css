@@ -214,7 +214,7 @@ body {
 .app {
   height: 100vh;
   display: grid;
-  grid-template-rows: var(--header-h) auto auto 1fr var(--footer-h);
+  grid-template-rows: var(--header-h) auto 1fr var(--footer-h);
   animation: app-in 0.7s ease both;
 }
 
@@ -335,6 +335,32 @@ body {
   color: var(--muted);
   border-bottom: 1px solid var(--line);
   background: rgba(255,255,255,0.35);
+}
+
+.status-strip {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 20px;
+  font-size: 0.7rem;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line);
+  background: rgba(255,255,255,0.35);
+}
+
+.status-strip-label { color: var(--ink-soft); font-weight: 500; }
+
+.device-badge {
+  background: var(--accent-soft) !important;
+  color: var(--accent-deep) !important;
+  border-color: rgba(11, 143, 140, 0.35) !important;
+}
+
+.adapt-reasons {
+  margin-top: 10px;
+  font-size: 0.68rem;
+  color: var(--muted);
+  line-height: 1.45;
 }
 
 .focus-sep { opacity: 0.4; }
@@ -1199,13 +1225,15 @@ body {
 .adapt-row span:first-child { color: var(--muted); }
 .adapt-row span:last-child { color: var(--ink); text-align: right; }
 
-/* ── Live demo ──────────────────────────────────────────────── */
+/* Live / Use product */
+#viewUse,
 #viewLive {
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
+#viewUse.hidden,
 #viewLive.hidden { display: none !important; }
 
 .demo-topbar {

@@ -1,5 +1,5 @@
 import { PILLARS, assessFocus, focusScore } from './focus.js';
-import { adaptExecution, formatAdaptPlan } from './runtime-api.js';
+import { adaptExecution, formatAdaptPlan } from 'touchai-sdk';
 
 export function renderFocusCheck(container, view, hw) {
   if (!container) return;
@@ -19,31 +19,28 @@ export function renderFocusCheck(container, view, hw) {
   `;
 }
 
-export function renderPillarStrip(container) {
-  if (!container) return;
-  container.innerHTML = `
-    <div class="pillar-strip">
-      ${PILLARS.map((p, i) => `
-        <span class="pillar-strip-item"><em>0${i + 1}</em> ${p.label}</span>
-      `).join('<span class="pillar-strip-sep">·</span>')}
-    </div>
-  `;
-}
-
-export function renderAdaptPanel(container, hw, modelId) {
+export async function renderAdaptPanel(container, hw, modelId) {
   if (!container || !hw) return;
-  const plan = adaptExecution(modelId, hw);
+  container.innerHTML = `<div class="nav-label">Hardware-aware execution</div><p class="ctx-hint">Probing…</p>`;
+  const plan = await adaptExecution(modelId, hw);
   container.innerHTML = `
     <div class="nav-label">Hardware-aware execution</div>
     <div class="adapt-plan">
+      <div class="adapt-row"><span>Device</span><span>${plan.device}</span></div>
       <div class="adapt-row"><span>Backend</span><span>${plan.backend}</span></div>
-      <div class="adapt-row"><span>Quant</span><span>${plan.quant}</span></div>
+      <div class="adapt-row"><span>Dtype</span><span>${plan.dtype}</span></div>
       <div class="adapt-row"><span>Mode</span><span>${plan.mode}</span></div>
       <div class="adapt-row"><span>Tokens</span><span>${plan.maxTokens}</span></div>
-      <div class="adapt-row"><span>Latency</span><span>${plan.latencyTarget}</span></div>
       <div class="adapt-row"><span>Thermal</span><span>${plan.thermal}</span></div>
       <div class="adapt-row"><span>Power</span><span>${plan.powerBudget}</span></div>
     </div>
     <code class="adapt-code">${formatAdaptPlan(plan)}</code>
+    <p class="adapt-reasons">${(plan.reasons ?? []).map((r) => esc(r)).join(' · ')}</p>
   `;
+}
+
+function esc(t) {
+  const s = document.createElement('span');
+  s.textContent = t;
+  return s.innerHTML;
 }

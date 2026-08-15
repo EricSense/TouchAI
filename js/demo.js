@@ -1,7 +1,7 @@
 import { hardwareSummary } from './hardware.js';
 import { MODELS, MODEL_ORDER, getModel } from './models.js';
-import { THESIS } from './focus.js';
-import { renderAdaptPanel, renderFocusCheck } from './focus-ui.js';
+import { PRODUCTS } from './focus.js';
+import { renderAdaptPanel } from './focus-ui.js';
 import {
   MemoryStore,
   recordDeviceVisit,
@@ -16,7 +16,6 @@ import { initVoice, isVoiceSupported } from './voice.js';
 let hardware = null;
 let activeModel = 'pulse';
 let isGenerating = false;
-let currentPlan = null;
 
 const memory = new MemoryStore({ persist: true });
 const stats = new SessionStats();
@@ -24,11 +23,33 @@ const stats = new SessionStats();
 let chatMessages, chatInput, sendBtn, voiceBtn, voiceStatus;
 let memoryList, memoryEmpty, modelList;
 
+/** Situated Agent — manages assistants using hardware situation */
+const ASSISTANTS = [
+  {
+    id: 'local',
+    name: 'Local model',
+    role: 'On-device inference',
+    when: 'Prefer when WebGPU/WASM ready and power allows',
+  },
+  {
+    id: 'cloud',
+    name: 'Cloud assistant',
+    role: 'Heavy / general work',
+    when: 'Prefer when thermal/power constrained or depth deferred',
+  },
+  {
+    id: 'code',
+    name: 'Coding assistant',
+    role: 'Dev workloads',
+    when: 'Route here when user rhythm is active coding + enough RAM',
+  },
+];
+
 const STARTER_PROMPTS = [
-  'What hardware am I running on?',
-  'How are you adapting to this machine?',
-  'Show my adapt plan',
-  'Why Hardware-Aware AI?',
+  'Which assistant should handle a heavy job right now?',
+  'Can we run locally on this machine?',
+  'What is my hardware situation?',
+  'Route the next task for me',
 ];
 
 export function initDemo(hw) {
@@ -38,29 +59,33 @@ export function initDemo(hw) {
 }
 
 export function mountDemoPanel(root) {
+  const product = PRODUCTS.find((p) => p.id === 'device');
+
   root.innerHTML = `
     <div class="demo-layout">
       <aside class="demo-sidebar">
         <div class="hardware-panel">
-          <div class="nav-label">Hardware situation</div>
-          <div class="hw-scan-badge live" id="hwScanBadge">8/8 layers active</div>
+          <div class="nav-label">Machine situation</div>
+          <div class="hw-scan-badge live" id="hwScanBadge">8/8 layers</div>
           <div class="hw-grid" id="hwAwarenessGrid"></div>
         </div>
         <div class="model-panel">
-          <div class="nav-label">Mode (adapted)</div>
-          <ul id="modelList" class="model-list"></ul>
+          <div class="nav-label">Assistants managed</div>
+          <ul class="assistant-list" id="assistantList"></ul>
         </div>
         <div class="adapt-panel" id="adaptPanel"></div>
-        <div class="demo-context" id="demoContext"></div>
-        <div class="demo-focus" id="demoFocusCheck"></div>
+        <div class="model-panel">
+          <div class="nav-label">Local mode</div>
+          <ul id="modelList" class="model-list"></ul>
+        </div>
       </aside>
 
       <section class="intel-panel">
         <div id="chatMessages" class="chat-messages"></div>
         <div class="chat-input-area">
-          <div class="input-label" id="inputLabel">Hardware-Aware AI — execution adapted to this machine</div>
+          <div class="input-label">${product.tagline} — manages assistants with hardware context</div>
           <div class="input-wrap">
-            <textarea id="chatInput" class="chat-input" placeholder="Ask about this machine’s hardware situation…" rows="1"></textarea>
+            <textarea id="chatInput" class="chat-input" placeholder="Ask the Situated Agent to route, situate, or decide…" rows="1"></textarea>
             <button id="voiceBtn" class="icon-btn voice-btn interactive" aria-label="Voice">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
@@ -81,11 +106,12 @@ export function mountDemoPanel(root) {
 
       <aside class="memory-panel">
         <div class="panel-header">
-          <span class="panel-title">Machine memory</span>
+          <span class="panel-title">Agent memory</span>
           <button id="clearMemory" class="text-btn interactive">Clear</button>
         </div>
         <ul id="memoryList" class="memory-list"></ul>
-        <div id="memoryEmpty" class="memory-empty">Persists on this device.<br/>Hardware situation compounds over visits.</div>
+        <div id="memoryEmpty" class="memory-empty">Learns this machine over time.<br/>Context no cloud model can acquire.</div>
+        <div class="demo-context" id="demoContext"></div>
         <div class="stats-mini" id="statsMini"></div>
       </aside>
     </div>
@@ -102,9 +128,9 @@ export function mountDemoPanel(root) {
 
   if (hardware) {
     renderHardware(hardware);
+    renderAssistants();
     renderModels();
-    refreshAdapt(activeModel);
-    renderFocusCheck(root.querySelector('#demoFocusCheck'), 'use', hardware);
+    renderAdaptPanel(root.querySelector('#adaptPanel'), hardware, activeModel);
     showWelcome(hardware);
     renderPromptChips();
     renderAgentContext();
@@ -121,14 +147,12 @@ export function mountDemoPanel(root) {
 
 function updateDemoHeader() {
   const title = document.getElementById('demoTitle');
-  if (!title) return;
-  title.textContent = `Hardware-Aware AI · ${hardware?.platform ?? 'Device'}`;
+  if (title) title.textContent = `Situated Agent · ${hardware?.platform ?? 'Device'}`;
 }
 
 function renderHardware(hw) {
   const badge = document.getElementById('hwScanBadge');
-  if (badge) badge.textContent = `${hw.layersActive}/${hw.layersTotal} layers active`;
-
+  if (badge) badge.textContent = `${hw.layersActive}/${hw.layersTotal} layers`;
   const grid = document.getElementById('hwAwarenessGrid');
   if (grid && hw.layers) {
     grid.innerHTML = hw.layers.map((l) => `
@@ -140,43 +164,43 @@ function renderHardware(hw) {
   }
 }
 
-async function refreshAdapt(modelId) {
-  await renderAdaptPanel(document.getElementById('adaptPanel'), hardware, modelId);
-  currentPlan = await adaptExecution(modelId, hardware);
-  const deviceBadge = document.getElementById('deviceBadge');
-  if (deviceBadge) deviceBadge.textContent = currentPlan.device;
-  const runtimeBadge = document.getElementById('runtimeBadge');
-  if (runtimeBadge) runtimeBadge.textContent = `${currentPlan.device} · ${currentPlan.dtype}`;
+async function renderAssistants() {
+  const el = document.getElementById('assistantList');
+  if (!el || !hardware) return;
+  const plan = await adaptExecution(activeModel, hardware);
+  const pick = plan.shouldDefer || plan.device === 'cpu' ? 'cloud' : 'local';
+
+  el.innerHTML = ASSISTANTS.map((a) => `
+    <li class="assistant-item${a.id === pick ? ' active' : ''}">
+      <div class="model-row">
+        <span class="model-name">${a.name}</span>
+        <span class="model-speed">${a.id === pick ? 'recommended' : a.role}</span>
+      </div>
+      <p class="assistant-when">${esc(a.when)}</p>
+    </li>
+  `).join('');
 }
 
 function renderAgentContext() {
   const el = document.getElementById('demoContext');
   if (!el || !hardware) return;
   const situated = situatedSummary(hardware);
-  const engine = getEngineStatus();
   el.innerHTML = `
-    <div class="nav-label">This machine</div>
+    <div class="nav-label">Long arc</div>
     <p class="ctx-hint">${situated.line}</p>
-    <div class="ctx-metrics">
-      <span><em>Platform</em> ${esc(hardware.platform)}</span>
-      <span><em>Form</em> ${esc(hardware.formFactor)}</span>
-      <span><em>Engine</em> ${esc(engine.device)}</span>
-      <span><em>NPU</em> ${esc(hardware.npu)}</span>
-    </div>
+    <p class="ctx-hint">Not the smartest model — the one with context no cloud model can acquire.</p>
   `;
 }
 
 function renderPromptChips() {
   const el = document.getElementById('promptChips');
   if (!el) return;
-
   el.innerHTML = `
-    <div class="prompt-chips-label">Try Hardware-Aware AI</div>
+    <div class="prompt-chips-label">Situated Agent</div>
     <div class="prompt-chips-row">
       ${STARTER_PROMPTS.map((p) => `<button type="button" class="prompt-chip interactive">${esc(p)}</button>`).join('')}
     </div>
   `;
-
   el.querySelectorAll('.prompt-chip').forEach((chip) => {
     chip.addEventListener('click', () => sendQuery(chip.textContent));
   });
@@ -196,7 +220,8 @@ function renderModels() {
     li.addEventListener('click', () => {
       activeModel = id;
       renderModels();
-      refreshAdapt(id);
+      renderAdaptPanel(document.getElementById('adaptPanel'), hardware, id);
+      renderAssistants();
       const badge = document.getElementById('modelBadge');
       if (badge) badge.textContent = getModel(id).name;
     });
@@ -207,15 +232,16 @@ function renderModels() {
 async function showWelcome(hw) {
   if (!chatMessages) return;
   const plan = await adaptExecution(hw.recommendedModel, hw);
-  currentPlan = plan;
+  const product = PRODUCTS.find((p) => p.id === 'device');
   chatMessages.innerHTML = `
     <div class="chat-welcome">
-      <h2>Hardware-Aware AI on this machine</h2>
-      <p class="welcome-thesis">${THESIS.question}</p>
-      <p class="welcome-thesis">Live on <strong>${hw.platform}</strong> via <strong>${plan.device}/${plan.dtype}</strong> · ${hw.layersActive} layers.</p>
+      <h2>Situated Agent</h2>
+      <p class="welcome-thesis">${product.does}</p>
+      <p class="welcome-thesis">${product.arc}</p>
+      <p class="welcome-thesis">Live on <strong>${hw.platform}</strong> · path <strong>${plan.device}/${plan.dtype}</strong> · ${hw.layersActive} layers.</p>
       <div class="welcome-hw">
+        <div class="welcome-hw-item"><span>Route</span><span>${plan.shouldDefer ? 'prefer cloud' : 'local ok'}</span></div>
         <div class="welcome-hw-item"><span>Device</span><span>${esc(plan.device)}</span></div>
-        <div class="welcome-hw-item"><span>Dtype</span><span>${esc(plan.dtype)}</span></div>
         <div class="welcome-hw-item"><span>Power</span><span>${esc(hw.awareness.power.level)}</span></div>
       </div>
     </div>
@@ -252,34 +278,23 @@ async function sendQuery(text) {
 
   const thinking = document.createElement('div');
   thinking.className = 'msg assistant thinking';
-  thinking.id = 'thinkingMsg';
-  thinking.innerHTML = '<div class="msg-bubble">Adapting to this machine’s hardware…</div>';
+  thinking.innerHTML = '<div class="msg-bubble">Reading machine situation…</div>';
   chatMessages.appendChild(thinking);
 
   const { response, latency, tokens, plan, engine } = await generate(
-    query, hardware, activeModel, memory.getConversationHistory(), {},
+    query, hardware, activeModel, memory.getConversationHistory(), { role: 'situated-agent' },
   );
 
   thinking.remove();
   memory.addTurn('assistant', response);
-  currentPlan = plan;
-  appendMessage(
-    'assistant',
-    response,
-    `${Math.round(latency)}ms · ~${tokens} tok · ${plan.device}/${plan.dtype} · ${engine}`,
-  );
+  appendMessage('assistant', response, `${Math.round(latency)}ms · ${plan.device}/${plan.dtype} · ${engine}`);
 
   const runtimeBadge = document.getElementById('runtimeBadge');
   if (runtimeBadge) runtimeBadge.textContent = `${plan.device} · ${plan.dtype}`;
   const deviceBadge = document.getElementById('deviceBadge');
   if (deviceBadge) deviceBadge.textContent = plan.device;
-  if (plan.modelId && plan.modelId !== activeModel) {
-    activeModel = plan.modelId;
-    renderModels();
-    const badge = document.getElementById('modelBadge');
-    if (badge) badge.textContent = getModel(activeModel).name;
-  }
-  await refreshAdapt(activeModel);
+  await renderAssistants();
+  await renderAdaptPanel(document.getElementById('adaptPanel'), hardware, activeModel);
 
   stats.record(latency, tokens);
   isGenerating = false;
@@ -340,5 +355,5 @@ export function preloadDemoModel(onProgress) {
 }
 
 export function getDemoStatus(hw) {
-  return `${hardwareSummary(hw)} · Hardware-Aware AI`;
+  return `${hardwareSummary(hw)} · Situated Agent`;
 }

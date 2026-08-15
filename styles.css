@@ -1225,7 +1225,8 @@ body {
 .adapt-row span:first-child { color: var(--muted); }
 .adapt-row span:last-child { color: var(--ink); text-align: right; }
 
-/* Live / Use product */
+/* Product views: home scroll + device agent + sdk playground */
+#viewDevice,
 #viewUse,
 #viewLive {
   display: flex;
@@ -1233,8 +1234,99 @@ body {
   overflow: hidden;
 }
 
+#viewDevice.hidden,
 #viewUse.hidden,
 #viewLive.hidden { display: none !important; }
+
+.playground {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.playground-col {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+}
+
+.playground-models {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.active-chip {
+  border-color: rgba(11, 143, 140, 0.45) !important;
+  background: var(--accent-soft) !important;
+  color: var(--accent-deep) !important;
+}
+
+.compare-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.compare-card {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(255,255,255,0.5);
+}
+
+.compare-card h3 {
+  font-family: var(--display);
+  font-size: 1.05rem;
+  margin-bottom: 8px;
+}
+
+.compare-card p {
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.accent-card {
+  background: var(--ink);
+  color: #f4f7fa;
+  border-color: var(--ink);
+}
+
+.accent-card p { color: rgba(244,247,250,0.85); }
+
+.assistant-list {
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+
+.assistant-item {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.55);
+}
+
+.assistant-item.active {
+  border-color: rgba(11, 143, 140, 0.4);
+  background: var(--accent-soft);
+}
+
+.assistant-when {
+  margin-top: 6px;
+  font-size: 0.68rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+@media (max-width: 1100px) {
+  .playground,
+  .compare-row { grid-template-columns: 1fr; }
+}
 
 .demo-topbar {
   display: flex;

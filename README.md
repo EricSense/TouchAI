@@ -1,36 +1,25 @@
 # TouchAI
 
-**Hardware-Aware AI.** Situational intelligence — not smarter models.
+**Hardware-aware AI.** Situational intelligence — not smarter models.
 
 TouchAI gives every AI model deep knowledge of the hardware it runs on.
 
-**Product:** https://touchai-kohl.vercel.app → **Use**
+**Live:** https://touchai-kohl.vercel.app
 
-## What it is
+## The problem
 
-Not a smarter chatbot. Hardware-Aware AI that:
+Every AI company positions around capability. That race ends in commodity.
 
-1. Scans the machine (8 layers)
-2. Probes real capabilities (WebGPU / WASM)
-3. Adapts execution (`device`, `dtype`, tokens)
-4. Runs inference on that path
+TouchAI positions on a different axis: **situational intelligence** — not how smart the AI is, but how well it understands where it is.
 
-## Use it
+## The market
 
-```bash
-npm install
-npm run dev
-```
+As foundation models commoditize, value shifts to the layer around them — **deployment**. TouchAI sits there.
 
-Opens on **Use** — Hardware-Aware AI on your machine.
+## Products
 
-| Route | What |
-|-------|------|
-| `#use` | Product — Hardware-Aware AI |
-| `#sdk` | Developer SDK + live adapt plan |
-| `#why` | Thesis — situational intelligence |
-
-## SDK
+### TouchAI SDK
+Developer product. Integrate hardware awareness into applications.
 
 ```bash
 npm install ./sdk
@@ -38,19 +27,23 @@ npm install ./sdk
 
 ```js
 import { createTouchAI } from 'touchai-sdk'
-
 const touch = await createTouchAI()
-const { response, plan } = await touch.runInference('What hardware am I on?')
-// plan.device is webgpu|wasm — runtime honors it
+// touch.hardware — situation
+// touch.plan — adapted device/dtype
 ```
 
-See [`sdk/README.md`](./sdk/README.md).
+### TouchAI Device — The Situated Agent
+Consumer/prosumer product. An agent that lives on your machine, learns it over time, and **manages all assistants** with context no cloud model can acquire.
 
-## Products
+## Site
 
-1. **TouchAI SDK** — Hardware-Aware AI for developers  
-2. **TouchAI Device** — Hardware-Aware AI you open and use on a machine  
+| Route | Product |
+|-------|---------|
+| `#home` | Thesis + roadmap |
+| `#sdk` | SDK + adaptation playground |
+| `#device` | Situated Agent |
 
-## Market
-
-As foundation models commoditize, value shifts to deployment. TouchAI sits at that layer.
+```bash
+npm install
+npm run dev
+```

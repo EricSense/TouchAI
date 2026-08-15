@@ -1,7 +1,9 @@
-import { THESIS, MARKET, PRODUCTS, PILLARS, HARDWARE_LAYERS, FLOW, focusLine } from './focus.js';
-import { renderFocusCheck } from './focus-ui.js';
+import { THESIS, MARKET, PRODUCTS, HARDWARE_LAYERS, FLOW, focusLine } from './focus.js';
+import { adaptExecution } from 'touchai-sdk';
 
-export function renderVisionView(container, hw) {
+export async function renderHomeView(container, hw) {
+  const plan = hw ? await adaptExecution(hw.recommendedModel, hw) : null;
+
   container.innerHTML = `
     <div class="vision-view">
       <section class="hero hero-full">
@@ -13,10 +15,10 @@ export function renderVisionView(container, hw) {
         <div class="hero-copy">
           <p class="brand-mark">TouchAI</p>
           <h1 class="hero-title">Hardware-aware AI.</h1>
-          <p class="hero-sub">Situational intelligence — not smarter models. Deep knowledge of the hardware every AI runs on.</p>
+          <p class="hero-sub">Situational intelligence — deep knowledge of the hardware every AI model runs on.</p>
           <div class="hero-actions">
-            <button class="btn btn-primary interactive" data-nav="use">Use Hardware-Aware AI</button>
-            <button class="btn btn-ghost interactive" data-nav="sdk">Get the SDK</button>
+            <button class="btn btn-primary interactive" data-nav="sdk">TouchAI SDK</button>
+            <button class="btn btn-ghost interactive" data-nav="device">TouchAI Device</button>
           </div>
         </div>
       </section>
@@ -33,10 +35,20 @@ export function renderVisionView(container, hw) {
 
       <section class="section axis-section">
         <p class="section-kicker">A different axis</p>
-        <h2 class="section-title">${THESIS.axis}</h2>
+        <h2 class="section-title">Situational intelligence.</h2>
         <p class="section-lead">${THESIS.question}</p>
         <p class="section-promise">${THESIS.promise}</p>
-        ${hw ? renderLiveSituation(hw) : ''}
+        ${hw && plan ? `
+          <div class="live-situation">
+            <span class="live-pill">This machine right now</span>
+            <div class="live-situation-grid">
+              <div class="live-situation-item"><span>Platform</span><strong>${hw.platform} · ${hw.arch}</strong></div>
+              <div class="live-situation-item"><span>Adapted path</span><strong>${plan.device} / ${plan.dtype}</strong></div>
+              <div class="live-situation-item"><span>Layers</span><strong>${hw.layersActive}/${hw.layersTotal}</strong></div>
+              <div class="live-situation-item"><span>Power</span><strong>${hw.awareness.power.level}</strong></div>
+            </div>
+          </div>
+        ` : ''}
       </section>
 
       <section class="section market-section">
@@ -47,44 +59,9 @@ export function renderVisionView(container, hw) {
         <div class="stack-diagram">
           <div class="stack-row muted">Application layer · assistants, agents, apps</div>
           <div class="stack-row muted">Model layer · foundation models (commoditizing)</div>
-          <div class="stack-row accent">TouchAI · situational intelligence · hardware-aware deployment</div>
+          <div class="stack-row accent">TouchAI · hardware-aware AI · situational intelligence</div>
           <div class="stack-row muted">Silicon · NPU · GPU · CPU · ${hw ? `${hw.platform} ${hw.arch}` : 'your device'}</div>
         </div>
-      </section>
-
-      <section class="section pillars-section">
-        <p class="section-kicker">What we build toward</p>
-        <h2 class="section-title">Three commitments.</h2>
-        <div class="pillars-grid">
-          ${PILLARS.map((p, i) => `
-            <article class="pillar-block">
-              <span class="pillar-num">0${i + 1}</span>
-              <h3>${p.label}</h3>
-              <p>${p.desc}</p>
-            </article>
-          `).join('')}
-        </div>
-      </section>
-
-      <section class="section awareness-section">
-        <p class="section-kicker">What hardware-aware means</p>
-        <h2 class="section-title">Eight layers of situation.</h2>
-        <p class="section-lead">Not “runs on device.” A live understanding of the machine — this moment, this context.</p>
-        <div class="awareness-grid">
-          ${HARDWARE_LAYERS.map((row) => `
-            <div class="awareness-item">
-              <span class="awareness-layer">${row.layer}</span>
-              <p>${row.knows}</p>
-            </div>
-          `).join('')}
-        </div>
-        <div class="flow-strip">
-          ${FLOW.map((step, i) => `
-            <span class="flow-step">${step}</span>
-            ${i < FLOW.length - 1 ? '<span class="flow-arrow" aria-hidden="true">→</span>' : ''}
-          `).join('')}
-        </div>
-        <p class="platform-focus-line">${focusLine(hw)}</p>
       </section>
 
       <section class="section products-section">
@@ -101,46 +78,41 @@ export function renderVisionView(container, hw) {
               <p class="product-tag">${p.tagline}</p>
               <p class="product-what">${p.what}</p>
               <p class="product-does">${p.does}</p>
-              <button class="btn btn-ghost interactive" data-nav="${p.view}">Open ${p.title.split(' ').pop()}</button>
+              ${p.arc ? `<p class="product-does">${p.arc}</p>` : ''}
+              <button class="btn btn-ghost interactive" data-nav="${p.view}">Open ${p.title}</button>
             </article>
           `).join('')}
         </div>
       </section>
 
-      <section class="section focus-check-section">
-        <p class="section-kicker">Built in focus</p>
-        <h2 class="section-title">Live on this device.</h2>
-        <div id="visionFocusCheck"></div>
-        <div class="closing-cta">
-          <button class="btn btn-primary interactive" data-nav="use">Use Hardware-Aware AI</button>
-          <button class="btn btn-ghost interactive" data-nav="sdk">Get the SDK</button>
+      <section class="section awareness-section">
+        <p class="section-kicker">What hardware-aware means</p>
+        <h2 class="section-title">Eight layers of situation.</h2>
+        <div class="awareness-grid">
+          ${HARDWARE_LAYERS.map((row) => `
+            <div class="awareness-item">
+              <span class="awareness-layer">${row.layer}</span>
+              <p>${row.knows}</p>
+            </div>
+          `).join('')}
         </div>
+        <div class="flow-strip">
+          ${FLOW.map((step, i) => `
+            <span class="flow-step">${step}</span>
+            ${i < FLOW.length - 1 ? '<span class="flow-arrow" aria-hidden="true">→</span>' : ''}
+          `).join('')}
+        </div>
+        <p class="platform-focus-line">${focusLine(hw)}</p>
       </section>
     </div>
   `;
 
   paintHeroMachine(container.querySelector('#heroMachine'), hw);
-
   container.querySelectorAll('[data-nav]').forEach((btn) => {
     btn.addEventListener('click', () => {
       document.dispatchEvent(new CustomEvent('touchai:nav', { detail: { view: btn.dataset.nav } }));
     });
   });
-
-  renderFocusCheck(container.querySelector('#visionFocusCheck'), 'why', hw);
-}
-
-function renderLiveSituation(hw) {
-  return `
-    <div class="live-situation">
-      <span class="live-pill">Live on this machine</span>
-      <div class="live-situation-grid">
-        ${(hw.layers ?? []).slice(0, 4).map((l) => `
-          <div class="live-situation-item"><span>${l.name}</span><strong>${l.summary}</strong></div>
-        `).join('')}
-      </div>
-    </div>
-  `;
 }
 
 function paintHeroMachine(el, hw) {
@@ -165,3 +137,6 @@ function paintHeroMachine(el, hw) {
     </svg>
   `;
 }
+
+/** @deprecated alias */
+export const renderVisionView = renderHomeView;

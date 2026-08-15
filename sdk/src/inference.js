@@ -25,97 +25,93 @@ export function getEngineStatus() {
 
 function buildSystemPrompt(hw, model, plan) {
   const a = hw.awareness;
-  return `You are TouchAI — Hardware-Aware AI on this machine.
+  return `You are TouchAI Device — the Situated Agent on this machine.
 
-You do not compete on model smartness. You compete on situational intelligence: how well you understand the hardware you run on.
+TouchAI builds Hardware-aware AI. You are NOT competing on model smartness.
+You are the intelligence that manages all assistants using situational knowledge of this hardware.
 
-LIVE HARDWARE SITUATION:
+LIVE SITUATION:
 - Silicon: ${a.silicon.platform} ${a.silicon.arch}, ${a.silicon.cores}, ${a.silicon.gpu}, ${a.silicon.npu}
 - Thermal: ${a.thermal.state}, ${a.thermal.headroom}, throttle ${a.thermal.throttleRisk}
 - Power: ${a.power.level}, ${a.power.budget}
 - Memory: ${a.memory.ram}, ${a.memory.heap ?? a.memory.bandwidth}
 - Sensors: ${a.sensors.active}
-- Peripherals: ${a.peripherals.connected}
 - History: ${a.history.scans} scans, ${a.history.avgLatency}
 - User: ${a.user.rhythm}, ${a.user.signature}
 
-ADAPT PLAN (honored by runtime):
-- Backend: ${plan.backend}
-- Device: ${plan.device}
-- Dtype: ${plan.dtype}
-- Max tokens: ${plan.maxTokens}
+ADAPT PLAN:
+- Device: ${plan.device} · Dtype: ${plan.dtype} · Tokens: ${plan.maxTokens}
+- Defer heavy local work: ${plan.shouldDefer}
 - Reasons: ${(plan.reasons ?? []).join(' · ')}
 
-Context: ${hw.context}
-Mode: ${model.name}. Always reference this machine's real hardware when answering.`;
+ASSISTANTS YOU MANAGE:
+- Local model — on-device when path is healthy
+- Cloud assistant — when thermal/power/depth should defer
+- Coding assistant — when user rhythm + RAM allow
+
+When asked to route or decide, recommend an assistant using this situation.
+You become the most capable interface on this device because of context no cloud model can acquire — not because you are the smartest model.
+Mode: ${model.name}.`;
 }
 
 const AGENT = {
   greeting: (hw, plan) =>
-    `TouchAI · Hardware-Aware AI online on ${hw.platform} (${hw.arch}, ${hw.cores ?? '?'} cores). ` +
-    `${hw.layersActive}/8 layers live. Running ${plan?.device ?? 'probing'} · ${plan?.dtype ?? '—'}.`,
+    `Situated Agent online on ${hw.platform}. ${hw.layersActive}/8 layers. ` +
+    `I manage assistants using this machine's situation — path ${plan?.device}/${plan?.dtype}.`,
+
+  route: (hw, plan) => {
+    const pick = plan.shouldDefer || plan.device === 'cpu' ? 'Cloud assistant' : 'Local model';
+    return `Routing recommendation for this machine:\n` +
+      `→ Prefer **${pick}** right now.\n` +
+      `Situation: thermal ${hw.awareness.thermal.state}, power ${hw.awareness.power.budget}, ` +
+      `path ${plan.device}/${plan.dtype}, defer=${plan.shouldDefer}.\n` +
+      `Reasons: ${(plan.reasons ?? []).join('; ')}`;
+  },
 
   hardware: (hw, plan) => {
     const a = hw.awareness;
-    return `Hardware-Aware AI profile (live):\n\n` +
-      `Silicon · ${a.silicon.platform} ${a.silicon.arch} · ${a.silicon.cores} · ${a.silicon.gpu} · ${a.silicon.npu}\n` +
-      `Thermal · ${a.thermal.state} · ${a.thermal.headroom} · throttle ${a.thermal.throttleRisk}\n` +
-      `Power · ${a.power.level} · ${a.power.charging ? 'charging' : 'on battery'} · ${a.power.budget}\n` +
-      `Memory · ${a.memory.ram} · ${a.memory.heap ?? ''} · ${a.memory.bandwidth}\n` +
-      `Sensors · ${a.sensors.active}\n` +
-      `Peripherals · ${a.peripherals.connected}\n` +
-      `History · ${a.history.scans} scans · ${a.history.avgLatency}\n` +
-      `User · ${a.user.rhythm} · ${a.user.signature}\n\n` +
-      `Adapt plan · ${plan?.backend} · ${plan?.device} · ${plan?.dtype} · ${plan?.maxTokens} tok\n` +
-      `Why · ${(plan?.reasons ?? []).join(' · ')}`;
+    return `Machine situation (what I use to manage assistants):\n\n` +
+      `Silicon · ${a.silicon.platform} ${a.silicon.arch} · ${a.silicon.cores} · ${a.silicon.gpu}\n` +
+      `Thermal · ${a.thermal.state} · ${a.thermal.headroom}\n` +
+      `Power · ${a.power.level} · ${a.power.budget}\n` +
+      `Memory · ${a.memory.ram}\n` +
+      `Adapt · ${plan?.device}/${plan?.dtype} · ${plan?.maxTokens} tok · defer=${plan?.shouldDefer}`;
   },
 
   adapt: (hw, plan) =>
-    `Hardware-aware execution on ${hw.platform}:\n` +
-    `Device: ${plan.device}\nBackend: ${plan.backend}\nDtype: ${plan.dtype}\n` +
-    `Mode: ${plan.mode}\nTokens: ${plan.maxTokens}\nLatency target: ${plan.latencyTarget}\n` +
-    `Thermal: ${plan.thermal}\nPower: ${plan.powerBudget}\n` +
-    `Defer heavy work: ${plan.shouldDefer ? 'yes' : 'no'}\n` +
-    `Reasons: ${(plan.reasons ?? []).join('; ')}`,
+    `Hardware-aware plan on ${hw.platform}: ${plan.device} · ${plan.dtype} · ${plan.mode} · ${plan.maxTokens} tok.\n` +
+    `${(plan.reasons ?? []).join('\n')}`,
 
-  situation: (hw) =>
-    `TouchAI is Hardware-Aware AI. Not how smart the model is — how well it understands where it is. ` +
-    `All ${hw.layersActive} layers active on ${hw.platform}. As models commoditize, value shifts to deployment.`,
+  situation: () =>
+    `TouchAI is Hardware-aware AI. Not how smart the model is — how well it understands where it is. ` +
+    `I am the Situated Agent: the intelligence that manages assistants with context no cloud model can acquire.`,
 
   identity: (hw, model, plan) =>
-    `I'm TouchAI — Hardware-Aware AI. ${model.name} on ${hw.platform} via ${plan?.device ?? 'local'} (${plan?.dtype}). ` +
-    `I situate inference to this silicon, thermal, and power state.`,
+    `I'm TouchAI Device — the Situated Agent on ${hw.platform}. ` +
+    `${model.name} via ${plan?.device}/${plan?.dtype}. I manage assistants using live hardware situation.`,
 
-  default: (hw, model, plan) => {
-    const a = hw.awareness;
-    return `[${hw.platform} · ${plan?.device}/${plan?.dtype} · ${model.name}] ` +
-      `Hardware-aware reply on ${hw.cores ?? '?'} cores. ` +
-      `Thermal ${a.thermal.state} · Power ${a.power.level} · ${hw.layersActive} layers active.`;
-  },
+  default: (hw, model, plan) =>
+    `Situated Agent · ${hw.platform} · ${plan?.device}/${plan?.dtype} · ${model.name}. ` +
+    `Thermal ${hw.awareness.thermal.state} · Power ${hw.awareness.power.level}. Ask me to route a task or read the situation.`,
 };
 
 async function agentReply(query, hw, model, plan) {
   const q = query.toLowerCase();
   if (/^(hi|hello|hey|greetings)/.test(q)) return AGENT.greeting(hw, plan);
-  if (/adapt|execution|backend|quant|dtype|webgpu|wasm|plan/.test(q)) return AGENT.adapt(hw, plan);
-  if (/hardware|spec|cpu|gpu|ram|npu|layer|device|machine|what.*running|awareness/.test(q)) {
+  if (/route|which assistant|heavy job|should handle|prefer|can we run locally|local(ly)?/.test(q)) {
+    return AGENT.route(hw, plan);
+  }
+  if (/adapt|execution|backend|dtype|webgpu|wasm|plan/.test(q)) return AGENT.adapt(hw, plan);
+  if (/hardware|situation|spec|cpu|gpu|ram|npu|layer|machine|what.*running|awareness/.test(q)) {
     return AGENT.hardware(hw, plan);
   }
-  if (/situat|commodity|market|deploy|position|capability|benchmark|hardware-aware|hardware aware/.test(q)) {
-    return AGENT.situation(hw);
+  if (/situat|commodity|market|deploy|position|capability|hardware-aware|hardware aware|touchai/.test(q)) {
+    return AGENT.situation();
   }
-  if (/what are you|who are you|touchai|vision|why/.test(q)) return AGENT.identity(hw, model, plan);
-  if (/thermal|temperature|throttl|heat/.test(q)) {
-    const t = hw.awareness.thermal;
-    return `Thermal: ${t.state} · ${t.headroom} · throttle ${t.throttleRisk}. Plan adjusted: ${plan.maxTokens} tok · ${plan.dtype}.`;
-  }
-  if (/power|battery|charg|energy/.test(q)) {
-    const p = hw.awareness.power;
-    return `Power: ${p.level} (${p.charging ? 'charging' : 'on battery'}) · ${p.budget}. Plan: ${plan.mode} · ${plan.device}.`;
-  }
+  if (/what are you|who are you|vision|why|agent/.test(q)) return AGENT.identity(hw, model, plan);
   if (/attest|integrity|trust|signature/.test(q)) {
     const proof = await attestIntegrity(hw);
-    return `Hardware-rooted proof:\nDevice: ${proof.deviceId}\nEnclave: ${proof.enclave}\nSig: ${proof.signature}\nLayers: ${proof.layers}/8`;
+    return `Hardware-rooted proof:\nDevice: ${proof.deviceId}\nSig: ${proof.signature}`;
   }
   return AGENT.default(hw, model, plan);
 }

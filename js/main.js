@@ -1,22 +1,22 @@
 import { runBootSequence } from './boot.js';
-import { renderVisionView } from './vision.js';
+import { renderHomeView } from './vision.js';
 import { renderSdkView } from './sdk.js';
 import { initDemo, mountDemoPanel, preloadDemoModel, getDemoStatus } from './demo.js';
 import { initRipples } from './ripple.js';
 import { initCursor } from './cursor.js';
 import { focusLine, getViewLabel } from './focus.js';
-import { adaptExecution, formatAdaptPlan } from 'touchai-sdk';
+import { adaptExecution } from 'touchai-sdk';
 
 let hardware = null;
-let productMounted = false;
+let deviceMounted = false;
 
 const views = {
-  use: () => document.getElementById('viewUse'),
+  home: () => document.getElementById('viewHome'),
   sdk: () => document.getElementById('viewSdk'),
-  why: () => document.getElementById('viewWhy'),
+  device: () => document.getElementById('viewDevice'),
 };
 
-const VALID = ['use', 'sdk', 'why'];
+const VALID = ['home', 'sdk', 'device'];
 
 function updateHash(view) {
   if (location.hash !== `#${view}`) location.hash = view;
@@ -24,10 +24,12 @@ function updateHash(view) {
 
 function parseHash() {
   const raw = location.hash.slice(1).split('/')[0];
-  // Legacy deep links
-  if (raw === 'live' || raw === 'device' || raw === 'vision') return { view: raw === 'vision' ? 'why' : 'use' };
-  if (VALID.includes(raw)) return { view: raw };
-  return { view: 'use' };
+  const aliases = {
+    vision: 'home', why: 'home', use: 'device', live: 'device',
+  };
+  const view = aliases[raw] ?? raw;
+  if (VALID.includes(view)) return { view };
+  return { view: 'home' };
 }
 
 async function updateStatusStrip(view, hw) {
@@ -45,7 +47,7 @@ async function updateStatusStrip(view, hw) {
 }
 
 export function navigate(view) {
-  if (!VALID.includes(view)) view = 'use';
+  if (!VALID.includes(view)) view = 'home';
 
   document.querySelectorAll('.nav-link').forEach((l) => {
     l.classList.toggle('active', l.dataset.view === view);
@@ -56,15 +58,15 @@ export function navigate(view) {
     if (el) el.classList.toggle('hidden', id !== view);
   });
 
-  if (view === 'use') {
+  if (view === 'home' && hardware) renderHomeView(views.home(), hardware);
+  if (view === 'sdk' && hardware) renderSdkView(views.sdk(), hardware);
+  if (view === 'device') {
     const root = document.getElementById('demoRoot');
-    if (!productMounted && root) {
+    if (!deviceMounted && root) {
       mountDemoPanel(root);
-      productMounted = true;
+      deviceMounted = true;
     }
   }
-  if (view === 'sdk' && hardware) renderSdkView(views.sdk(), hardware);
-  if (view === 'why' && hardware) renderVisionView(views.why(), hardware);
 
   updateStatusStrip(view, hardware);
   updateHash(view);
@@ -80,24 +82,18 @@ async function initApp(hw) {
   const sit = document.getElementById('navSituation');
   if (sit && hw) {
     const plan = await adaptExecution(hw.recommendedModel, hw);
-    sit.textContent = `${hw.platform} · ${plan.device}/${plan.dtype}`;
-    document.getElementById('statusText').textContent =
-      `${getDemoStatus(hw)} · ${formatAdaptPlan(plan)}`;
+    sit.textContent = `${hw.platform} · ${plan.device}`;
   }
+  document.getElementById('statusText').textContent = getDemoStatus(hw);
 
   document.querySelectorAll('.nav-link').forEach((link) => {
     link.addEventListener('click', () => navigate(link.dataset.view));
   });
-
   document.querySelectorAll('[data-nav]').forEach((btn) => {
     btn.addEventListener('click', () => navigate(btn.dataset.nav));
   });
-
   document.addEventListener('touchai:nav', (e) => navigate(e.detail.view));
-
-  window.addEventListener('hashchange', () => {
-    navigate(parseHash().view);
-  });
+  window.addEventListener('hashchange', () => navigate(parseHash().view));
 
   preloadDemoModel((msg) => {
     const el = document.getElementById('statusText');

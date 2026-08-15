@@ -42,20 +42,20 @@ export const PRODUCTS = [
     num: '01',
     title: 'TouchAI SDK',
     audience: 'Developers',
-    tagline: 'Hardware awareness for every application',
-    what: 'The developer-facing product. The interface through which AI developers integrate hardware awareness into their applications.',
-    does: 'Scan silicon, adapt execution, and run inference that knows the machine it lands on.',
+    tagline: 'Hardware-Aware AI for every application',
+    what: 'The developer-facing product. Integrate hardware awareness into your AI apps.',
+    does: 'Scan silicon, probe capabilities, adapt execution, run inference that knows the machine.',
   },
   {
     id: 'device',
-    view: 'device',
+    view: 'use',
     num: '02',
     title: 'TouchAI Device',
-    audience: 'Consumer & prosumer',
-    tagline: 'The Situated Agent',
-    what: 'An AI agent that lives on your specific machine and develops a genuine understanding of it over time.',
-    does: 'The intelligence that manages all assistants — with context no cloud model can acquire.',
-    arc: 'As the situated agent learns more about the machine and the user\'s patterns, it becomes the most capable AI interface on that device — not because it\'s the smartest model, but because it has context no cloud model can acquire.',
+    audience: 'Anyone on a machine',
+    tagline: 'Hardware-Aware AI you open and use',
+    what: 'The product that runs on your specific machine and understands it over time.',
+    does: 'Live 8-layer situation + adapted inference — context no cloud model can acquire.',
+    arc: 'As it learns more about the machine and your patterns, it becomes the most capable interface on that device — not because it is the smartest model, but because it is hardware-aware.',
   },
 ];
 
@@ -81,8 +81,8 @@ export const SDK_API = [
   {
     name: 'createTouchAI()',
     pillar: 'deployment',
-    desc: 'Bound SDK client for one machine session — scan, adapt, infer, attest.',
-    code: `const touch = await createTouchAI();\nconst plan = touch.adaptExecution('pulse');`,
+    desc: 'Bound Hardware-Aware AI client — scan, probe capabilities, adapt, infer, attest.',
+    code: `const touch = await createTouchAI();\nconst plan = await touch.adaptExecution('pulse');\n// plan.device is webgpu|wasm — runtime honors it`,
   },
   {
     name: 'scanHardware()',
@@ -91,22 +91,28 @@ export const SDK_API = [
     code: `const hw = await scanHardware();\n// → { platform, arch, cores, gpu, npu, layers… }`,
   },
   {
-    name: 'adaptExecution(model, hw)',
+    name: 'detectCapabilities()',
     pillar: 'adaptation',
-    desc: 'Select quantization, backend, token budget, and latency tier for this machine.',
-    code: `const plan = adaptExecution(model, hw);\n// → { backend, quant, budget, latencyTarget }`,
+    desc: 'Probe WebGPU / WASM / WebNN — real availability, not guesses.',
+    code: `const caps = await detectCapabilities();\n// → { webgpu, wasm, webnn, transformersDevice }`,
   },
   {
-    name: 'runInference(query, ctx)',
+    name: 'adaptExecution(model, hw)',
     pillar: 'adaptation',
-    desc: 'Hardware-aware generation grounded in this device’s situation.',
-    code: `const { response, latency } = await runInference(\n  query, hw, model, history\n);`,
+    desc: 'Select device, dtype, token budget for this machine — honored by runInference.',
+    code: `const plan = await adaptExecution(model, hw);\n// → { device, dtype, maxTokens, shouldDefer, reasons }`,
+  },
+  {
+    name: 'runInference(query, …)',
+    pillar: 'adaptation',
+    desc: 'Hardware-aware generation on the adapted device path.',
+    code: `const { response, plan } = await runInference(\n  query, hw, model, history\n);`,
   },
   {
     name: 'attestIntegrity()',
     pillar: 'deployment',
     desc: 'Hardware-rooted attestation — prove where inference ran.',
-    code: `const proof = await attestIntegrity();\n// → { deviceId, enclave, signature }`,
+    code: `const proof = await attestIntegrity(hw);\n// → { deviceId, enclave, signature }`,
   },
 ];
 
@@ -122,17 +128,19 @@ export const FLOW = [
 ];
 
 export const JOURNEY = [
-  { step: 1, view: 'vision', title: 'Vision', desc: 'Situational intelligence, not smarter models' },
-  { step: 2, view: 'sdk', title: 'SDK', desc: 'Hardware awareness for developers' },
-  { step: 3, view: 'device', title: 'Device', desc: 'The Situated Agent on your machine' },
-  { step: 4, view: 'live', title: 'Live', desc: 'Prove it on this hardware' },
+  { step: 1, view: 'use', title: 'Use', desc: 'Hardware-Aware AI on this machine' },
+  { step: 2, view: 'sdk', title: 'SDK', desc: 'Integrate hardware awareness' },
+  { step: 3, view: 'why', title: 'Why', desc: 'Situational intelligence thesis' },
 ];
 
 export const VIEW_FOCUS = {
-  vision: { label: 'Vision · situational intelligence', checks: ['situation', 'deployment'] },
+  use: { label: 'Use · Hardware-Aware AI', checks: ['situation', 'adaptation', 'deployment'] },
   sdk: { label: 'SDK · developer interface', checks: ['situation', 'adaptation', 'deployment'] },
-  device: { label: 'Device · situated agent', checks: ['situation', 'adaptation'] },
-  live: { label: 'Live · hardware-aware inference', checks: ['situation', 'adaptation', 'deployment'] },
+  why: { label: 'Why · situational intelligence', checks: ['situation', 'deployment'] },
+  // legacy aliases
+  live: { label: 'Use · Hardware-Aware AI', checks: ['situation', 'adaptation', 'deployment'] },
+  device: { label: 'Use · Hardware-Aware AI', checks: ['situation', 'adaptation'] },
+  vision: { label: 'Why · situational intelligence', checks: ['situation', 'deployment'] },
 };
 
 export function focusLine(hw) {

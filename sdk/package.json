@@ -1,0 +1,42 @@
+{
+  "name": "touchai-sdk",
+  "version": "0.2.0",
+  "description": "Hardware-Aware AI SDK — situational intelligence for any model on any machine",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EricSense/TouchAI.git",
+    "directory": "sdk"
+  },
+  "homepage": "https://touchai-kohl.vercel.app",
+  "type": "module",
+  "main": "./src/index.js",
+  "module": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "keywords": [
+    "ai",
+    "hardware-aware",
+    "situational-intelligence",
+    "on-device",
+    "inference",
+    "touchai"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "peerDependencies": {
+    "@huggingface/transformers": "^3.4.0"
+  },
+  "peerDependenciesMeta": {
+    "@huggingface/transformers": {
+      "optional": true
+    }
+  }
+}

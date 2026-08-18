@@ -3,4 +3,3 @@ dist/
 .vercel
 .DS_Store
 *.local
-*.tgz

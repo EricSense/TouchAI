@@ -1,49 +1,39 @@
-# TouchAI
+# FORGE
 
-**Hardware-aware AI.** Situational intelligence — not smarter models.
+**The capital that builds its own startups.**
 
-TouchAI gives every AI model deep knowledge of the hardware it runs on.
+An AI-native fund that detects problems, instantiates disposable ventures to solve them, and gets repaid as a share of verified outcomes — no pitch decks, no cap tables, no company that outlives its use.
 
-**Live:** https://touchai-kohl.vercel.app
+This repository is the Phase 1 **manual loop**: one vertical (B2B ops automation), AI-assisted detection and pricing, humans on every capital decision.
 
-## The problem
+## The mechanism
 
-Every AI company positions around capability. That race ends in commodity.
+1. **Problem detection** — signals cluster into sized, evidenced problems. Decks are not an input.
+2. **Disposable ventures** — the winning bid instantiates a contractor-only shell with a 12-week maximum term. It scales, plateaus, or dissolves.
+3. **Outcome-linked capital** — repayment is a live share of verified outcomes (payments, usage, telemetry, escrow). FORGE’s carry is the spread between the venture’s share rate and the rate promised to LPs. When the stream ends, so does the obligation.
 
-TouchAI positions on a different axis: **situational intelligence** — not how smart the AI is, but how well it understands where it is.
+Phase 1 will not auto-allocate. Award, instantiate, and dissolve must be signed by a liable **allocator**.
 
-## The market
-
-As foundation models commoditize, value shifts to the layer around them — **deployment**. TouchAI sits there.
-
-## Products
-
-### TouchAI SDK
-Developer product. Integrate hardware awareness into applications.
-
-```bash
-npm install ./sdk
-```
-
-```js
-import { createTouchAI } from 'touchai-sdk'
-const touch = await createTouchAI()
-// touch.hardware — situation
-// touch.plan — adapted device/dtype
-```
-
-### TouchAI Device — The Situated Agent
-Consumer/prosumer product. An agent that lives on your machine, learns it over time, and **manages all assistants** with context no cloud model can acquire.
-
-## Site
-
-| Route | Product |
-|-------|---------|
-| `#home` | Thesis + roadmap |
-| `#sdk` | SDK + adaptation playground |
-| `#device` | Situated Agent |
+## Run
 
 ```bash
 npm install
+npm test
 npm run dev
 ```
+
+Open the Loop view and operate a seeded pilot: invoice-to-cash, support SLA, duplicate vendor payments (already live with attested outcomes), and more.
+
+## Engine
+
+The loop is a pure module in `src/engine`. It enforces:
+
+- share rates above the LP promised rate (no negative spread)
+- 12-week legal term cap
+- SHA-256 attestations over canonical outcome payloads
+- pool identity: `available + allocated + write-downs + platform fees = committed + LP yield`
+
+## What’s next
+
+- **Phase 2** — automate detection and bid-matching; keep allocation and legal human-reviewed.
+- **Phase 3** — selective autonomy on lower-risk decisions, using Phase 1–2 liability data.

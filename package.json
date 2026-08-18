@@ -1,23 +1,17 @@
 {
-  "name": "touchai",
-  "version": "1.1.0",
+  "name": "forge",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
-  "workspaces": [
-    "sdk"
-  ],
+  "description": "FORGE — an AI-native fund that detects problems, instantiates disposable ventures, and gets repaid as a share of verified outcomes.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "sdk:pack": "npm pack --workspace touchai-sdk"
+    "test": "node --test test/**/*.test.js"
   },
   "engines": {
     "node": ">=20"
-  },
-  "dependencies": {
-    "@huggingface/transformers": "^3.4.0",
-    "touchai-sdk": "0.2.0"
   },
   "devDependencies": {
     "vite": "^6.3.5"

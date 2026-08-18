@@ -6,6 +6,8 @@ An AI-native fund that detects problems, instantiates disposable ventures to sol
 
 FORGE is a **separate product from TouchAI**. This directory is the whole app: engine, UI, tests, and Vercel config. Do not deploy it from the repository root (that project is TouchAI).
 
+**Live:** https://forge-lilac-nu.vercel.app
+
 ## The mechanism
 
 1. **Problem detection** — signals cluster into sized, evidenced problems. Decks are not an input.
@@ -27,11 +29,11 @@ Open the Loop view and operate a seeded B2B ops pilot.
 
 ## Deploy (own Vercel project)
 
-Create a **new** Vercel project named `forge`. Set **Root Directory** to `forge` so it does not overwrite [TouchAI](https://touchai-kohl.vercel.app).
+Production is a **new** Vercel project named `forge` (Root Directory = `forge`). It does not overwrite [TouchAI](https://touchai-kohl.vercel.app).
 
 ```bash
 cd forge
-npx vercel --yes --name forge --prod
+npx vercel --yes --prod
 ```
 
 ## Engine

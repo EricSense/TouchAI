@@ -50,4 +50,4 @@ npm run dev
 
 ## FORGE
 
-FORGE is a **separate product** in [`forge/`](./forge). It does not share TouchAI’s app, SDK, or Vercel project. Run and deploy it from that directory.
+FORGE is a **separate product** in [`forge/`](./forge). Live: https://forge-lilac-nu.vercel.app — it does not share TouchAI’s app, SDK, or Vercel project.

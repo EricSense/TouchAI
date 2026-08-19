@@ -4,6 +4,7 @@ import { getModel } from './models.js';
 import { recordQuery } from './awareness.js';
 import { recordDeviceQuery } from './device-profile.js';
 import { scanHardware } from './hardware.js';
+import { recommendAssistant, formatRouteDecision } from './route.js';
 
 let pipeline = null;
 let loading = false;
@@ -20,15 +21,17 @@ export function getEngineStatus() {
     device: runtimeDevice ?? 'probing',
     ready: Boolean(pipeline) || !loading,
     loaded: Boolean(pipeline),
+    loading,
   };
 }
 
 function buildSystemPrompt(hw, model, plan) {
   const a = hw.awareness;
-  return `You are TouchAI Device — the Situated Agent on this machine.
+  const route = recommendAssistant(hw, plan);
+  return `You are TouchAI — the Situated Agent MVP on this host.
 
-TouchAI builds Hardware-aware AI. You are NOT competing on model smartness.
-You are the intelligence that manages all assistants using situational knowledge of this hardware.
+You practice Hardware-aware AI / situational intelligence.
+You are NOT competing on model smartness. You manage assistants using live hardware situation.
 
 LIVE SITUATION:
 - Silicon: ${a.silicon.platform} ${a.silicon.arch}, ${a.silicon.cores}, ${a.silicon.gpu}, ${a.silicon.npu}
@@ -44,76 +47,82 @@ ADAPT PLAN:
 - Defer heavy local work: ${plan.shouldDefer}
 - Reasons: ${(plan.reasons ?? []).join(' · ')}
 
+DEFAULT ROUTE NOW: ${route.name} (${Math.round(route.confidence * 100)}%)
+${route.reasons.map((r) => `- ${r}`).join('\n')}
+
 ASSISTANTS YOU MANAGE:
 - Local model — on-device when path is healthy
 - Cloud assistant — when thermal/power/depth should defer
-- Coding assistant — when user rhythm + RAM allow
+- Coding assistant — when coding intent + RAM allow
 
-When asked to route or decide, recommend an assistant using this situation.
-You become the most capable interface on this device because of context no cloud model can acquire — not because you are the smartest model.
-Mode: ${model.name}.`;
+When asked to route or decide, recommend an assistant using this situation and explain why.
+Be concise and concrete. Mode: ${model.name}.`;
 }
 
 const AGENT = {
-  greeting: (hw, plan) =>
-    `Situated Agent online on ${hw.platform}. ${hw.layersActive}/8 layers. ` +
-    `I manage assistants using this machine's situation — path ${plan?.device}/${plan?.dtype}.`,
+  greeting: (hw, plan, route) =>
+    `Situated Agent online on ${hw.platform}. ${hw.layersActive}/8 layers live.\n` +
+    `Default route right now: ${route.name} via ${plan.device}/${plan.dtype}.\n` +
+    `Ask me to route a task, read the situation, or check if we can run locally.`,
 
-  route: (hw, plan) => {
-    const pick = plan.shouldDefer || plan.device === 'cpu' ? 'Cloud assistant' : 'Local model';
-    return `Routing recommendation for this machine:\n` +
-      `→ Prefer **${pick}** right now.\n` +
-      `Situation: thermal ${hw.awareness.thermal.state}, power ${hw.awareness.power.budget}, ` +
-      `path ${plan.device}/${plan.dtype}, defer=${plan.shouldDefer}.\n` +
-      `Reasons: ${(plan.reasons ?? []).join('; ')}`;
-  },
+  route: (hw, plan, route) =>
+    `Routing decision for this host:\n\n${formatRouteDecision(route)}\n\n` +
+    `Thermal ${hw.awareness.thermal.state} · Power ${hw.awareness.power.budget} · ` +
+    `Defer=${plan.shouldDefer}.`,
 
-  hardware: (hw, plan) => {
+  hardware: (hw, plan, route) => {
     const a = hw.awareness;
     return `Machine situation (what I use to manage assistants):\n\n` +
       `Silicon · ${a.silicon.platform} ${a.silicon.arch} · ${a.silicon.cores} · ${a.silicon.gpu}\n` +
       `Thermal · ${a.thermal.state} · ${a.thermal.headroom}\n` +
       `Power · ${a.power.level} · ${a.power.budget}\n` +
       `Memory · ${a.memory.ram}\n` +
-      `Adapt · ${plan?.device}/${plan?.dtype} · ${plan?.maxTokens} tok · defer=${plan?.shouldDefer}`;
+      `Adapt · ${plan.device}/${plan.dtype} · ${plan.maxTokens} tok · defer=${plan.shouldDefer}\n` +
+      `Route · ${route.name} (${Math.round(route.confidence * 100)}%)`;
   },
 
   adapt: (hw, plan) =>
-    `Hardware-aware plan on ${hw.platform}: ${plan.device} · ${plan.dtype} · ${plan.mode} · ${plan.maxTokens} tok.\n` +
-    `${(plan.reasons ?? []).join('\n')}`,
+    `Hardware-aware plan on ${hw.platform}:\n` +
+    `${plan.device} · ${plan.dtype} · ${plan.mode} · ${plan.maxTokens} tok\n` +
+    `${(plan.reasons ?? []).map((r) => `· ${r}`).join('\n')}`,
 
   situation: () =>
-    `TouchAI is Hardware-aware AI. Not how smart the model is — how well it understands where it is. ` +
-    `I am the Situated Agent: the intelligence that manages assistants with context no cloud model can acquire.`,
+    `TouchAI is Hardware-aware AI. Not how smart the model is — how well it understands where it is.\n` +
+    `I'm the Situated Agent MVP: I give models a home on this host and route work with depth the cloud can't see.`,
 
-  identity: (hw, model, plan) =>
-    `I'm TouchAI Device — the Situated Agent on ${hw.platform}. ` +
-    `${model.name} via ${plan?.device}/${plan?.dtype}. I manage assistants using live hardware situation.`,
+  identity: (hw, model, plan, route) =>
+    `I'm TouchAI's Situated Agent on ${hw.platform}.\n` +
+    `${model.name} via ${plan.device}/${plan.dtype}. Default assistant: ${route.name}.\n` +
+    `I manage Local, Cloud, and Coding assistants using live hardware situation.`,
 
-  default: (hw, model, plan) =>
-    `Situated Agent · ${hw.platform} · ${plan?.device}/${plan?.dtype} · ${model.name}. ` +
-    `Thermal ${hw.awareness.thermal.state} · Power ${hw.awareness.power.level}. Ask me to route a task or read the situation.`,
+  default: (hw, model, plan, route) =>
+    `Situated Agent · ${hw.platform} · ${plan.device}/${plan.dtype} · ${model.name}.\n` +
+    `Default route: ${route.name}. Thermal ${hw.awareness.thermal.state} · Power ${hw.awareness.power.level}.\n` +
+    `Try: “route a heavy job”, “can we run locally?”, or “what is my hardware situation?”`,
 };
 
 async function agentReply(query, hw, model, plan) {
+  const route = recommendAssistant(hw, plan, query);
   const q = query.toLowerCase();
-  if (/^(hi|hello|hey|greetings)/.test(q)) return AGENT.greeting(hw, plan);
-  if (/route|which assistant|heavy job|should handle|prefer|can we run locally|local(ly)?/.test(q)) {
-    return AGENT.route(hw, plan);
+  if (/^(hi|hello|hey|greetings)/.test(q)) return AGENT.greeting(hw, plan, route);
+  if (/route|which assistant|heavy job|should handle|prefer|can we run locally|local(ly)?|next task/.test(q)) {
+    return AGENT.route(hw, plan, route);
   }
   if (/adapt|execution|backend|dtype|webgpu|wasm|plan/.test(q)) return AGENT.adapt(hw, plan);
-  if (/hardware|situation|spec|cpu|gpu|ram|npu|layer|machine|what.*running|awareness/.test(q)) {
-    return AGENT.hardware(hw, plan);
+  if (/hardware|situation|spec|cpu|gpu|ram|npu|layer|machine|what.*running|awareness|host/.test(q)) {
+    return AGENT.hardware(hw, plan, route);
   }
-  if (/situat|commodity|market|deploy|position|capability|hardware-aware|hardware aware|touchai/.test(q)) {
+  if (/situat|commodity|market|deploy|position|capability|hardware-aware|hardware aware|touchai|depth|homeless|home/.test(q)) {
     return AGENT.situation();
   }
-  if (/what are you|who are you|vision|why|agent/.test(q)) return AGENT.identity(hw, model, plan);
+  if (/what are you|who are you|vision|why|agent|mvp|prototype/.test(q)) {
+    return AGENT.identity(hw, model, plan, route);
+  }
   if (/attest|integrity|trust|signature/.test(q)) {
     const proof = await attestIntegrity(hw);
     return `Hardware-rooted proof:\nDevice: ${proof.deviceId}\nSig: ${proof.signature}`;
   }
-  return AGENT.default(hw, model, plan);
+  return AGENT.default(hw, model, plan, route);
 }
 
 function pipelineKey(modelId, device, dtype) {
@@ -240,6 +249,7 @@ export async function generate(query, hardware, modelId, history = [], ctx = {})
     network: getNetworkStats(),
     engine: pipeline ? `touchai-hwa+${runtimeDevice ?? plan.device}` : 'touchai-hwa+rules',
     plan,
+    route: recommendAssistant(hardware, plan, query),
     ctx,
   };
 }

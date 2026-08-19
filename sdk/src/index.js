@@ -36,6 +36,7 @@ export {
   getMachineMemory,
   situatedSummary,
 } from './device-profile.js';
+export { recommendAssistant, formatRouteDecision } from './route.js';
 export { MemoryStore } from './memory.js';
 export { getAwarenessHistory, recordQuery } from './awareness.js';
 
@@ -43,6 +44,7 @@ import { scanHardware } from './hardware.js';
 import { adaptExecution, detectCapabilities, canRunLocally } from './adapt.js';
 import { attestIntegrity } from './attest.js';
 import { generate } from './inference.js';
+import { recommendAssistant } from './route.js';
 import { SDK_VERSION } from './layers.js';
 
 /** Bound Hardware-Aware AI client for one machine session */
@@ -57,10 +59,13 @@ export async function createTouchAI(options = {}) {
     hardware: hw,
     capabilities,
     plan,
+    route: recommendAssistant(hw, plan),
     canRun: canRunLocally(hw, plan),
     scanHardware: (force) => scanHardware(force),
     detectCapabilities,
     adaptExecution: async (modelId) => adaptExecution(modelId ?? hw.recommendedModel, hw),
+    recommendAssistant: (query, modelId) =>
+      adaptExecution(modelId ?? hw.recommendedModel, hw).then((p) => recommendAssistant(hw, p, query)),
     attestIntegrity: () => attestIntegrity(hw),
     runInference: (query, modelId, history = [], ctx = {}) =>
       generate(query, hw, modelId ?? plan.modelId ?? hw.recommendedModel, history, ctx),

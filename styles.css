@@ -1511,6 +1511,114 @@ body {
   line-height: 1.4;
 }
 
+.route-panel { margin-top: 4px; }
+
+.route-card {
+  margin-top: 8px;
+  padding: 12px;
+  border: 1px solid rgba(11, 143, 140, 0.28);
+  border-radius: 12px;
+  background: rgba(11, 143, 140, 0.08);
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+
+.route-pick {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+  color: var(--ink);
+}
+
+.route-pick strong {
+  font-size: 0.95rem;
+  letter-spacing: -0.02em;
+}
+
+.route-pick span {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--accent-deep);
+}
+
+.route-path {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  margin-bottom: 8px;
+}
+
+.route-reasons {
+  list-style: none;
+  display: grid;
+  gap: 4px;
+}
+
+.route-reasons li {
+  position: relative;
+  padding-left: 12px;
+  line-height: 1.35;
+}
+
+.route-reasons li::before {
+  content: '·';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+}
+
+.welcome-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.welcome-act {
+  font-size: 0.75rem !important;
+  padding: 8px 12px !important;
+}
+
+.msg-decision {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(11, 143, 140, 0.25);
+  background: rgba(11, 143, 140, 0.08);
+  font-size: 0.75rem;
+}
+
+.msg-decision-label {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent-deep);
+}
+
+.msg-decision strong { color: var(--ink); }
+
+.engine-line {
+  margin-top: 8px;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--muted);
+}
+
+.msg-bubble { white-space: pre-wrap; }
+
+.hardware-panel .panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
 @media (max-width: 1100px) {
   .playground,
   .compare-row { grid-template-columns: 1fr; }

@@ -1,50 +1,49 @@
 # TouchAI
 
-**The touch layer for AI agents.** Hands, not brain.
+**Hardware-aware AI.** Situational intelligence — not smarter models.
 
-An API/SDK for real-world AI agents to take actions — click buttons, fill forms, call APIs, control devices.
-
-> Stripe for AI actions. The point of contact between an agent and the real world.
+TouchAI gives every AI model deep knowledge of the hardware it runs on.
 
 **Live:** https://touchai-kohl.vercel.app
 
-## Why
+## The problem
 
-Most AI is read-only (chat, generate). The frontier is agents that **act**. TouchAI is the interaction layer any LLM plugs into to safely touch web, desktop, IoT, and robotics APIs.
+Every AI company positions around capability. That race ends in commodity.
 
-## Product
+TouchAI positions on a different axis: **situational intelligence** — not how smart the AI is, but how well it understands where it is.
 
-| Layer | Role |
-|-------|------|
-| Your LLM / agent | Brain — plans |
-| **TouchAI** | Hands — permissions, actions, adapters, audit |
-| Real systems | World — UI, APIs, devices |
+## The market
 
-## SDK
+As foundation models commoditize, value shifts to the layer around them — **deployment**. TouchAI sits there.
+
+## Products
+
+### TouchAI SDK
+Developer product. Integrate hardware awareness into applications.
+
+```bash
+npm install ./sdk
+```
+
+```js
+import { createTouchAI } from 'touchai-sdk'
+const touch = await createTouchAI()
+// touch.hardware — situation
+// touch.plan — adapted device/dtype
+```
+
+### TouchAI Device — The Situated Agent
+Consumer/prosumer product. An agent that lives on your machine, learns it over time, and **manages all assistants** with context no cloud model can acquire.
+
+## Site
+
+| Route | Product |
+|-------|---------|
+| `#home` | Thesis + roadmap |
+| `#sdk` | SDK + adaptation playground |
+| `#device` | Situated Agent |
 
 ```bash
 npm install
 npm run dev
-# SDK package: ./sdk → touchai-sdk
 ```
-
-```js
-import { createTouch, createWebAdapter } from 'touchai-sdk'
-
-const touch = createTouch({
-  allow: ['web.click', 'web.type', 'web.read', 'http.request'],
-  requireConfirm: ['http.request'],
-  adapters: { web: createWebAdapter('#world') },
-})
-
-const tools = touch.tools('openai') // plug into any model
-await touch.act({ name: 'web.click', args: { selector: '#pay' } })
-```
-
-See [`sdk/README.md`](./sdk/README.md).
-
-## Site
-
-- Thesis + product stack
-- Action catalog
-- Playground: sandboxed UI an agent can touch via the same SDK

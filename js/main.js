@@ -1,139 +1,106 @@
-import { createTouch, createWebAdapter, ACTIONS } from 'touchai-sdk';
+import { runBootSequence } from './boot.js';
+import { renderHomeView } from './vision.js';
+import { renderSdkView } from './sdk.js';
+import { initDemo, mountDemoPanel, preloadDemoModel, getDemoStatus } from './demo.js';
+import { initRipples } from './ripple.js';
+import { initCursor } from './cursor.js';
+import { focusLine, getViewLabel } from './focus.js';
+import { adaptExecution } from 'touchai-sdk';
 
-const world = document.getElementById('world');
-const statusEl = document.getElementById('worldStatus');
-const auditLog = document.getElementById('auditLog');
-const planList = document.getElementById('planList');
-const catalog = document.getElementById('actionCatalog');
-const qty = document.getElementById('qty');
-const total = document.getElementById('total');
+let hardware = null;
+let deviceMounted = false;
 
-const DEMO_PLAN = [
-  { name: 'web.read', args: { selector: '#total' }, label: 'Observe total' },
-  { name: 'web.type', args: { selector: '#email', text: 'agent@touch.ai', clear: true }, label: 'Fill email' },
-  { name: 'web.type', args: { selector: '#qty', text: '2', clear: true }, label: 'Set quantity' },
-  { name: 'web.click', args: { selector: '#pay' }, label: 'Click Pay now' },
-];
+const views = {
+  home: () => document.getElementById('viewHome'),
+  sdk: () => document.getElementById('viewSdk'),
+  device: () => document.getElementById('viewDevice'),
+};
 
-function flash(selector) {
-  const el = world.querySelector(selector);
-  if (!el) return;
-  el.classList.remove('touched');
-  void el.offsetWidth;
-  el.classList.add('touched');
-  setTimeout(() => el.classList.remove('touched'), 700);
+const VALID = ['home', 'sdk', 'device'];
+
+function updateHash(view) {
+  if (location.hash !== `#${view}`) location.hash = view;
 }
 
-qty?.addEventListener('input', () => {
-  const n = Math.max(1, Number(qty.value) || 1);
-  total.textContent = `$${n * 48}`;
-});
-
-document.getElementById('pay')?.addEventListener('click', () => {
-  statusEl.textContent = `Paid ${total.textContent} · order simulated`;
-  statusEl.classList.add('ok');
-});
-
-document.getElementById('save')?.addEventListener('click', () => {
-  statusEl.textContent = 'Cart saved';
-  statusEl.classList.add('ok');
-});
-
-world?.addEventListener('touchai:navigate', (e) => {
-  statusEl.textContent = `Navigated → ${e.detail.url}`;
-});
-
-const touch = createTouch({
-  allow: ['web.click', 'web.type', 'web.read', 'web.navigate', 'web.submit', 'http.request', 'device.command'],
-  requireConfirm: [],
-  adapters: {
-    web: createWebAdapter(world),
-  },
-  onAudit: renderAudit,
-});
-
-function renderCatalog() {
-  if (!catalog) return;
-  catalog.innerHTML = Object.entries(ACTIONS).map(([name, meta]) => `
-    <div class="action-chip">
-      <code>${name}</code>
-      <p>${meta.description}</p>
-    </div>
-  `).join('');
+function parseHash() {
+  const raw = location.hash.slice(1).split('/')[0];
+  const aliases = {
+    vision: 'home', why: 'home', use: 'device', live: 'device',
+  };
+  const view = aliases[raw] ?? raw;
+  if (VALID.includes(view)) return { view };
+  return { view: 'home' };
 }
 
-function renderPlan(states = {}) {
-  planList.innerHTML = DEMO_PLAN.map((step, i) => `
-    <div class="plan-step ${states[i] ?? ''}" data-step="${i}">
-      <span class="n">${i + 1}</span>
-      <div>
-        <div>${step.label}</div>
-        <code>${step.name}(${JSON.stringify(step.args)})</code>
-      </div>
-    </div>
-  `).join('');
-}
-
-function renderAudit() {
-  const entries = touch.history();
-  auditLog.innerHTML = entries.length
-    ? entries.map((e) => `
-        <li class="${e.status}">
-          ${e.status.toUpperCase()} · ${e.name}
-          ${e.error ? ` · ${e.error}` : ''}
-          ${e.result ? ` · ${escapeJson(e.result)}` : ''}
-        </li>
-      `).join('')
-    : '<li>No actions yet</li>';
-}
-
-function escapeJson(v) {
-  try {
-    return JSON.stringify(v).slice(0, 80);
-  } catch {
-    return '';
+async function updateStatusStrip(view, hw) {
+  const label = document.getElementById('statusStripLabel');
+  const detail = document.getElementById('statusStripDetail');
+  const badge = document.getElementById('runtimeBadge');
+  if (label) label.textContent = getViewLabel(view);
+  if (detail) detail.textContent = focusLine(hw);
+  if (badge && hw) {
+    const plan = await adaptExecution(hw.recommendedModel, hw);
+    badge.textContent = `${plan.device} · ${plan.dtype}`;
+    const deviceBadge = document.getElementById('deviceBadge');
+    if (deviceBadge) deviceBadge.textContent = plan.device;
   }
 }
 
-async function runDemo() {
-  const btn = document.getElementById('runDemo');
-  btn.disabled = true;
-  statusEl.textContent = 'Agent plan running via TouchAI…';
-  statusEl.classList.remove('ok');
-  touch.clearHistory();
-  renderAudit();
+export function navigate(view) {
+  if (!VALID.includes(view)) view = 'home';
 
-  const states = {};
-  for (let i = 0; i < DEMO_PLAN.length; i++) {
-    states[i] = 'running';
-    renderPlan(states);
-    const step = DEMO_PLAN[i];
-    if (step.args.selector) flash(step.args.selector);
-    const entry = await touch.act(step);
-    states[i] = entry.status === 'ok' ? 'ok' : 'error';
-    renderPlan(states);
-    renderAudit();
-    await wait(450);
-    if (step.name === 'web.type' && step.args.selector === '#qty') {
-      total.textContent = `$${(Number(qty.value) || 1) * 48}`;
+  document.querySelectorAll('.nav-link').forEach((l) => {
+    l.classList.toggle('active', l.dataset.view === view);
+  });
+
+  VALID.forEach((id) => {
+    const el = views[id]();
+    if (el) el.classList.toggle('hidden', id !== view);
+  });
+
+  if (view === 'home' && hardware) renderHomeView(views.home(), hardware);
+  if (view === 'sdk' && hardware) renderSdkView(views.sdk(), hardware);
+  if (view === 'device') {
+    const root = document.getElementById('demoRoot');
+    if (!deviceMounted && root) {
+      mountDemoPanel(root);
+      deviceMounted = true;
     }
   }
 
-  statusEl.textContent = 'Plan complete — every touch audited';
-  statusEl.classList.add('ok');
-  btn.disabled = false;
+  updateStatusStrip(view, hardware);
+  updateHash(view);
 }
 
-function wait(ms) {
-  return new Promise((r) => setTimeout(r, ms));
+async function initApp(hw) {
+  hardware = hw;
+  initDemo(hw);
+
+  initCursor(document.getElementById('cursor'));
+  initRipples(document.getElementById('rippleLayer'));
+
+  const sit = document.getElementById('navSituation');
+  if (sit && hw) {
+    const plan = await adaptExecution(hw.recommendedModel, hw);
+    sit.textContent = `${hw.platform} · ${plan.device}`;
+  }
+  document.getElementById('statusText').textContent = getDemoStatus(hw);
+
+  document.querySelectorAll('.nav-link').forEach((link) => {
+    link.addEventListener('click', () => navigate(link.dataset.view));
+  });
+  document.querySelectorAll('[data-nav]').forEach((btn) => {
+    btn.addEventListener('click', () => navigate(btn.dataset.nav));
+  });
+  document.addEventListener('touchai:nav', (e) => navigate(e.detail.view));
+  window.addEventListener('hashchange', () => navigate(parseHash().view));
+
+  preloadDemoModel((msg) => {
+    const el = document.getElementById('statusText');
+    if (el) el.textContent = msg;
+  });
+
+  navigate(parseHash().view);
 }
 
-document.getElementById('runDemo')?.addEventListener('click', runDemo);
-document.getElementById('clearAudit')?.addEventListener('click', () => {
-  touch.clearHistory();
-  renderAudit();
-});
-
-renderCatalog();
-renderPlan();
-renderAudit();
+runBootSequence(initApp);

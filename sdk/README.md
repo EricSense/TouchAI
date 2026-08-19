@@ -1,69 +1,55 @@
 # touchai-sdk
 
-**The touch layer for AI agents.** Hands, not brain.
+**Hardware-Aware AI for developers.** Situational intelligence — not smarter models.
 
-Any LLM plugs into TouchAI to safely act on real systems — web, APIs, devices.
-
-> Stripe for AI actions. The point of contact between an agent and the real world.
+Gives every AI model deep knowledge of the hardware it runs on.
 
 ## Install
 
 ```bash
+# from a clone of https://github.com/EricSense/TouchAI
 npm install ./sdk
-# from a clone of github.com/EricSense/TouchAI
-```
 
-## Quick start
+# in your app (after copying or linking the sdk folder)
+npm install ./touchai-sdk
+npm install @huggingface/transformers   # optional — local generation
+```
 
 ```js
-import { createTouch, createWebAdapter } from 'touchai-sdk'
+import { createTouchAI } from 'touchai-sdk'
 
-const touch = createTouch({
-  allow: ['web.click', 'web.type', 'web.read', 'web.navigate', 'http.request'],
-  requireConfirm: ['http.request'],
-  onConfirm: async ({ name, args }) => {
-    // gate dangerous actions
-    return confirm(`Allow ${name}?`)
-  },
-  adapters: {
-    web: createWebAdapter('#sandbox'), // DOM root the agent may touch
-  },
-})
+const touch = await createTouchAI()
 
-// Give these tools to your model (OpenAI shape)
-const tools = touch.tools('openai')
+// Probed capabilities + adapted plan for THIS machine
+console.log(touch.capabilities.webgpu, touch.plan.device, touch.plan.dtype)
 
-// When the model calls a tool:
-const result = await touch.act({
-  name: 'web.click',
-  args: { selector: '#pay' },
-})
-
-console.log(result.status, result.result)
-console.log(touch.history())
+const { response, plan, engine } = await touch.runInference(
+  'What hardware am I on?',
+)
 ```
 
-## What TouchAI is
+## What the runtime actually does
 
-| | |
-|--|--|
-| **Brain** | Your LLM / agent planner |
-| **Hands** | TouchAI — `act()`, permissions, adapters, audit |
-| **World** | Web UI, HTTP APIs, IoT / robotics bridges, desktop |
+1. **`scanHardware()`** — 8-layer situation (silicon → user) via browser APIs  
+2. **`detectCapabilities()`** — probes WebGPU / WASM / WebNN  
+3. **`adaptExecution()`** — picks `device`, `dtype`, token budget, deferral from situation  
+4. **`runInference()`** — loads the model on that device path (WebGPU → WASM fallback) and generates  
 
-## Actions
+`plan.device` is not a label — `loadModel` passes it to Transformers.js.
 
-- `web.click` · `web.type` · `web.navigate` · `web.submit` · `web.read`
-- `http.request`
-- `device.command` (dry-run until you inject a device bridge)
-- `desktop.key` (requires desktop bridge)
+## API
 
-## Safety
+| Call | Purpose |
+|------|---------|
+| `createTouchAI()` | Bound Hardware-Aware AI client |
+| `scanHardware()` | 8-layer profile |
+| `detectCapabilities()` | Real WebGPU/WASM probe |
+| `adaptExecution(modelId, hw)` | Device + dtype + tokens |
+| `runInference(...)` | Adapted generation |
+| `attestIntegrity(hw)` | Hardware-rooted proof |
+| `canRunLocally(hw, plan)` | Whether local path is viable |
+| `MemoryStore` | Persistent machine memory |
 
-- `allow` — only listed actions run
-- `requireConfirm` + `onConfirm` — human / policy gate
-- `history()` — audit trail of every touch
+## Try the product
 
-## Philosophy
-
-Most AI is read-only. The frontier is agents that **act**. TouchAI is the interaction layer at the point of contact — so any model can touch the real world without becoming the world.
+Open [touchai-kohl.vercel.app](https://touchai-kohl.vercel.app) → **Use**.

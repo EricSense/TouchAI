@@ -1,9 +1,11 @@
 {
   "name": "touchai",
-  "version": "3.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
-  "workspaces": ["sdk"],
+  "workspaces": [
+    "sdk"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -14,7 +16,8 @@
     "node": ">=20"
   },
   "dependencies": {
-    "touchai-sdk": "0.3.0"
+    "@huggingface/transformers": "^3.4.0",
+    "touchai-sdk": "0.2.0"
   },
   "devDependencies": {
     "vite": "^6.3.5"

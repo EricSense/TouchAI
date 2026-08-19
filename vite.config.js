@@ -12,4 +12,7 @@ export default defineConfig({
       'touchai-sdk': path.resolve(root, 'sdk/src/index.js'),
     },
   },
+  optimizeDeps: {
+    exclude: ['@huggingface/transformers'],
+  },
 });

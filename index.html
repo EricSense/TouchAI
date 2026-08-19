@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="TouchAI — the touch layer for AI agents. Hands, not brain. Stripe for AI actions." />
-  <meta property="og:title" content="TouchAI — the touch layer for AI agents" />
-  <meta property="og:description" content="An API/SDK for real-world AI agents to take actions. Any model. Any interface." />
+  <meta name="description" content="TouchAI — Touch-Aware AI. Awareness of contact: force, motion, place, meaning." />
+  <meta property="og:title" content="TouchAI — Touch-Aware AI" />
+  <meta property="og:description" content="Touch-Aware AI for TouchAI. Contact enters awareness — force, motion, place." />
   <meta property="og:type" content="website" />
-  <meta name="theme-color" content="#0A0B0D" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='10' fill='none' stroke='%23FF5A36' stroke-width='2'/><circle cx='16' cy='16' r='3' fill='%23FF5A36'/></svg>" />
-  <title>TouchAI — the touch layer for AI agents</title>
+  <meta name="theme-color" content="#080A0E" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='6' y='6' width='20' height='20' rx='6' fill='none' stroke='%233D7EFF' stroke-width='2'/><circle cx='16' cy='16' r='3' fill='%233D7EFF'/></svg>" />
+  <title>TouchAI — Touch-Aware AI</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
@@ -20,122 +20,99 @@
 
   <header class="top">
     <a class="brand" href="#top">
-      <span class="brand-mark" aria-hidden="true"></span>
-      <span class="brand-name">TouchAI</span>
+      <span class="mark" aria-hidden="true"></span>
+      TouchAI
     </a>
     <nav class="nav">
-      <a href="#product">Product</a>
-      <a href="#sdk">SDK</a>
-      <a href="#playground">Playground</a>
+      <a href="#aware">Aware</a>
+      <a href="#model">Model</a>
+      <a href="#api">API</a>
     </nav>
-    <a class="top-cta" href="#playground">Try actions</a>
   </header>
 
   <main id="top">
-    <section class="hero">
-      <p class="brand-hero">TouchAI</p>
-      <h1>The touch layer for AI agents.</h1>
-      <p class="hero-sub">An API/SDK so real-world agents can act — click, type, call APIs, control devices. Hands, not brain.</p>
-      <div class="hero-actions">
-        <a class="btn btn-primary" href="#playground">Open playground</a>
-        <a class="btn btn-ghost" href="#sdk">Get the SDK</a>
+    <section class="hero" id="aware">
+      <div
+        class="field"
+        id="field"
+        role="application"
+        tabindex="0"
+        aria-label="TouchAI awareness field. Press and move to enter touch awareness."
+      >
+        <canvas id="trails" class="trails" aria-hidden="true"></canvas>
+        <div class="hero-copy">
+          <p class="brand-hero">TouchAI</p>
+          <h1>Touch-Aware AI.</h1>
+          <p class="hero-sub">Contact enters awareness — force, motion, place.</p>
+        </div>
       </div>
-      <p class="hero-aside">Stripe for AI actions · any model · any interface</p>
-    </section>
 
-    <section class="section" id="problem">
-      <p class="eyebrow">The problem</p>
-      <h2>Most AI is read-only.</h2>
-      <p class="lede">Chat. Generate text. Generate images. The frontier is agents that <em>act</em> — click buttons, fill forms, call APIs, control devices.</p>
-    </section>
+      <aside class="panel">
+        <p class="eyebrow">Awareness</p>
+        <p class="status" id="status">TouchAI</p>
+        <p class="detail" id="detail">Touch-Aware AI. Make contact — force, motion, and place enter awareness.</p>
 
-    <section class="section" id="product">
-      <p class="eyebrow">Product</p>
-      <h2>Intelligence at the point of contact.</h2>
-      <p class="lede">TouchAI sits between an agent and the real world — the interaction layer any LLM plugs into to safely touch web, desktop, IoT, and robotics APIs.</p>
-      <div class="stack">
-        <div class="stack-row muted">Agent / LLM — the brain</div>
-        <div class="stack-row accent">TouchAI — permissions · actions · adapters · audit</div>
-        <div class="stack-row muted">World — web · HTTP · devices · desktop</div>
-      </div>
-    </section>
-
-    <section class="section" id="sdk">
-      <p class="eyebrow">SDK</p>
-      <h2>Give any model hands.</h2>
-      <pre class="code"><code>npm install ./sdk
-
-import { createTouch, createWebAdapter } from 'touchai-sdk'
-
-const touch = createTouch({
-  allow: ['web.click', 'web.type', 'web.read', 'http.request'],
-  requireConfirm: ['http.request'],
-  adapters: { web: createWebAdapter('#world') },
-})
-
-// Tool schemas for your LLM
-const tools = touch.tools('openai')
-
-// When the model decides to act:
-await touch.act({ name: 'web.click', args: { selector: '#pay' } })</code></pre>
-      <div class="action-grid" id="actionCatalog"></div>
-    </section>
-
-    <section class="section playground-section" id="playground">
-      <p class="eyebrow">Playground</p>
-      <h2>Watch an agent touch a real UI.</h2>
-      <p class="lede">A sandboxed checkout. Run TouchAI actions against it — the same API your agent would call.</p>
-
-      <div class="playground">
-        <div class="world-shell">
-          <div class="world-chrome">
-            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-            <span class="world-url" data-route-label="/cart">/cart</span>
+        <div class="meters" aria-hidden="true">
+          <div class="meter">
+            <span>Force</span>
+            <div class="track"><i id="meterForce"></i></div>
           </div>
-          <div id="world" class="world" data-route="/cart">
-            <h3 class="world-title">Northwind Store</h3>
-            <p class="world-sub">Sandbox UI for agent actions</p>
-            <label class="field">
-              <span>Email</span>
-              <input id="email" type="email" placeholder="you@company.com" />
-            </label>
-            <label class="field">
-              <span>Qty</span>
-              <input id="qty" type="number" value="1" min="1" />
-            </label>
-            <p class="world-total">Total · <strong id="total">$48</strong></p>
-            <div class="world-actions">
-              <button type="button" id="pay" class="world-btn primary">Pay now</button>
-              <button type="button" id="save" class="world-btn">Save cart</button>
-            </div>
-            <p id="worldStatus" class="world-status">Waiting for TouchAI…</p>
-            <form id="checkoutForm" class="hidden-form"></form>
+          <div class="meter">
+            <span>Motion</span>
+            <div class="track"><i id="meterMotion"></i></div>
+          </div>
+          <div class="meter zone">
+            <span>Zone</span>
+            <strong id="meterZone">—</strong>
           </div>
         </div>
 
-        <div class="console">
-          <div class="console-head">
-            <span>Agent → TouchAI</span>
-            <button type="button" id="runDemo" class="btn btn-primary btn-small">Run demo plan</button>
-          </div>
-          <div class="plan" id="planList"></div>
-          <div class="audit">
-            <div class="console-head"><span>Audit log</span><button type="button" id="clearAudit" class="text-btn">Clear</button></div>
-            <ul id="auditLog" class="audit-log"></ul>
-          </div>
+        <form class="ask" id="askForm">
+          <label class="sr" for="askInput">Ask TouchAI</label>
+          <input id="askInput" type="text" placeholder="Ask the aware state…" autocomplete="off" />
+          <button class="btn" type="submit">Ask</button>
+        </form>
+
+        <div class="log-wrap">
+          <p class="log-label">Memory</p>
+          <ul id="awareLog" class="log"></ul>
         </div>
-      </div>
+      </aside>
+    </section>
+
+    <section class="section" id="model">
+      <p class="eyebrow">Model</p>
+      <h2>Touch-Aware AI for TouchAI.</h2>
+      <p class="lede">TouchAI is not a chatbot with a theme. It is Touch-Aware AI — built so contact itself is a first-class signal: how hard, how fast, where, and what that means next.</p>
+      <ul class="pillars">
+        <li><strong>Aware</strong><span>Live contact updates force, motion, and zone.</span></li>
+        <li><strong>Remember</strong><span>Each contact writes to touch memory.</span></li>
+        <li><strong>Answer</strong><span>Language stays grounded in what was felt.</span></li>
+      </ul>
+    </section>
+
+    <section class="section" id="api">
+      <p class="eyebrow">API</p>
+      <h2>Run Touch-Aware AI.</h2>
+      <pre class="code"><code>import { createTouchAI } from './src/touchai.js'
+
+const ai = createTouchAI() // Touch-Aware AI
+
+ai.sense('start', { x, y, nx, ny, pressure })
+ai.sense('move',  { x, y, nx, ny, pressure })
+const aware = ai.sense('end')
+// aware.headline · aware.detail · aware.force · aware.zone
+
+ai.ask('What did you last feel?')</code></pre>
     </section>
   </main>
 
   <footer class="foot">
     <span>TouchAI</span>
     <span class="sep">·</span>
-    <span>The touch layer for AI agents</span>
-    <span class="sep">·</span>
-    <span>Hands, not brain</span>
+    <span>Touch-Aware AI</span>
   </footer>
 
-  <script type="module" src="/js/main.js"></script>
+  <script type="module" src="/src/main.js"></script>
 </body>
 </html>

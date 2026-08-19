@@ -2,92 +2,71 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="TouchAI — Hardware-aware AI. Situational intelligence: deep knowledge of the hardware every model runs on." />
-  <meta property="og:title" content="TouchAI — Hardware-aware AI" />
-  <meta property="og:description" content="Not how smart is the AI — how well does it understand where it is. SDK + Situated Agent." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="TouchAI — building for AI to touch." />
+  <meta property="og:title" content="TouchAI" />
+  <meta property="og:description" content="Building for AI to touch." />
   <meta property="og:type" content="website" />
-  <meta name="twitter:card" content="summary" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='none' stroke='%230B8F8C' stroke-width='2'/><circle cx='16' cy='16' r='4' fill='%230B8F8C'/></svg>" />
-  <title>TouchAI — Hardware-aware AI</title>
+  <meta name="theme-color" content="#0A0B0D" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='10' fill='none' stroke='%23FF5A36' stroke-width='2'/><circle cx='16' cy='16' r='3' fill='%23FF5A36'/></svg>" />
+  <title>TouchAI</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
-  <div id="boot" class="boot" aria-hidden="false">
-    <div class="boot-inner">
-      <div class="boot-logo"><span class="boot-ring"></span><span class="boot-dot"></span></div>
-      <div class="boot-title">TouchAI</div>
-      <div class="boot-sub">Hardware-aware AI</div>
-      <div id="bootLog" class="boot-log" role="log" aria-live="polite"></div>
-      <div class="boot-bar"><div id="bootProgress" class="boot-bar-fill"></div></div>
-    </div>
+  <div id="field" class="field" aria-label="TouchAI field">
+    <canvas id="canvas" class="field-canvas"></canvas>
+    <div id="ripples" class="ripple-layer" aria-hidden="true"></div>
+    <div id="replies" class="reply-layer" aria-hidden="true"></div>
   </div>
 
-  <div id="cursor" class="cursor" aria-hidden="true">
-    <div class="cursor-ring"></div>
-    <div class="cursor-dot"></div>
-  </div>
-  <div id="rippleLayer" class="ripple-layer" aria-hidden="true"></div>
-
-  <div id="app" class="app hidden">
-    <header class="site-header">
-      <button class="header-left interactive" data-nav="home" type="button" aria-label="TouchAI home">
-        <div class="logo-mark"><span class="logo-ring"></span><span class="logo-dot"></span></div>
-        <div>
-          <span class="logo-text">TouchAI</span>
-          <span class="logo-tagline">Hardware-aware AI</span>
-        </div>
-      </button>
-
-      <nav class="site-nav" aria-label="Main">
-        <button class="nav-link interactive active" data-view="home">Home</button>
-        <button class="nav-link interactive" data-view="sdk">SDK</button>
-        <button class="nav-link interactive" data-view="device">Device</button>
-      </nav>
-
-      <div class="header-right">
-        <span class="header-stat" id="navSituation">Situational intelligence</span>
-        <span class="runtime-badge" id="runtimeBadge">—</span>
-      </div>
-    </header>
-
-    <div class="status-strip" id="statusStrip">
-      <span class="status-strip-label" id="statusStripLabel">Home · Hardware-aware AI</span>
-      <span class="focus-sep">·</span>
-      <span id="statusStripDetail">deployment layer</span>
+  <header class="top">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-name">TouchAI</span>
     </div>
+    <p class="top-line">Building for AI to touch</p>
+  </header>
 
-    <div class="view-container">
-      <div id="viewHome" class="view"></div>
-      <div id="viewSdk" class="view hidden"></div>
-      <div id="viewDevice" class="view hidden">
-        <header class="demo-topbar">
-          <div class="demo-topbar-left">
-            <h1 id="demoTitle">Situated Agent</h1>
-            <span class="topbar-badge" id="modelBadge">Pulse</span>
-            <span class="topbar-badge device-badge" id="deviceBadge">local</span>
-          </div>
-          <div class="stats-bar">
-            <div class="stat"><span class="stat-label">Last</span><span class="stat-val" id="statLast">—</span></div>
-            <div class="stat"><span class="stat-label">Avg</span><span class="stat-val" id="statAvg">—</span></div>
-            <div class="stat"><span class="stat-label">Queries</span><span class="stat-val" id="statQueries">0</span></div>
-            <div class="stat"><span class="stat-label">Tokens</span><span class="stat-val" id="statTokens">0</span></div>
-          </div>
-        </header>
-        <div id="demoRoot" class="demo-root"></div>
+  <main class="hero">
+    <h1 class="hero-brand">TouchAI</h1>
+    <p class="hero-line">Building for AI to touch.</p>
+    <p class="hero-sub">Intelligence that meets the world at the point of contact.</p>
+    <p class="hero-cta" id="cta">Touch anywhere to begin</p>
+  </main>
+
+  <section class="below" id="about">
+    <div class="below-inner">
+      <p class="eyebrow">What we’re building</p>
+      <h2>AI that can touch.</h2>
+      <p class="lede">
+        Models live behind glass. TouchAI is the contact layer —
+        where intelligence presses into the physical world and the physical world presses back.
+      </p>
+      <div class="pillars">
+        <article>
+          <h3>Contact</h3>
+          <p>Every touch is a signal. TouchAI turns contact into understanding.</p>
+        </article>
+        <article>
+          <h3>Presence</h3>
+          <p>AI that doesn’t wait in a chat box — it arrives where your hand is.</p>
+        </article>
+        <article>
+          <h3>The world</h3>
+          <p>Building so AI can reach devices, surfaces, and bodies — not only screens of text.</p>
+        </article>
       </div>
     </div>
+  </section>
 
-    <footer class="site-footer">
-      <div class="status-dot online"></div>
-      <span id="statusText">Hardware-aware AI · starting</span>
-      <span class="footer-sep">·</span>
-      <span>SDK · Device · situational intelligence</span>
-    </footer>
-  </div>
+  <footer class="foot">
+    <span>TouchAI</span>
+    <span class="foot-sep">·</span>
+    <span>Building for AI to touch</span>
+  </footer>
 
   <script type="module" src="/js/main.js"></script>
 </body>

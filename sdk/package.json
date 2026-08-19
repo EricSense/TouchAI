@@ -1,13 +1,7 @@
 {
   "name": "touchai-sdk",
-  "version": "0.2.1",
-  "description": "Hardware-aware AI SDK — deep relationship between models and their host machines",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/EricSense/TouchAI.git",
-    "directory": "sdk"
-  },
-  "homepage": "https://touchai-kohl.vercel.app",
+  "version": "0.3.0",
+  "description": "TouchAI — hardware-aware AI. Scan, adapt, route, run on the host.",
   "type": "module",
   "main": "./src/index.js",
   "module": "./src/index.js",
@@ -15,28 +9,16 @@
     ".": "./src/index.js",
     "./package.json": "./package.json"
   },
-  "files": [
-    "src",
-    "README.md"
-  ],
-  "keywords": [
-    "ai",
-    "hardware-aware",
-    "situational-intelligence",
-    "on-device",
-    "inference",
-    "touchai"
-  ],
+  "files": ["src", "README.md"],
+  "keywords": ["touchai", "hardware-aware", "situational-intelligence", "ai"],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EricSense/TouchAI.git",
+    "directory": "sdk"
+  },
+  "homepage": "https://touchai-kohl.vercel.app",
   "engines": {
     "node": ">=20"
-  },
-  "peerDependencies": {
-    "@huggingface/transformers": "^3.4.0"
-  },
-  "peerDependenciesMeta": {
-    "@huggingface/transformers": {
-      "optional": true
-    }
   }
 }

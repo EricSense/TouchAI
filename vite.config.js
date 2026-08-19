@@ -5,14 +5,11 @@ import { fileURLToPath } from 'node:url';
 const root = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  server: { port: 5173, open: true },
+  server: { port: 5173 },
   build: { outDir: 'dist', target: 'esnext' },
   resolve: {
     alias: {
       'touchai-sdk': path.resolve(root, 'sdk/src/index.js'),
     },
-  },
-  optimizeDeps: {
-    exclude: ['@huggingface/transformers'],
   },
 });

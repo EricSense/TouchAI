@@ -2,45 +2,34 @@
 
 **Hardware-aware AI.**
 
-## What TouchAI does
+## What it does
 
-TouchAI makes AI hardware-aware. It creates a deep relationship between AI models and their physical host machines — so a model knows where it is, what the machine can do right now, and how to run on it.
+TouchAI makes AI know where it is. It creates a deep relationship between AI models and their physical host machines.
 
-- Knows the host (silicon, thermal, power, memory, sensors, history, usage)
-- Adapts execution (device path, dtype, budget)
-- Routes work (Local / Cloud / Coding from live situation)
-- Compounds depth (machine memory over time)
+Models today are homeless. TouchAI gives them a home on the machine.
 
-Capability races end in commodity. TouchAI positions on **situational intelligence** — not how smart the AI is, but how well it understands where it is. Models today are homeless; TouchAI gives AI a home. The cloud solved scale; TouchAI solves depth.
-
-## How TouchAI works
+## How it works
 
 ```
 Scan → Adapt → Route → Run → Remember
 ```
 
-| Step | Meaning |
-|------|---------|
-| **Scan** | Read 8 layers of host situation |
-| **Adapt** | Plan device / dtype / tokens for this machine |
-| **Route** | Pick Local, Cloud, or Coding assistant |
-| **Run** | Execute with that plan |
-| **Remember** | Store machine memory for depth |
+1. **Scan** — read the host (8 layers)  
+2. **Adapt** — device, dtype, budget for this machine  
+3. **Route** — Local / Cloud / Coding  
+4. **Run** — execute with that plan  
+5. **Remember** — machine memory for depth  
 
-## Prototype & SDK
+## Live
 
-**Live:** [touchai-kohl.vercel.app](https://touchai-kohl.vercel.app)
-
-| Route | Purpose |
-|-------|---------|
-| `#home` | What & How |
-| `#try` | Situated Agent on this host |
-| `#sdk` | Developer SDK |
+[touchai-kohl.vercel.app](https://touchai-kohl.vercel.app)
 
 ```bash
 npm install
 npm run dev
 ```
+
+## SDK
 
 ```bash
 npm install ./sdk
@@ -50,8 +39,5 @@ npm install ./sdk
 import { createTouchAI } from 'touchai-sdk'
 
 const touch = await createTouchAI()
-// touch.hardware  — scan
-// touch.plan      — adapt
-// touch.route     — route
-await touch.runInference('Can we run locally?')
+await touch.runInference('What is my hardware situation?')
 ```

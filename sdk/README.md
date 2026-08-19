@@ -1,10 +1,10 @@
 # touchai-sdk
 
-Hardware-aware AI for developers.
+TouchAI — hardware-aware AI for developers.
 
 ## What it does
 
-Gives every AI model deep knowledge of the host it runs on.
+Gives AI models deep knowledge of the physical host they run on.
 
 ## How it works
 
@@ -16,26 +16,12 @@ Scan → Adapt → Route → Run → Remember
 import { createTouchAI } from 'touchai-sdk'
 
 const touch = await createTouchAI()
-// touch.hardware — Scan
-// touch.plan     — Adapt
-// touch.route    — Route
-const { response, plan, route } = await touch.runInference('Can we run locally?')
+console.log(touch.hardware) // Scan
+console.log(touch.plan)     // Adapt
+console.log(touch.route)    // Route
+await touch.runInference('Can we run locally?')
 ```
-
-## Install
 
 ```bash
 npm install ./sdk
 ```
-
-## API
-
-| Call | Step |
-|------|------|
-| `scanHardware()` | Scan |
-| `adaptExecution()` | Adapt |
-| `recommendAssistant()` | Route |
-| `runInference()` | Run |
-| `MemoryStore` / device profile | Remember |
-
-Product: [touchai-kohl.vercel.app](https://touchai-kohl.vercel.app)

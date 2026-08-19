@@ -1,6 +1,6 @@
 {
   "name": "touchai-sdk",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Hardware-aware AI SDK — deep relationship between models and their host machines",
   "repository": {
     "type": "git",

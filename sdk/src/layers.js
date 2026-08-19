@@ -10,4 +10,4 @@ export const HARDWARE_LAYERS = [
   { layer: 'User', knows: 'Workload rhythms, usage patterns, behavioral signatures' },
 ];
 
-export const SDK_VERSION = '0.2.0';
+export const SDK_VERSION = '0.2.1';

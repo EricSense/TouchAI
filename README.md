@@ -1,50 +1,35 @@
 # TouchAI
 
-**The touch layer for AI agents.** Hands, not brain.
+**An AI that understands Touch.**
 
-An API/SDK for real-world AI agents to take actions — click buttons, fill forms, call APIs, control devices.
+Contact, pressure, motion, and material — read as meaning. Not chat about touch. Touch, understood.
 
-> Stripe for AI actions. The point of contact between an agent and the real world.
+Live: [touchai-kohl.vercel.app](https://touchai-kohl.vercel.app)
 
-**Live:** https://touchai-kohl.vercel.app
+## Experience
 
-## Why
+Open the site. Touch the sensing field. TouchAI tells you what it felt — gesture, material, pressure, intent — in language.
 
-Most AI is read-only (chat, generate). The frontier is agents that **act**. TouchAI is the interaction layer any LLM plugs into to safely touch web, desktop, IoT, and robotics APIs.
+Ask it: *What did you feel?* · *What material?* · *How hard?* · *What was the intent?*
 
-## Product
+## Engine
 
-| Layer | Role |
-|-------|------|
-| Your LLM / agent | Brain — plans |
-| **TouchAI** | Hands — permissions, actions, adapters, audit |
-| Real systems | World — UI, APIs, devices |
+```js
+import { createTouchAI } from './src/touchai.js'
 
-## SDK
+const ai = createTouchAI()
+
+ai.sense('start', { x, y, nx, ny, pressure })
+ai.sense('move',  { x, y, nx, ny, pressure })
+const felt = ai.sense('end')
+// felt.text — what TouchAI understood
+
+ai.ask('What material was that?')
+```
+
+## Develop
 
 ```bash
 npm install
 npm run dev
-# SDK package: ./sdk → touchai-sdk
 ```
-
-```js
-import { createTouch, createWebAdapter } from 'touchai-sdk'
-
-const touch = createTouch({
-  allow: ['web.click', 'web.type', 'web.read', 'http.request'],
-  requireConfirm: ['http.request'],
-  adapters: { web: createWebAdapter('#world') },
-})
-
-const tools = touch.tools('openai') // plug into any model
-await touch.act({ name: 'web.click', args: { selector: '#pay' } })
-```
-
-See [`sdk/README.md`](./sdk/README.md).
-
-## Site
-
-- Thesis + product stack
-- Action catalog
-- Playground: sandboxed UI an agent can touch via the same SDK

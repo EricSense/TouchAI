@@ -47,7 +47,3 @@ Consumer/prosumer product. An agent that lives on your machine, learns it over t
 npm install
 npm run dev
 ```
-
-## FORGE
-
-FORGE is a **separate product** in [`forge/`](./forge). Live: https://forge-lilac-nu.vercel.app — it does not share TouchAI’s app, SDK, or Vercel project.

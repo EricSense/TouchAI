@@ -35,23 +35,24 @@ export async function renderSdkView(container, hw) {
 
       <section class="section" id="sdkInstall">
         <p class="section-kicker">Install</p>
-        <h2 class="section-title">Integrate hardware awareness.</h2>
-        <p class="section-lead">Give any model a relationship with its physical host — deep knowledge of the hardware it runs on.</p>
+        <h2 class="section-title">Same pipeline in your app.</h2>
+        <p class="section-lead">Scan → Adapt → Route → Run. Give any model a relationship with its host.</p>
         <div class="install-block">
           <pre class="api-code"><code>npm install ./sdk
 # from a clone of github.com/EricSense/TouchAI</code></pre>
           <pre class="api-code"><code>import { createTouchAI } from 'touchai-sdk'
 
 const touch = await createTouchAI()
-// touch.hardware — 8-layer situation
-// touch.plan     — device / dtype adapted to this machine
-await touch.runInference(prompt)</code></pre>
+// touch.hardware — Scan
+// touch.plan     — Adapt
+// touch.route    — Route
+await touch.runInference(prompt) // Run + Remember</code></pre>
         </div>
       </section>
 
       <section class="section">
         <p class="section-kicker">API</p>
-        <h2 class="section-title">Four calls. Full situation.</h2>
+        <h2 class="section-title">How it works in code.</h2>
         <div class="api-grid">
           ${SDK_API.map((api) => `
             <article class="api-card">
@@ -70,7 +71,7 @@ await touch.runInference(prompt)</code></pre>
 
         <div class="playground">
           <div class="playground-col">
-            <div class="nav-label">1 · Situation</div>
+            <div class="nav-label">1 · Scan</div>
             <div class="live-plan">
               ${hw ? hw.layers.map((l) => `
                 <div class="adapt-row"><span>${l.name}</span><span>${esc(l.summary)}</span></div>
@@ -79,13 +80,13 @@ await touch.runInference(prompt)</code></pre>
           </div>
 
           <div class="playground-col">
-            <div class="nav-label">2 · Capabilities (probed)</div>
+            <div class="nav-label">2 · Probe</div>
             <div class="live-plan">
               <div class="adapt-row"><span>WebGPU</span><span>${caps.webgpu ? 'available' : 'no'}</span></div>
               <div class="adapt-row"><span>WASM</span><span>${caps.wasm ? 'available' : 'no'}</span></div>
               <div class="adapt-row"><span>WebNN</span><span>${caps.webnn ? 'available' : 'no'}</span></div>
             </div>
-            <div class="nav-label" style="margin-top:16px">3 · Model to situate</div>
+            <div class="nav-label" style="margin-top:16px">3 · Model</div>
             <div class="playground-models" id="sdkModelPick">
               ${MODEL_ORDER.map((id) => `
                 <button type="button" class="prompt-chip interactive${id === modelId ? ' active-chip' : ''}" data-model="${id}">${MODELS[id].name}</button>
@@ -94,7 +95,7 @@ await touch.runInference(prompt)</code></pre>
           </div>
 
           <div class="playground-col">
-            <div class="nav-label">4 · Adapt plan (honored by runtime)</div>
+            <div class="nav-label">4 · Adapt</div>
             <div class="live-plan" id="sdkPlanPanel">
               ${plan ? renderPlan(plan) : ''}
             </div>

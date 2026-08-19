@@ -94,7 +94,7 @@ export function mountDemoPanel(root) {
       <section class="intel-panel">
         <div id="chatMessages" class="chat-messages"></div>
         <div class="chat-input-area">
-          <div class="input-label">${product.tagline} — hardware-aware routing on this host</div>
+          <div class="input-label">How it works live — Scan → Adapt → Route → Run on this host</div>
           <div class="input-wrap">
             <textarea id="chatInput" class="chat-input" placeholder="Ask to route, situate, or decide…" rows="1"></textarea>
             <button id="voiceBtn" class="icon-btn voice-btn interactive" aria-label="Voice" type="button">

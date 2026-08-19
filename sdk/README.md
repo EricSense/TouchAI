@@ -1,33 +1,41 @@
 # touchai-sdk
 
-**Hardware-aware AI SDK** — MVP for developers.
+Hardware-aware AI for developers.
 
-Give any model a relationship with its host machine: scan → adapt → run.
+## What it does
 
-## Install (MVP)
+Gives every AI model deep knowledge of the host it runs on.
 
-```bash
-# from a clone of https://github.com/EricSense/TouchAI
-npm install ./sdk
-npm install @huggingface/transformers   # optional — local generation
+## How it works
+
+```
+Scan → Adapt → Route → Run → Remember
 ```
 
 ```js
 import { createTouchAI } from 'touchai-sdk'
 
 const touch = await createTouchAI()
-console.log(touch.plan.device, touch.plan.dtype)
-
-const { response, plan } = await touch.runInference('What hardware am I on?')
+// touch.hardware — Scan
+// touch.plan     — Adapt
+// touch.route    — Route
+const { response, plan, route } = await touch.runInference('Can we run locally?')
 ```
 
-## Runtime
+## Install
 
-1. `scanHardware()` — 8-layer host situation  
-2. `detectCapabilities()` — WebGPU / WASM / WebNN  
-3. `adaptExecution()` — device, dtype, tokens  
-4. `runInference()` — generate on the adapted path  
+```bash
+npm install ./sdk
+```
 
-## Product
+## API
 
-[touchai-kohl.vercel.app](https://touchai-kohl.vercel.app) → **Try MVP** or **SDK**
+| Call | Step |
+|------|------|
+| `scanHardware()` | Scan |
+| `adaptExecution()` | Adapt |
+| `recommendAssistant()` | Route |
+| `runInference()` | Run |
+| `MemoryStore` / device profile | Remember |
+
+Product: [touchai-kohl.vercel.app](https://touchai-kohl.vercel.app)

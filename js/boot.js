@@ -53,12 +53,12 @@ function buildBootLines(hw, caps, plan) {
   };
 
   return [
-    line('TouchAI MVP — Hardware-aware AI', 'info'),
-    line('Situating model on this host…', 'info'),
-    line(`Silicon · ${a.silicon.platform} ${a.silicon.arch} · ${a.silicon.cores}`, 'ok'),
+    line('TouchAI — Hardware-aware AI', 'info'),
+    line('How it works · Scan → Adapt → Route → Run', 'info'),
+    line(`Scan · ${a.silicon.platform} ${a.silicon.arch} · ${a.silicon.cores}`, 'ok'),
     line(`Thermal · ${a.thermal.state} · Power · ${a.power.budget}`, 'ok'),
-    line(`Probe · WebGPU ${caps.webgpu ? 'yes' : 'no'} · WASM ${caps.wasm ? 'yes' : 'no'}`, caps.webgpu ? 'ok' : 'warn'),
     line(`Adapt · ${plan.device}/${plan.dtype} · ${plan.maxTokens} tok`, 'ok'),
-    line('Prototype ready · Try MVP or SDK', 'info'),
+    line(`Probe · WebGPU ${caps.webgpu ? 'yes' : 'no'} · WASM ${caps.wasm ? 'yes' : 'no'}`, caps.webgpu ? 'ok' : 'warn'),
+    line('Ready · open What & How, Try, or SDK', 'info'),
   ];
 }

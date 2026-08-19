@@ -1,7 +1,10 @@
 /**
- * TouchAI — startup product source of truth.
- * Hardware-aware AI. Situational intelligence.
- * MVP: situate a model on this host + Situated Agent prototype.
+ * TouchAI — what it does, how it works.
+ *
+ * WHAT: Hardware-aware AI. Gives every AI model deep knowledge of the
+ *       physical host it runs on — a relationship with the machine.
+ *
+ * HOW:  Scan → Adapt → Route → Run → Remember
  */
 
 import { HARDWARE_LAYERS as SDK_LAYERS } from 'touchai-sdk';
@@ -9,38 +12,71 @@ import { HARDWARE_LAYERS as SDK_LAYERS } from 'touchai-sdk';
 export const BRAND = {
   name: 'TouchAI',
   line: 'Hardware-aware AI',
-  thesis: 'Situational intelligence',
-  company: 'TouchAI builds the infrastructure for hardware-intelligent AI.',
+};
+
+/** One sentence: what TouchAI does */
+export const WHAT = {
+  headline: 'TouchAI makes AI hardware-aware.',
+  body: 'It creates a deep relationship between AI models and their physical host machines — so a model knows where it is, what the machine can do right now, and how to run on it.',
+  bullets: [
+    'Knows the host: silicon, thermal, power, memory, sensors, history, usage',
+    'Adapts execution: device path, dtype, and budget for this machine',
+    'Routes work: Local, Cloud, or Coding based on live situation',
+    'Compounds depth: remembers the machine over time',
+  ],
+};
+
+/** How TouchAI works — the pipeline */
+export const HOW = [
+  {
+    id: 'scan',
+    step: '01',
+    title: 'Scan',
+    detail: 'Read the host. Eight layers of situation — not a benchmark, a live profile of this machine.',
+  },
+  {
+    id: 'adapt',
+    step: '02',
+    title: 'Adapt',
+    detail: 'Turn situation into a plan: WebGPU/WASM path, dtype, token budget, whether to defer heavy work.',
+  },
+  {
+    id: 'route',
+    step: '03',
+    title: 'Route',
+    detail: 'Pick the right assistant for the job on this host right now — Local, Cloud, or Coding.',
+  },
+  {
+    id: 'run',
+    step: '04',
+    title: 'Run',
+    detail: 'Execute with that plan. The model is no longer homeless — it has a home on this machine.',
+  },
+  {
+    id: 'remember',
+    step: '05',
+    title: 'Remember',
+    detail: 'Store machine memory. Cloud solved scale; TouchAI builds depth on the host you actually use.',
+  },
+];
+
+export const THESIS = {
+  problem:
+    'Every AI company positions around capability. Smarter models. Faster responses. More parameters. Better benchmarks. That race ends in commodity.',
+  axis: 'TouchAI positions on situational intelligence — not how smart the AI is, but how well it understands where it is.',
+  home: 'Today every model is essentially homeless. TouchAI gives AI a home on the machine.',
+  depth: 'The cloud solved scale. TouchAI is solving depth.',
 };
 
 export const MVP = {
-  badge: 'MVP prototype',
+  badge: 'Working prototype',
   ships: [
-    'Live 8-layer hardware scan of this host',
-    'Adapted execution plan (device / dtype / budget)',
-    'Situated Agent that routes with machine context',
-    'Developer SDK you can install from this repo',
+    'Live host scan (8 layers)',
+    'Adapted execution plan',
+    'Assistant routing from situation',
+    'Situated Agent you can talk to',
+    'SDK installable from this repo',
   ],
-  notYet: [
-    'Published npm package (install from repo for now)',
-    'Native desktop agent binary',
-    'Multi-device fleet orchestration',
-  ],
-};
-
-export const THESIS = {
-  opening:
-    'TouchAI creates a deep relationship between AI models and their physical host machines.',
-  problem:
-    'Every AI company positions around capability. Smarter models. Faster responses. More parameters. Better benchmarks.',
-  destination:
-    'That race ends in commodity. When every model is smart enough, smart enough stops being a differentiator.',
-  refusal: "TouchAI doesn't play that game.",
-  axis: 'We position on situational intelligence — not how smart the AI is, but how well it understands where it is.',
-  promise:
-    'Hardware-aware AI that gives every model deep knowledge of the hardware it runs on.',
-  home: 'Models today are homeless. TouchAI gives AI a home on the machine.',
-  depth: 'The cloud solved scale. TouchAI is solving depth.',
 };
 
 export const HARDWARE_LAYERS = SDK_LAYERS;
@@ -51,10 +87,10 @@ export const PRODUCTS = [
     view: 'try',
     num: '01',
     title: 'Situated Agent',
-    audience: 'MVP prototype',
-    tagline: 'AI that lives on this host',
-    what: 'The working prototype. An agent grounded in this machine’s situation — silicon, power, thermal, history — that routes work with context no cloud model has.',
-    does: 'Scan → adapt → talk. Use it on this browser host right now.',
+    audience: 'Prototype',
+    tagline: 'See what TouchAI does on this host',
+    what: 'The live prototype. Scan this machine, adapt a plan, route assistants, and talk to an agent that uses that situation.',
+    does: 'Scan → Adapt → Route → Run on the browser host you are on right now.',
   },
   {
     id: 'sdk',
@@ -62,82 +98,64 @@ export const PRODUCTS = [
     num: '02',
     title: 'TouchAI SDK',
     audience: 'Developers',
-    tagline: 'Hardware awareness for any app',
-    what: 'The developer product. Integrate situational intelligence so any model knows the host it lands on.',
-    does: 'scanHardware · detectCapabilities · adaptExecution · runInference',
-  },
-];
-
-export const PILLARS = [
-  {
-    id: 'situation',
-    label: 'Situational intelligence',
-    desc: 'Know where the model runs — silicon, thermal, power, memory, sensors, history, usage.',
-  },
-  {
-    id: 'adaptation',
-    label: 'Hardware-aware execution',
-    desc: 'Device path, dtype, and budget adapt to the host underneath.',
-  },
-  {
-    id: 'deployment',
-    label: 'Depth infrastructure',
-    desc: 'Cloud solved scale. TouchAI is infrastructure for depth on real machines.',
+    tagline: 'Put hardware awareness in your app',
+    what: 'The developer product. Same pipeline — scan, adapt, route, run — as a library.',
+    does: 'createTouchAI() · scanHardware · adaptExecution · recommendAssistant · runInference',
   },
 ];
 
 export const SDK_API = [
   {
     name: 'scanHardware()',
-    pillar: 'situation',
+    pillar: 'scan',
     desc: 'Eight-layer situation profile of the host.',
     code: `const hw = await scanHardware()`,
   },
   {
-    name: 'detectCapabilities()',
-    pillar: 'adaptation',
-    desc: 'Probe WebGPU / WASM / WebNN on this runtime.',
-    code: `const caps = await detectCapabilities()`,
+    name: 'adaptExecution(model, hw)',
+    pillar: 'adapt',
+    desc: 'Hardware-aware plan: device, dtype, tokens.',
+    code: `const plan = await adaptExecution('pulse', hw)`,
   },
   {
-    name: 'adaptExecution(model, hw)',
-    pillar: 'adaptation',
-    desc: 'Hardware-aware plan any model can run under.',
-    code: `const plan = await adaptExecution('pulse', hw)\n// device, dtype, tokens, reasons`,
+    name: 'recommendAssistant(hw, plan, query)',
+    pillar: 'route',
+    desc: 'Route Local / Cloud / Coding from situation.',
+    code: `const route = recommendAssistant(hw, plan, query)`,
   },
   {
     name: 'runInference(…)',
-    pillar: 'adaptation',
-    desc: 'Execute on the adapted path (honors the plan).',
-    code: `const { response, plan } = await runInference(q, hw, 'pulse')`,
+    pillar: 'run',
+    desc: 'Generate on the adapted path.',
+    code: `const { response, plan, route } = await runInference(q, hw)`,
   },
 ];
 
-export const FLOW = [
-  'Scan host',
-  'Adapt plan',
-  'Run situated',
-  'Remember machine',
+export const PILLARS = [
+  { id: 'situation', label: 'Scan', desc: WHAT.bullets[0] },
+  { id: 'adaptation', label: 'Adapt & route', desc: 'Plan and assistant choice follow the host.' },
+  { id: 'deployment', label: 'Run & remember', desc: 'Situated execution with machine memory.' },
 ];
 
+export const FLOW = HOW.map((h) => h.title);
+
 export const JOURNEY = [
-  { step: 1, view: 'home', title: 'Product', desc: 'Hardware-aware AI' },
-  { step: 2, view: 'try', title: 'Try MVP', desc: 'Situated Agent' },
-  { step: 3, view: 'sdk', title: 'SDK', desc: 'Get started' },
+  { step: 1, view: 'home', title: 'What & How', desc: 'Product' },
+  { step: 2, view: 'try', title: 'Try', desc: 'Prototype' },
+  { step: 3, view: 'sdk', title: 'SDK', desc: 'Build' },
 ];
 
 export const VIEW_FOCUS = {
-  home: { label: 'Product · Hardware-aware AI', checks: ['situation', 'deployment'] },
-  try: { label: 'Try MVP · Situated Agent', checks: ['situation', 'adaptation', 'deployment'] },
-  sdk: { label: 'SDK · get started', checks: ['situation', 'adaptation', 'deployment'] },
-  // aliases kept for focus checks
-  device: { label: 'Try MVP · Situated Agent', checks: ['situation', 'adaptation', 'deployment'] },
+  home: { label: 'What · How · TouchAI', checks: ['situation', 'deployment'] },
+  try: { label: 'Try · Situated Agent', checks: ['situation', 'adaptation', 'deployment'] },
+  sdk: { label: 'SDK · build with it', checks: ['situation', 'adaptation', 'deployment'] },
+  device: { label: 'Try · Situated Agent', checks: ['situation', 'adaptation', 'deployment'] },
 };
 
 export function focusLine(hw) {
   const machine = hw ? `${hw.platform} · ${hw.cores ?? '?'} cores` : 'your host';
   const layers = hw?.layersActive ? `${hw.layersActive}/${hw.layersTotal} layers · ` : '';
-  return `${layers}MVP live on ${machine}`;
+  return `${layers}TouchAI on ${machine}`;
 }
 
 export function getViewLabel(view) {
@@ -163,16 +181,9 @@ export function assessFocus(view, hw) {
 
 function pillarActive(id, hw) {
   if (!hw) return id === 'deployment';
-  switch (id) {
-    case 'situation':
-      return hw.layersActive === hw.layersTotal;
-    case 'adaptation':
-      return Boolean(hw.recommendedModel && hw.awareness);
-    case 'deployment':
-      return true;
-    default:
-      return false;
-  }
+  if (id === 'situation') return hw.layersActive === hw.layersTotal;
+  if (id === 'adaptation') return Boolean(hw.recommendedModel && hw.awareness);
+  return true;
 }
 
 export function focusScore(view, hw) {

@@ -1,4 +1,4 @@
-import { THESIS, MARKET, PRODUCTS, HARDWARE_LAYERS, FLOW, focusLine } from './focus.js';
+import { THESIS, HOME, MARKET, PRODUCTS, HARDWARE_LAYERS, FLOW, BRAND, focusLine } from './focus.js';
 import { adaptExecution } from 'touchai-sdk';
 
 export async function renderHomeView(container, hw) {
@@ -15,12 +15,19 @@ export async function renderHomeView(container, hw) {
         <div class="hero-copy">
           <p class="brand-mark">TouchAI</p>
           <h1 class="hero-title">Hardware-aware AI.</h1>
-          <p class="hero-sub">Situational intelligence — deep knowledge of the hardware every AI model runs on.</p>
+          <p class="hero-sub">A deep relationship between AI models and their physical host machines.</p>
           <div class="hero-actions">
             <button class="btn btn-primary interactive" data-nav="sdk">TouchAI SDK</button>
             <button class="btn btn-ghost interactive" data-nav="device">TouchAI Device</button>
           </div>
         </div>
+      </section>
+
+      <section class="section opening-section">
+        <p class="section-kicker">What we’re building</p>
+        <h2 class="section-title">Infrastructure for hardware-intelligent AI.</h2>
+        <p class="section-lead">${THESIS.opening}</p>
+        <p class="company-line">${BRAND.company}</p>
       </section>
 
       <section class="section problem-section">
@@ -36,11 +43,12 @@ export async function renderHomeView(container, hw) {
       <section class="section axis-section">
         <p class="section-kicker">A different axis</p>
         <h2 class="section-title">Situational intelligence.</h2>
-        <p class="section-lead">${THESIS.question}</p>
-        <p class="section-promise">${THESIS.promise}</p>
+        <p class="section-lead">${THESIS.axis}</p>
+        <p class="section-promise">${THESIS.question}</p>
+        <p class="section-lead">${THESIS.promise}</p>
         ${hw && plan ? `
           <div class="live-situation">
-            <span class="live-pill">This machine right now</span>
+            <span class="live-pill">This host · right now</span>
             <div class="live-situation-grid">
               <div class="live-situation-item"><span>Platform</span><strong>${hw.platform} · ${hw.arch}</strong></div>
               <div class="live-situation-item"><span>Adapted path</span><strong>${plan.device} / ${plan.dtype}</strong></div>
@@ -51,6 +59,26 @@ export async function renderHomeView(container, hw) {
         ` : ''}
       </section>
 
+      <section class="section home-section">
+        <p class="section-kicker">What it means for AI to know its hardware</p>
+        <h2 class="section-title">Every model is homeless. TouchAI gives it a home.</h2>
+        <div class="home-stack">
+          <p>${HOME.homeless}</p>
+          <p class="home-answer">${HOME.home}</p>
+        </div>
+        <div class="scale-depth">
+          <div class="scale-depth-card">
+            <span class="scale-depth-label">Scale</span>
+            <p>The cloud solved scale.</p>
+          </div>
+          <div class="scale-depth-card accent">
+            <span class="scale-depth-label">Depth</span>
+            <p>TouchAI is solving depth.</p>
+          </div>
+        </div>
+        <p class="depth-line">${HOME.depth}</p>
+      </section>
+
       <section class="section market-section">
         <p class="section-kicker">The market</p>
         <h2 class="section-title">Value is shifting to deployment.</h2>
@@ -59,14 +87,14 @@ export async function renderHomeView(container, hw) {
         <div class="stack-diagram">
           <div class="stack-row muted">Application layer · assistants, agents, apps</div>
           <div class="stack-row muted">Model layer · foundation models (commoditizing)</div>
-          <div class="stack-row accent">TouchAI · hardware-aware AI · situational intelligence</div>
-          <div class="stack-row muted">Silicon · NPU · GPU · CPU · ${hw ? `${hw.platform} ${hw.arch}` : 'your device'}</div>
+          <div class="stack-row accent">TouchAI · hardware-aware infrastructure · depth</div>
+          <div class="stack-row muted">Host · NPU · GPU · CPU · ${hw ? `${hw.platform} ${hw.arch}` : 'your machine'}</div>
         </div>
       </section>
 
       <section class="section products-section">
-        <p class="section-kicker">Product roadmap</p>
-        <h2 class="section-title">Two products. One axis.</h2>
+        <p class="section-kicker">Products</p>
+        <h2 class="section-title">Two products. One relationship.</h2>
         <div class="products-grid">
           ${PRODUCTS.map((p) => `
             <article class="product-panel">
@@ -133,7 +161,7 @@ function paintHeroMachine(el, hw) {
       <circle class="orbit orbit-b" cx="50" cy="50" r="24" fill="none"/>
       <circle class="core" cx="50" cy="50" r="6"/>
       ${rings}
-      <text x="50" y="92" text-anchor="middle" class="machine-label">${hw ? hw.platform : 'device'}</text>
+      <text x="50" y="92" text-anchor="middle" class="machine-label">${hw ? hw.platform : 'host'}</text>
     </svg>
   `;
 }

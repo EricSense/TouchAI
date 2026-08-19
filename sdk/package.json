@@ -1,7 +1,7 @@
 {
   "name": "touchai-sdk",
   "version": "0.2.0",
-  "description": "Hardware-Aware AI SDK — situational intelligence for any model on any machine",
+  "description": "Hardware-aware AI SDK — deep relationship between models and their host machines",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/EricSense/TouchAI.git",

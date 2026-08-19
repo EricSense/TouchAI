@@ -35,7 +35,7 @@ export async function renderSdkView(container, hw) {
       <section class="section" id="sdkInstall">
         <p class="section-kicker">Install</p>
         <h2 class="section-title">Integrate hardware awareness.</h2>
-        <p class="section-lead">Give any model deep knowledge of the hardware it runs on.</p>
+        <p class="section-lead">Give any model a relationship with its physical host — deep knowledge of the hardware it runs on.</p>
         <div class="install-block">
           <pre class="api-code"><code>npm install ./sdk
 # from a clone of github.com/EricSense/TouchAI</code></pre>
@@ -65,7 +65,7 @@ await touch.runInference(prompt)</code></pre>
       <section class="section" id="sdkPlayground">
         <p class="section-kicker">Playground · this machine</p>
         <h2 class="section-title">See hardware-aware adaptation.</h2>
-        <p class="section-lead">Without TouchAI, a model guesses. With TouchAI, execution follows a probed plan.</p>
+        <p class="section-lead">Without TouchAI, a model is homeless on the machine. With TouchAI, execution follows a probed plan for this host.</p>
 
         <div class="playground">
           <div class="playground-col">
@@ -103,13 +103,13 @@ await touch.runInference(prompt)</code></pre>
 
         <div class="compare-row">
           <article class="compare-card">
-            <h3>Without TouchAI</h3>
-            <p>Same model everywhere. No knowledge of cores, thermal, power, or available accelerator. Blind deployment.</p>
+            <h3>Homeless model</h3>
+            <p>Same model everywhere. No relationship with cores, thermal, power, or accelerator. Deployed — but nowhere.</p>
           </article>
           <article class="compare-card accent-card">
-            <h3>With TouchAI</h3>
+            <h3>Hardware-aware home</h3>
             <p id="sdkWithLine">${plan
-              ? `This machine → <strong>${plan.device}/${plan.dtype}</strong>, ${plan.maxTokens} tokens. ${(plan.reasons ?? []).join(' · ')}`
+              ? `This host → <strong>${plan.device}/${plan.dtype}</strong>, ${plan.maxTokens} tokens. ${(plan.reasons ?? []).join(' · ')}`
               : '—'}</p>
           </article>
         </div>

@@ -1,7 +1,8 @@
 /**
- * TouchAI SDK — Hardware-Aware AI for developers.
+ * TouchAI SDK — Hardware-aware AI for developers.
  *
- * Situational intelligence: give every model deep knowledge of the hardware it runs on.
+ * Infrastructure for a deep relationship between AI models and their physical host machines.
+ * Situational intelligence: every model knows the hardware it runs on.
  */
 
 export { SDK_VERSION, HARDWARE_LAYERS } from './layers.js';

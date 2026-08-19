@@ -30,12 +30,12 @@ export function renderDeviceView(container, hw) {
         <p class="section-lead">${p.does}</p>
         <div class="device-roles">
           <article class="device-role">
-            <h3>Lives on your machine</h3>
-            <p>Not a cloud tab. An agent rooted in this silicon, this thermal envelope, this power budget.</p>
+            <h3>Gives AI a home</h3>
+            <p>Not a cloud tab. An agent rooted in this silicon, this thermal envelope, this power budget — a lasting relationship with the host.</p>
           </article>
           <article class="device-role">
-            <h3>Learns the situation</h3>
-            <p>History and user layers compound — the longer it runs, the more specific its understanding becomes.</p>
+            <h3>Builds depth</h3>
+            <p>Hardware and usage layers compound. AI that knows your machine starts to model how you use it — context no cloud model can acquire.</p>
           </article>
           <article class="device-role">
             <h3>Orchestrates assistants</h3>
@@ -46,7 +46,7 @@ export function renderDeviceView(container, hw) {
 
       <section class="section arc-section">
         <p class="section-kicker">The long arc</p>
-        <h2 class="section-title">Most capable — because most situated.</h2>
+        <h2 class="section-title">Most capable — because it has a home here.</h2>
         <blockquote class="arc-quote">${p.arc}</blockquote>
       </section>
 

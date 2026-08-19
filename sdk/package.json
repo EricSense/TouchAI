@@ -1,7 +1,7 @@
 {
   "name": "touchai-sdk",
-  "version": "0.3.0",
-  "description": "The touch layer for AI agents — take real-world actions safely. Hands, not brain.",
+  "version": "0.4.0",
+  "description": "Built for AI models — the touch layer so any LLM can take real-world actions",
   "type": "module",
   "main": "./src/index.js",
   "module": "./src/index.js",

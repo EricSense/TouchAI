@@ -1,54 +1,33 @@
 # touchai-sdk
 
-**Hardware-aware AI for developers.** Infrastructure for a deep relationship between models and their host machines.
+**Hardware-aware AI SDK** — MVP for developers.
 
-Gives every AI model deep knowledge of the hardware it runs on — so deployment stops being homeless.
+Give any model a relationship with its host machine: scan → adapt → run.
 
-## Install
+## Install (MVP)
 
 ```bash
 # from a clone of https://github.com/EricSense/TouchAI
 npm install ./sdk
-
-# optional — local generation
-npm install @huggingface/transformers
+npm install @huggingface/transformers   # optional — local generation
 ```
 
 ```js
 import { createTouchAI } from 'touchai-sdk'
 
 const touch = await createTouchAI()
+console.log(touch.plan.device, touch.plan.dtype)
 
-// Probed capabilities + adapted plan for THIS host
-console.log(touch.capabilities.webgpu, touch.plan.device, touch.plan.dtype)
-
-const { response, plan, engine } = await touch.runInference(
-  'What hardware am I on?',
-)
+const { response, plan } = await touch.runInference('What hardware am I on?')
 ```
 
-## What the runtime does
+## Runtime
 
-1. **`scanHardware()`** — 8-layer situation (silicon → user) via browser APIs  
-2. **`detectCapabilities()`** — probes WebGPU / WASM / WebNN  
-3. **`adaptExecution()`** — picks `device`, `dtype`, token budget from the host  
-4. **`runInference()`** — loads the model on that device path and generates  
-
-`plan.device` is not a label — `loadModel` passes it to Transformers.js.
-
-## API
-
-| Call | Purpose |
-|------|---------|
-| `createTouchAI()` | Bound Hardware-Aware AI client |
-| `scanHardware()` | 8-layer host profile |
-| `detectCapabilities()` | Real WebGPU/WASM probe |
-| `adaptExecution(modelId, hw)` | Device + dtype + tokens |
-| `runInference(...)` | Adapted generation |
-| `attestIntegrity(hw)` | Hardware-rooted proof |
-| `canRunLocally(hw, plan)` | Whether local path is viable |
-| `MemoryStore` | Persistent machine memory |
+1. `scanHardware()` — 8-layer host situation  
+2. `detectCapabilities()` — WebGPU / WASM / WebNN  
+3. `adaptExecution()` — device, dtype, tokens  
+4. `runInference()` — generate on the adapted path  
 
 ## Product
 
-Open [touchai-kohl.vercel.app](https://touchai-kohl.vercel.app) → **SDK** or **Device**.
+[touchai-kohl.vercel.app](https://touchai-kohl.vercel.app) → **Try MVP** or **SDK**

@@ -1,18 +1,16 @@
 /**
- * Minimal Hardware-Aware AI example
- * Run from repo root after `npm install`:
- *   node --experimental-vm-modules examples/basic.mjs
- * (Browser APIs required for full scan — use the web app for the real product.)
+ * TouchAI MVP — Hardware-Aware AI
+ * Run: npm install && npm run dev → open #try
  */
 
 console.log(`
-TouchAI — Hardware-Aware AI
+TouchAI — Hardware-aware AI · MVP
 
-Use the product in a browser:
+Try the prototype:
   npm run dev
-  open http://localhost:5173/#use
+  open http://localhost:5173/#try
 
-Install the SDK into your app:
+Install the SDK:
   npm install ./sdk
 
 Example:

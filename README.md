@@ -1,41 +1,40 @@
 # TouchAI
 
-**Hardware-aware AI.** Situational intelligence — not smarter models.
+**Hardware-aware AI** — startup MVP.
 
-TouchAI creates a deep relationship between AI models and their physical host machines. By making AI hardware-intelligent, we unlock critical capabilities — and TouchAI is the company building the infrastructure for it.
+TouchAI creates a deep relationship between AI models and their physical host machines. Situational intelligence, not smarter models.
 
-**Live:** https://touchai-kohl.vercel.app
+**Live MVP:** [touchai-kohl.vercel.app](https://touchai-kohl.vercel.app)
 
-## The problem with how AI is positioned today
+## What this MVP ships
 
-Every AI company positions around capability. Smarter models. Faster responses. More parameters. Better benchmarks.
+| Surface | What you get |
+|---------|----------------|
+| **Product** (`#home`) | Thesis + MVP scope |
+| **Try MVP** (`#try`) | Situated Agent prototype on *this* host |
+| **SDK** (`#sdk`) | Install path + adaptation playground |
 
-That race has one destination — a commodity. When every model is smart enough, smart enough stops being a differentiator.
+**In the prototype now**
+- Live 8-layer hardware scan
+- Adapted execution plan (device / dtype / budget)
+- Situated Agent with machine-aware routing
+- `touchai-sdk` from this repo
 
-TouchAI doesn’t play that game.
+**Not in MVP yet**
+- Published npm package
+- Native desktop agent
+- Multi-device fleet
 
-## A different axis
+## Run
 
-TouchAI positions around **situational intelligence**.
+```bash
+npm install
+npm run dev
+```
 
-Not how smart is the AI — but how well does the AI understand where it is.
+Open the app → **Try MVP** to use the Situated Agent on your machine.
 
-TouchAI is building Hardware-aware AI that gives every AI model deep knowledge of the hardware it runs on.
-
-## Giving AI a home
-
-Right now, every AI model is essentially homeless. It gets deployed wherever and has no real relationship with that environment. It doesn’t know what it’s capable of on the machine, right now.
-
-TouchAI is essentially giving AI a home.
-
-The cloud solved scale. TouchAI is solving depth.
-
-AI that knows your hardware starts to build a model of how you use that machine. That changes everything — and makes TouchAI possible.
-
-## Products
-
-### TouchAI SDK
-Developer infrastructure. Integrate hardware awareness so any model knows its host.
+## SDK
 
 ```bash
 npm install ./sdk
@@ -43,23 +42,12 @@ npm install ./sdk
 
 ```js
 import { createTouchAI } from 'touchai-sdk'
+
 const touch = await createTouchAI()
-// touch.hardware — situation
-// touch.plan — adapted device/dtype
+const { response, plan } = await touch.runInference('What hardware am I on?')
+console.log(plan.device, plan.dtype, response)
 ```
 
-### TouchAI Device — The Situated Agent
-An agent that lives on your machine, learns it over time, and manages assistants with depth no cloud model can acquire.
+## Company thesis
 
-## Site
-
-| Route | Product |
-|-------|---------|
-| `#home` | Thesis |
-| `#sdk` | SDK + adaptation playground |
-| `#device` | Situated Agent |
-
-```bash
-npm install
-npm run dev
-```
+Capability races end in commodity. TouchAI positions on **situational intelligence** — how well the AI understands where it is. Models today are homeless; TouchAI gives AI a home. The cloud solved scale. TouchAI is solving depth.

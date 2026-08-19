@@ -8,15 +8,15 @@ import { focusLine, getViewLabel } from './focus.js';
 import { adaptExecution } from 'touchai-sdk';
 
 let hardware = null;
-let deviceMounted = false;
+let tryMounted = false;
 
 const views = {
   home: () => document.getElementById('viewHome'),
   sdk: () => document.getElementById('viewSdk'),
-  device: () => document.getElementById('viewDevice'),
+  try: () => document.getElementById('viewTry'),
 };
 
-const VALID = ['home', 'sdk', 'device'];
+const VALID = ['home', 'sdk', 'try'];
 
 function updateHash(view) {
   if (location.hash !== `#${view}`) location.hash = view;
@@ -25,7 +25,14 @@ function updateHash(view) {
 function parseHash() {
   const raw = location.hash.slice(1).split('/')[0];
   const aliases = {
-    vision: 'home', why: 'home', use: 'device', live: 'device',
+    vision: 'home',
+    product: 'home',
+    why: 'home',
+    device: 'try',
+    use: 'try',
+    live: 'try',
+    mvp: 'try',
+    prototype: 'try',
   };
   const view = aliases[raw] ?? raw;
   if (VALID.includes(view)) return { view };
@@ -60,11 +67,11 @@ export function navigate(view) {
 
   if (view === 'home' && hardware) renderHomeView(views.home(), hardware);
   if (view === 'sdk' && hardware) renderSdkView(views.sdk(), hardware);
-  if (view === 'device') {
+  if (view === 'try') {
     const root = document.getElementById('demoRoot');
-    if (!deviceMounted && root) {
+    if (!tryMounted && root) {
       mountDemoPanel(root);
-      deviceMounted = true;
+      tryMounted = true;
     }
   }
 

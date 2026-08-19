@@ -26,10 +26,11 @@ export async function renderSdkView(container, hw) {
     <div class="product-view sdk-view">
       <section class="product-hero">
         <p class="brand-mark compact">TouchAI</p>
-        <p class="section-kicker">01 · Developer product · v${SDK_VERSION}</p>
+        <p class="section-kicker">02 · Developer product · v${SDK_VERSION}</p>
         <h1 class="product-hero-title">TouchAI SDK</h1>
         <p class="product-hero-tag">${p.tagline}</p>
         <p class="product-hero-lead">${p.what}</p>
+        <p class="mvp-pill compact">MVP · install from this repo</p>
       </section>
 
       <section class="section" id="sdkInstall">
@@ -126,7 +127,7 @@ await touch.runInference(prompt)</code></pre>
           `).join('')}
         </div>
         <div class="closing-cta">
-          <button class="btn btn-primary interactive" data-nav="device">Open TouchAI Device</button>
+          <button class="btn btn-primary interactive" data-nav="try">Try the Situated Agent MVP</button>
         </div>
       </section>
     </div>

@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="TouchAI — Hardware-aware AI. A deep relationship between AI models and their physical host machines. Situational intelligence." />
-  <meta property="og:title" content="TouchAI — Hardware-aware AI" />
-  <meta property="og:description" content="Not how smart is the AI — how well does it understand where it is. The cloud solved scale. TouchAI is solving depth." />
+  <meta name="description" content="TouchAI — Hardware-aware AI startup. MVP: situate models on real hosts. Situated Agent prototype + developer SDK." />
+  <meta property="og:title" content="TouchAI — Hardware-aware AI · MVP" />
+  <meta property="og:description" content="Situational intelligence for AI. Try the Situated Agent prototype. Get the SDK." />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='none' stroke='%230B8F8C' stroke-width='2'/><circle cx='16' cy='16' r='4' fill='%230B8F8C'/></svg>" />
-  <title>TouchAI — Hardware-aware AI</title>
+  <title>TouchAI — Hardware-aware AI · MVP</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet" />
@@ -20,7 +20,7 @@
     <div class="boot-inner">
       <div class="boot-logo"><span class="boot-ring"></span><span class="boot-dot"></span></div>
       <div class="boot-title">TouchAI</div>
-      <div class="boot-sub">Hardware-aware AI</div>
+      <div class="boot-sub">Hardware-aware AI · MVP</div>
       <div id="bootLog" class="boot-log" role="log" aria-live="polite"></div>
       <div class="boot-bar"><div id="bootProgress" class="boot-bar-fill"></div></div>
     </div>
@@ -43,29 +43,31 @@
       </button>
 
       <nav class="site-nav" aria-label="Main">
-        <button class="nav-link interactive active" data-view="home">Home</button>
+        <button class="nav-link interactive active" data-view="home">Product</button>
+        <button class="nav-link interactive" data-view="try">Try MVP</button>
         <button class="nav-link interactive" data-view="sdk">SDK</button>
-        <button class="nav-link interactive" data-view="device">Device</button>
       </nav>
 
       <div class="header-right">
-        <span class="header-stat" id="navSituation">Situational intelligence</span>
+        <span class="mvp-badge-header">MVP</span>
+        <span class="header-stat" id="navSituation">Scanning host…</span>
         <span class="runtime-badge" id="runtimeBadge">—</span>
       </div>
     </header>
 
     <div class="status-strip" id="statusStrip">
-      <span class="status-strip-label" id="statusStripLabel">Home · Hardware-aware AI</span>
+      <span class="status-strip-label" id="statusStripLabel">Product · Hardware-aware AI</span>
       <span class="focus-sep">·</span>
-      <span id="statusStripDetail">deployment layer</span>
+      <span id="statusStripDetail">startup MVP</span>
     </div>
 
     <div class="view-container">
       <div id="viewHome" class="view"></div>
       <div id="viewSdk" class="view hidden"></div>
-      <div id="viewDevice" class="view hidden">
+      <div id="viewTry" class="view hidden">
         <header class="demo-topbar">
           <div class="demo-topbar-left">
+            <span class="mvp-pill compact">MVP prototype</span>
             <h1 id="demoTitle">Situated Agent</h1>
             <span class="topbar-badge" id="modelBadge">Pulse</span>
             <span class="topbar-badge device-badge" id="deviceBadge">local</span>
@@ -77,15 +79,16 @@
             <div class="stat"><span class="stat-label">Tokens</span><span class="stat-val" id="statTokens">0</span></div>
           </div>
         </header>
+        <p class="mvp-banner">Working prototype on <strong>this host</strong> — hardware scan, adapted plan, assistant routing. Not a mock.</p>
         <div id="demoRoot" class="demo-root"></div>
       </div>
     </div>
 
     <footer class="site-footer">
       <div class="status-dot online"></div>
-      <span id="statusText">Hardware-aware AI · starting</span>
+      <span id="statusText">TouchAI MVP · starting</span>
       <span class="footer-sep">·</span>
-      <span>SDK · Device · situational intelligence</span>
+      <span>Hardware-aware AI · Situated Agent · SDK</span>
     </footer>
   </div>
 

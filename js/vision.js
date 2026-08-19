@@ -1,133 +1,107 @@
-import { THESIS, HOME, MARKET, PRODUCTS, HARDWARE_LAYERS, FLOW, BRAND, focusLine } from './focus.js';
+import { THESIS, MVP, PRODUCTS, HARDWARE_LAYERS, FLOW, BRAND, focusLine } from './focus.js';
 import { adaptExecution } from 'touchai-sdk';
 
 export async function renderHomeView(container, hw) {
   const plan = hw ? await adaptExecution(hw.recommendedModel, hw) : null;
+  const tryProduct = PRODUCTS.find((p) => p.id === 'try');
+  const sdkProduct = PRODUCTS.find((p) => p.id === 'sdk');
 
   container.innerHTML = `
-    <div class="vision-view">
-      <section class="hero hero-full">
+    <div class="vision-view startup-view">
+      <section class="hero hero-full hero-startup">
         <div class="hero-atmosphere" aria-hidden="true">
           <div class="hero-grid"></div>
           <div class="hero-machine" id="heroMachine"></div>
           <div class="hero-glow"></div>
         </div>
         <div class="hero-copy">
+          <p class="mvp-pill">${MVP.badge}</p>
           <p class="brand-mark">TouchAI</p>
           <h1 class="hero-title">Hardware-aware AI.</h1>
-          <p class="hero-sub">A deep relationship between AI models and their physical host machines.</p>
+          <p class="hero-sub">${THESIS.opening} ${THESIS.depth}</p>
           <div class="hero-actions">
-            <button class="btn btn-primary interactive" data-nav="sdk">TouchAI SDK</button>
-            <button class="btn btn-ghost interactive" data-nav="device">TouchAI Device</button>
+            <button class="btn btn-primary interactive" data-nav="try">Try the prototype</button>
+            <button class="btn btn-ghost interactive" data-nav="sdk">Get the SDK</button>
           </div>
+          ${hw && plan ? `
+            <div class="hero-host">
+              <span class="live-pill">This host</span>
+              <span>${hw.platform} · ${plan.device}/${plan.dtype} · ${hw.layersActive}/${hw.layersTotal} layers</span>
+            </div>
+          ` : ''}
         </div>
       </section>
 
-      <section class="section opening-section">
-        <p class="section-kicker">What we’re building</p>
-        <h2 class="section-title">Infrastructure for hardware-intelligent AI.</h2>
-        <p class="section-lead">${THESIS.opening}</p>
-        <p class="company-line">${BRAND.company}</p>
-      </section>
-
       <section class="section problem-section">
-        <p class="section-kicker">The problem with how AI is positioned today</p>
+        <p class="section-kicker">The problem</p>
         <h2 class="section-title">Capability is a race to commodity.</h2>
         <div class="problem-stack">
           <p>${THESIS.problem}</p>
           <p class="problem-dest">${THESIS.destination}</p>
           <p class="problem-refusal">${THESIS.refusal}</p>
+          <p class="section-promise">${THESIS.axis}</p>
+          <p>${THESIS.promise}</p>
+          <p class="home-answer">${THESIS.home}</p>
         </div>
       </section>
 
-      <section class="section axis-section">
-        <p class="section-kicker">A different axis</p>
-        <h2 class="section-title">Situational intelligence.</h2>
-        <p class="section-lead">${THESIS.axis}</p>
-        <p class="section-promise">${THESIS.question}</p>
-        <p class="section-lead">${THESIS.promise}</p>
-        ${hw && plan ? `
-          <div class="live-situation">
-            <span class="live-pill">This host · right now</span>
-            <div class="live-situation-grid">
-              <div class="live-situation-item"><span>Platform</span><strong>${hw.platform} · ${hw.arch}</strong></div>
-              <div class="live-situation-item"><span>Adapted path</span><strong>${plan.device} / ${plan.dtype}</strong></div>
-              <div class="live-situation-item"><span>Layers</span><strong>${hw.layersActive}/${hw.layersTotal}</strong></div>
-              <div class="live-situation-item"><span>Power</span><strong>${hw.awareness.power.level}</strong></div>
+      <section class="section mvp-section">
+        <p class="section-kicker">What ships in this MVP</p>
+        <h2 class="section-title">A prototype you can use now.</h2>
+        <p class="section-lead">${BRAND.company} This build is the working slice: situate a model on a real host and talk to a Situated Agent.</p>
+        <div class="mvp-grid">
+          <div class="mvp-col">
+            <h3>In this prototype</h3>
+            <ul class="mvp-list">
+              ${MVP.ships.map((s) => `<li>${s}</li>`).join('')}
+            </ul>
+          </div>
+          <div class="mvp-col muted-col">
+            <h3>Not in MVP yet</h3>
+            <ul class="mvp-list">
+              ${MVP.notYet.map((s) => `<li>${s}</li>`).join('')}
+            </ul>
+          </div>
+        </div>
+        <div class="products-grid mvp-products">
+          <article class="product-panel">
+            <div class="product-head">
+              <span class="product-num">${tryProduct.num}</span>
+              <span class="product-audience">${tryProduct.audience}</span>
             </div>
-          </div>
-        ` : ''}
-      </section>
-
-      <section class="section home-section">
-        <p class="section-kicker">What it means for AI to know its hardware</p>
-        <h2 class="section-title">Every model is homeless. TouchAI gives it a home.</h2>
-        <div class="home-stack">
-          <p>${HOME.homeless}</p>
-          <p class="home-answer">${HOME.home}</p>
-        </div>
-        <div class="scale-depth">
-          <div class="scale-depth-card">
-            <span class="scale-depth-label">Scale</span>
-            <p>The cloud solved scale.</p>
-          </div>
-          <div class="scale-depth-card accent">
-            <span class="scale-depth-label">Depth</span>
-            <p>TouchAI is solving depth.</p>
-          </div>
-        </div>
-        <p class="depth-line">${HOME.depth}</p>
-      </section>
-
-      <section class="section market-section">
-        <p class="section-kicker">The market</p>
-        <h2 class="section-title">Value is shifting to deployment.</h2>
-        <p class="section-lead">${MARKET.opening}</p>
-        <p class="market-position">${MARKET.position}</p>
-        <div class="stack-diagram">
-          <div class="stack-row muted">Application layer · assistants, agents, apps</div>
-          <div class="stack-row muted">Model layer · foundation models (commoditizing)</div>
-          <div class="stack-row accent">TouchAI · hardware-aware infrastructure · depth</div>
-          <div class="stack-row muted">Host · NPU · GPU · CPU · ${hw ? `${hw.platform} ${hw.arch}` : 'your machine'}</div>
-        </div>
-      </section>
-
-      <section class="section products-section">
-        <p class="section-kicker">Products</p>
-        <h2 class="section-title">Two products. One relationship.</h2>
-        <div class="products-grid">
-          ${PRODUCTS.map((p) => `
-            <article class="product-panel">
-              <div class="product-head">
-                <span class="product-num">${p.num}</span>
-                <span class="product-audience">${p.audience}</span>
-              </div>
-              <h3>${p.title}</h3>
-              <p class="product-tag">${p.tagline}</p>
-              <p class="product-what">${p.what}</p>
-              <p class="product-does">${p.does}</p>
-              ${p.arc ? `<p class="product-does">${p.arc}</p>` : ''}
-              <button class="btn btn-ghost interactive" data-nav="${p.view}">Open ${p.title}</button>
-            </article>
-          `).join('')}
+            <h3>${tryProduct.title}</h3>
+            <p class="product-tag">${tryProduct.tagline}</p>
+            <p class="product-what">${tryProduct.what}</p>
+            <button class="btn btn-primary interactive" data-nav="try">Open prototype</button>
+          </article>
+          <article class="product-panel">
+            <div class="product-head">
+              <span class="product-num">${sdkProduct.num}</span>
+              <span class="product-audience">${sdkProduct.audience}</span>
+            </div>
+            <h3>${sdkProduct.title}</h3>
+            <p class="product-tag">${sdkProduct.tagline}</p>
+            <p class="product-what">${sdkProduct.what}</p>
+            <button class="btn btn-ghost interactive" data-nav="sdk">Install SDK</button>
+          </article>
         </div>
       </section>
 
       <section class="section awareness-section">
-        <p class="section-kicker">What hardware-aware means</p>
-        <h2 class="section-title">Eight layers of situation.</h2>
-        <div class="awareness-grid">
+        <p class="section-kicker">How it works</p>
+        <h2 class="section-title">Situation → adapt → run.</h2>
+        <div class="flow-strip">
+          ${FLOW.map((step, i) => `
+            <span class="flow-step">${step}</span>
+            ${i < FLOW.length - 1 ? '<span class="flow-arrow" aria-hidden="true">→</span>' : ''}
+          `).join('')}
+        </div>
+        <div class="awareness-grid compact">
           ${HARDWARE_LAYERS.map((row) => `
             <div class="awareness-item">
               <span class="awareness-layer">${row.layer}</span>
               <p>${row.knows}</p>
             </div>
-          `).join('')}
-        </div>
-        <div class="flow-strip">
-          ${FLOW.map((step, i) => `
-            <span class="flow-step">${step}</span>
-            ${i < FLOW.length - 1 ? '<span class="flow-arrow" aria-hidden="true">→</span>' : ''}
           `).join('')}
         </div>
         <p class="platform-focus-line">${focusLine(hw)}</p>
@@ -166,5 +140,4 @@ function paintHeroMachine(el, hw) {
   `;
 }
 
-/** @deprecated alias */
 export const renderVisionView = renderHomeView;

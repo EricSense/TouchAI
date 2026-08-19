@@ -59,7 +59,7 @@ export function initDemo(hw) {
 }
 
 export function mountDemoPanel(root) {
-  const product = PRODUCTS.find((p) => p.id === 'device');
+  const product = PRODUCTS.find((p) => p.id === 'try');
 
   root.innerHTML = `
     <div class="demo-layout">
@@ -232,12 +232,13 @@ function renderModels() {
 async function showWelcome(hw) {
   if (!chatMessages) return;
   const plan = await adaptExecution(hw.recommendedModel, hw);
-  const product = PRODUCTS.find((p) => p.id === 'device');
+  const product = PRODUCTS.find((p) => p.id === 'try');
   chatMessages.innerHTML = `
     <div class="chat-welcome">
+      <p class="mvp-pill compact">MVP prototype</p>
       <h2>Situated Agent</h2>
+      <p class="welcome-thesis">${product.what}</p>
       <p class="welcome-thesis">${product.does}</p>
-      <p class="welcome-thesis">${product.arc}</p>
       <p class="welcome-thesis">Live on <strong>${hw.platform}</strong> · path <strong>${plan.device}/${plan.dtype}</strong> · ${hw.layersActive} layers.</p>
       <div class="welcome-hw">
         <div class="welcome-hw-item"><span>Route</span><span>${plan.shouldDefer ? 'prefer cloud' : 'local ok'}</span></div>
@@ -355,5 +356,5 @@ export function preloadDemoModel(onProgress) {
 }
 
 export function getDemoStatus(hw) {
-  return `${hardwareSummary(hw)} · Situated Agent`;
+  return `${hardwareSummary(hw)} · MVP · Situated Agent`;
 }

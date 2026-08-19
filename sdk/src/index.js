@@ -1,9 +1,11 @@
 /**
  * TouchAI SDK — the touch layer for AI agents.
- * Hands, not brain. Any model plugs in to safely act on real systems.
+ * Hands, not brain. Built for AI models — any LLM plugs in to act on real systems.
  */
 
-export const VERSION = '0.3.0';
+import { forModel as bindModel } from './models.js';
+
+export const VERSION = '0.4.0';
 
 /** Built-in action catalog */
 export const ACTIONS = {
@@ -204,7 +206,8 @@ export function createTouch(options = {}) {
   }
 
   /**
-   * Tool definitions for LLM function calling (OpenAI / Anthropic shaped).
+   * Tool definitions for LLM function calling.
+   * @param {'openai'|'anthropic'|'gemini'} format
    */
   function tools(format = 'openai') {
     const list = [...allow].filter((n) => ACTIONS[n]).map((name) => {
@@ -223,6 +226,14 @@ export function createTouch(options = {}) {
         name: t.name,
         description: t.description,
         input_schema: t.parameters,
+      }));
+    }
+
+    if (format === 'gemini') {
+      return list.map((t) => ({
+        name: t.name,
+        description: t.description,
+        parameters: t.parameters,
       }));
     }
 
@@ -248,10 +259,15 @@ export function createTouch(options = {}) {
     ].join('\n');
   }
 
-  return {
+  /** Bind this Touch instance to a model provider */
+  function bind(provider = 'openai') {
+    return bindModel(api, provider);
+  }
+
+  const api = {
     version: VERSION,
     product: 'TouchAI',
-    tagline: 'The touch layer between any model and any interface',
+    tagline: 'Built for AI models — hands for any LLM',
     actions: () => Object.fromEntries([...allow].filter((n) => ACTIONS[n]).map((n) => [n, ACTIONS[n]])),
     tools,
     systemPrompt,
@@ -261,7 +277,10 @@ export function createTouch(options = {}) {
     clearHistory: () => { history.length = 0; },
     allow: [...allow],
     requireConfirm: [...requireConfirm],
+    forModel: bind,
   };
+
+  return api;
 }
 
 async function defaultHttpAdapter(name, args) {
@@ -361,3 +380,24 @@ export function createWebAdapter(root) {
 }
 
 export { createTouch as default };
+export {
+  forModel,
+  handleToolCalls,
+  extractToolCalls,
+  touchFromModel,
+  appendToolResults,
+} from './models.js';
+
+/** One call: Touch runtime + model binding for OpenAI / Anthropic / Gemini */
+export function createTouchForModel(provider = 'openai', options = {}) {
+  const touch = createTouch(options);
+  const model = bindModel(touch, provider);
+  return {
+    touch,
+    model,
+    tools: model.tools,
+    system: model.system,
+    handle: model.handle,
+    nextMessages: model.nextMessages,
+  };
+}

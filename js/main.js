@@ -1,196 +1,139 @@
-/**
- * TouchAI — building for AI to touch.
- * The field is the product: contact creates presence.
- */
+import { createTouch, createWebAdapter, ACTIONS } from 'touchai-sdk';
 
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-const ripples = document.getElementById('ripples');
-const replies = document.getElementById('replies');
-const field = document.getElementById('field');
-const hero = document.querySelector('.hero');
-const cta = document.getElementById('cta');
+const world = document.getElementById('world');
+const statusEl = document.getElementById('worldStatus');
+const auditLog = document.getElementById('auditLog');
+const planList = document.getElementById('planList');
+const catalog = document.getElementById('actionCatalog');
+const qty = document.getElementById('qty');
+const total = document.getElementById('total');
 
-const POINTS = [];
-const MAX_POINTS = 48;
-let w = 0;
-let h = 0;
-let dpr = 1;
-let started = false;
-let pointer = { x: 0.7, y: 0.35, active: false };
-
-const VOICES = [
-  'Contact.',
-  'I feel that.',
-  'Here.',
-  'Touch received.',
-  'Presence.',
-  'The world presses back.',
-  'I’m at your hand.',
-  'Signal.',
-  'AI to touch.',
-  'Still here.',
-  'Surface awake.',
-  'That reached me.',
+const DEMO_PLAN = [
+  { name: 'web.read', args: { selector: '#total' }, label: 'Observe total' },
+  { name: 'web.type', args: { selector: '#email', text: 'agent@touch.ai', clear: true }, label: 'Fill email' },
+  { name: 'web.type', args: { selector: '#qty', text: '2', clear: true }, label: 'Set quantity' },
+  { name: 'web.click', args: { selector: '#pay' }, label: 'Click Pay now' },
 ];
 
-function resize() {
-  dpr = Math.min(window.devicePixelRatio || 1, 2);
-  w = window.innerWidth;
-  h = window.innerHeight;
-  canvas.width = Math.floor(w * dpr);
-  canvas.height = Math.floor(h * dpr);
-  canvas.style.width = `${w}px`;
-  canvas.style.height = `${h}px`;
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+function flash(selector) {
+  const el = world.querySelector(selector);
+  if (!el) return;
+  el.classList.remove('touched');
+  void el.offsetWidth;
+  el.classList.add('touched');
+  setTimeout(() => el.classList.remove('touched'), 700);
 }
 
-function addRipple(x, y, strength = 1) {
-  const el = document.createElement('div');
-  el.className = 'ripple';
-  const size = 80 + strength * 140;
-  el.style.left = `${x}px`;
-  el.style.top = `${y}px`;
-  el.style.width = `${size}px`;
-  el.style.height = `${size}px`;
-  ripples.appendChild(el);
-  setTimeout(() => el.remove(), 1100);
-}
-
-function speakAt(x, y) {
-  const el = document.createElement('div');
-  el.className = 'reply';
-  el.textContent = VOICES[Math.floor(Math.random() * VOICES.length)];
-  el.style.left = `${x}px`;
-  el.style.top = `${y}px`;
-  replies.appendChild(el);
-  setTimeout(() => el.classList.add('fade'), 1600);
-  setTimeout(() => el.remove(), 2200);
-}
-
-function contact(x, y, strength = 1) {
-  if (!started) {
-    started = true;
-    hero?.classList.add('started');
-    if (cta) cta.textContent = 'Keep touching — AI meets you here';
-  }
-
-  POINTS.push({
-    x,
-    y,
-    life: 1,
-    r: 6 + strength * 10,
-    born: performance.now(),
-  });
-  if (POINTS.length > MAX_POINTS) POINTS.shift();
-
-  addRipple(x, y, strength);
-  if (strength > 0.35) speakAt(x, y);
-}
-
-function onPointer(e) {
-  const x = e.clientX ?? e.touches?.[0]?.clientX;
-  const y = e.clientY ?? e.touches?.[0]?.clientY;
-  if (x == null || y == null) return;
-  pointer = { x, y, active: true };
-  contact(x, y, e.type.includes('move') ? 0.25 : 1);
-}
-
-function onPointerUp() {
-  pointer.active = false;
-}
-
-field.addEventListener('pointerdown', onPointer);
-field.addEventListener('pointermove', (e) => {
-  if (e.buttons || e.pressure > 0) onPointer(e);
-  else pointer = { x: e.clientX, y: e.clientY, active: false };
+qty?.addEventListener('input', () => {
+  const n = Math.max(1, Number(qty.value) || 1);
+  total.textContent = `$${n * 48}`;
 });
-field.addEventListener('pointerup', onPointerUp);
-field.addEventListener('pointercancel', onPointerUp);
-field.addEventListener('pointerleave', onPointerUp);
 
-// Soft ambient drift even before first touch
-function seedAmbient() {
-  const x = w * (0.55 + Math.random() * 0.3);
-  const y = h * (0.25 + Math.random() * 0.25);
-  POINTS.push({ x, y, life: 0.35, r: 18, born: performance.now(), ambient: true });
+document.getElementById('pay')?.addEventListener('click', () => {
+  statusEl.textContent = `Paid ${total.textContent} · order simulated`;
+  statusEl.classList.add('ok');
+});
+
+document.getElementById('save')?.addEventListener('click', () => {
+  statusEl.textContent = 'Cart saved';
+  statusEl.classList.add('ok');
+});
+
+world?.addEventListener('touchai:navigate', (e) => {
+  statusEl.textContent = `Navigated → ${e.detail.url}`;
+});
+
+const touch = createTouch({
+  allow: ['web.click', 'web.type', 'web.read', 'web.navigate', 'web.submit', 'http.request', 'device.command'],
+  requireConfirm: [],
+  adapters: {
+    web: createWebAdapter(world),
+  },
+  onAudit: renderAudit,
+});
+
+function renderCatalog() {
+  if (!catalog) return;
+  catalog.innerHTML = Object.entries(ACTIONS).map(([name, meta]) => `
+    <div class="action-chip">
+      <code>${name}</code>
+      <p>${meta.description}</p>
+    </div>
+  `).join('');
 }
 
-function draw(now) {
-  ctx.clearRect(0, 0, w, h);
+function renderPlan(states = {}) {
+  planList.innerHTML = DEMO_PLAN.map((step, i) => `
+    <div class="plan-step ${states[i] ?? ''}" data-step="${i}">
+      <span class="n">${i + 1}</span>
+      <div>
+        <div>${step.label}</div>
+        <code>${step.name}(${JSON.stringify(step.args)})</code>
+      </div>
+    </div>
+  `).join('');
+}
 
-  // soft vignette field grain via sparse dots
-  ctx.fillStyle = 'rgba(244,241,236,0.015)';
-  for (let i = 0; i < 40; i++) {
-    const gx = (Math.sin(now * 0.0002 + i * 12.1) * 0.5 + 0.5) * w;
-    const gy = (Math.cos(now * 0.00015 + i * 7.7) * 0.5 + 0.5) * h;
-    ctx.beginPath();
-    ctx.arc(gx, gy, 1, 0, Math.PI * 2);
-    ctx.fill();
+function renderAudit() {
+  const entries = touch.history();
+  auditLog.innerHTML = entries.length
+    ? entries.map((e) => `
+        <li class="${e.status}">
+          ${e.status.toUpperCase()} · ${e.name}
+          ${e.error ? ` · ${e.error}` : ''}
+          ${e.result ? ` · ${escapeJson(e.result)}` : ''}
+        </li>
+      `).join('')
+    : '<li>No actions yet</li>';
+}
+
+function escapeJson(v) {
+  try {
+    return JSON.stringify(v).slice(0, 80);
+  } catch {
+    return '';
   }
+}
 
-  // connection web between recent contacts
-  for (let i = 0; i < POINTS.length; i++) {
-    for (let j = i + 1; j < POINTS.length; j++) {
-      const a = POINTS[i];
-      const b = POINTS[j];
-      const dx = a.x - b.x;
-      const dy = a.y - b.y;
-      const dist = Math.hypot(dx, dy);
-      if (dist < 180) {
-        const alpha = (1 - dist / 180) * 0.18 * Math.min(a.life, b.life);
-        ctx.strokeStyle = `rgba(255,90,54,${alpha})`;
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(a.x, a.y);
-        ctx.lineTo(b.x, b.y);
-        ctx.stroke();
-      }
+async function runDemo() {
+  const btn = document.getElementById('runDemo');
+  btn.disabled = true;
+  statusEl.textContent = 'Agent plan running via TouchAI…';
+  statusEl.classList.remove('ok');
+  touch.clearHistory();
+  renderAudit();
+
+  const states = {};
+  for (let i = 0; i < DEMO_PLAN.length; i++) {
+    states[i] = 'running';
+    renderPlan(states);
+    const step = DEMO_PLAN[i];
+    if (step.args.selector) flash(step.args.selector);
+    const entry = await touch.act(step);
+    states[i] = entry.status === 'ok' ? 'ok' : 'error';
+    renderPlan(states);
+    renderAudit();
+    await wait(450);
+    if (step.name === 'web.type' && step.args.selector === '#qty') {
+      total.textContent = `$${(Number(qty.value) || 1) * 48}`;
     }
   }
 
-  for (let i = POINTS.length - 1; i >= 0; i--) {
-    const p = POINTS[i];
-    const age = (now - p.born) / 1000;
-    p.life = Math.max(0, 1 - age / (p.ambient ? 4 : 2.8));
-    if (p.life <= 0) {
-      POINTS.splice(i, 1);
-      continue;
-    }
-
-    const radius = p.r * (0.7 + (1 - p.life) * 0.8);
-    const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, radius * 3);
-    g.addColorStop(0, `rgba(255,90,54,${0.35 * p.life})`);
-    g.addColorStop(0.4, `rgba(255,90,54,${0.12 * p.life})`);
-    g.addColorStop(1, 'rgba(255,90,54,0)');
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, radius * 3, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.fillStyle = `rgba(244,241,236,${0.85 * p.life})`;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, Math.max(2, radius * 0.25), 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  // idle presence near pointer or default
-  const px = pointer.active ? pointer.x : w * 0.72;
-  const py = pointer.active ? pointer.y : h * 0.32;
-  const pulse = 0.5 + Math.sin(now * 0.003) * 0.5;
-  const idle = ctx.createRadialGradient(px, py, 0, px, py, 120 + pulse * 40);
-  idle.addColorStop(0, `rgba(255,90,54,${0.08 + pulse * 0.05})`);
-  idle.addColorStop(1, 'rgba(255,90,54,0)');
-  ctx.fillStyle = idle;
-  ctx.beginPath();
-  ctx.arc(px, py, 160, 0, Math.PI * 2);
-  ctx.fill();
-
-  requestAnimationFrame(draw);
+  statusEl.textContent = 'Plan complete — every touch audited';
+  statusEl.classList.add('ok');
+  btn.disabled = false;
 }
 
-window.addEventListener('resize', resize);
-resize();
-seedAmbient();
-setInterval(seedAmbient, 3200);
-requestAnimationFrame(draw);
+function wait(ms) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+document.getElementById('runDemo')?.addEventListener('click', runDemo);
+document.getElementById('clearAudit')?.addEventListener('click', () => {
+  touch.clearHistory();
+  renderAudit();
+});
+
+renderCatalog();
+renderPlan();
+renderAudit();

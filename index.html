@@ -2,70 +2,138 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="description" content="TouchAI — building for AI to touch." />
-  <meta property="og:title" content="TouchAI" />
-  <meta property="og:description" content="Building for AI to touch." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="TouchAI — the touch layer for AI agents. Hands, not brain. Stripe for AI actions." />
+  <meta property="og:title" content="TouchAI — the touch layer for AI agents" />
+  <meta property="og:description" content="An API/SDK for real-world AI agents to take actions. Any model. Any interface." />
   <meta property="og:type" content="website" />
   <meta name="theme-color" content="#0A0B0D" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='10' fill='none' stroke='%23FF5A36' stroke-width='2'/><circle cx='16' cy='16' r='3' fill='%23FF5A36'/></svg>" />
-  <title>TouchAI</title>
+  <title>TouchAI — the touch layer for AI agents</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
-  <div id="field" class="field" aria-label="TouchAI field">
-    <canvas id="canvas" class="field-canvas"></canvas>
-    <div id="ripples" class="ripple-layer" aria-hidden="true"></div>
-    <div id="replies" class="reply-layer" aria-hidden="true"></div>
-  </div>
+  <div class="atmosphere" aria-hidden="true"></div>
 
   <header class="top">
-    <div class="brand">
+    <a class="brand" href="#top">
       <span class="brand-mark" aria-hidden="true"></span>
       <span class="brand-name">TouchAI</span>
-    </div>
-    <p class="top-line">Building for AI to touch</p>
+    </a>
+    <nav class="nav">
+      <a href="#product">Product</a>
+      <a href="#sdk">SDK</a>
+      <a href="#playground">Playground</a>
+    </nav>
+    <a class="top-cta" href="#playground">Try actions</a>
   </header>
 
-  <main class="hero">
-    <h1 class="hero-brand">TouchAI</h1>
-    <p class="hero-line">Building for AI to touch.</p>
-    <p class="hero-sub">Intelligence that meets the world at the point of contact.</p>
-    <p class="hero-cta" id="cta">Touch anywhere to begin</p>
-  </main>
-
-  <section class="below" id="about">
-    <div class="below-inner">
-      <p class="eyebrow">What we’re building</p>
-      <h2>AI that can touch.</h2>
-      <p class="lede">
-        Models live behind glass. TouchAI is the contact layer —
-        where intelligence presses into the physical world and the physical world presses back.
-      </p>
-      <div class="pillars">
-        <article>
-          <h3>Contact</h3>
-          <p>Every touch is a signal. TouchAI turns contact into understanding.</p>
-        </article>
-        <article>
-          <h3>Presence</h3>
-          <p>AI that doesn’t wait in a chat box — it arrives where your hand is.</p>
-        </article>
-        <article>
-          <h3>The world</h3>
-          <p>Building so AI can reach devices, surfaces, and bodies — not only screens of text.</p>
-        </article>
+  <main id="top">
+    <section class="hero">
+      <p class="brand-hero">TouchAI</p>
+      <h1>The touch layer for AI agents.</h1>
+      <p class="hero-sub">An API/SDK so real-world agents can act — click, type, call APIs, control devices. Hands, not brain.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#playground">Open playground</a>
+        <a class="btn btn-ghost" href="#sdk">Get the SDK</a>
       </div>
-    </div>
-  </section>
+      <p class="hero-aside">Stripe for AI actions · any model · any interface</p>
+    </section>
+
+    <section class="section" id="problem">
+      <p class="eyebrow">The problem</p>
+      <h2>Most AI is read-only.</h2>
+      <p class="lede">Chat. Generate text. Generate images. The frontier is agents that <em>act</em> — click buttons, fill forms, call APIs, control devices.</p>
+    </section>
+
+    <section class="section" id="product">
+      <p class="eyebrow">Product</p>
+      <h2>Intelligence at the point of contact.</h2>
+      <p class="lede">TouchAI sits between an agent and the real world — the interaction layer any LLM plugs into to safely touch web, desktop, IoT, and robotics APIs.</p>
+      <div class="stack">
+        <div class="stack-row muted">Agent / LLM — the brain</div>
+        <div class="stack-row accent">TouchAI — permissions · actions · adapters · audit</div>
+        <div class="stack-row muted">World — web · HTTP · devices · desktop</div>
+      </div>
+    </section>
+
+    <section class="section" id="sdk">
+      <p class="eyebrow">SDK</p>
+      <h2>Give any model hands.</h2>
+      <pre class="code"><code>npm install ./sdk
+
+import { createTouch, createWebAdapter } from 'touchai-sdk'
+
+const touch = createTouch({
+  allow: ['web.click', 'web.type', 'web.read', 'http.request'],
+  requireConfirm: ['http.request'],
+  adapters: { web: createWebAdapter('#world') },
+})
+
+// Tool schemas for your LLM
+const tools = touch.tools('openai')
+
+// When the model decides to act:
+await touch.act({ name: 'web.click', args: { selector: '#pay' } })</code></pre>
+      <div class="action-grid" id="actionCatalog"></div>
+    </section>
+
+    <section class="section playground-section" id="playground">
+      <p class="eyebrow">Playground</p>
+      <h2>Watch an agent touch a real UI.</h2>
+      <p class="lede">A sandboxed checkout. Run TouchAI actions against it — the same API your agent would call.</p>
+
+      <div class="playground">
+        <div class="world-shell">
+          <div class="world-chrome">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            <span class="world-url" data-route-label="/cart">/cart</span>
+          </div>
+          <div id="world" class="world" data-route="/cart">
+            <h3 class="world-title">Northwind Store</h3>
+            <p class="world-sub">Sandbox UI for agent actions</p>
+            <label class="field">
+              <span>Email</span>
+              <input id="email" type="email" placeholder="you@company.com" />
+            </label>
+            <label class="field">
+              <span>Qty</span>
+              <input id="qty" type="number" value="1" min="1" />
+            </label>
+            <p class="world-total">Total · <strong id="total">$48</strong></p>
+            <div class="world-actions">
+              <button type="button" id="pay" class="world-btn primary">Pay now</button>
+              <button type="button" id="save" class="world-btn">Save cart</button>
+            </div>
+            <p id="worldStatus" class="world-status">Waiting for TouchAI…</p>
+            <form id="checkoutForm" class="hidden-form"></form>
+          </div>
+        </div>
+
+        <div class="console">
+          <div class="console-head">
+            <span>Agent → TouchAI</span>
+            <button type="button" id="runDemo" class="btn btn-primary btn-small">Run demo plan</button>
+          </div>
+          <div class="plan" id="planList"></div>
+          <div class="audit">
+            <div class="console-head"><span>Audit log</span><button type="button" id="clearAudit" class="text-btn">Clear</button></div>
+            <ul id="auditLog" class="audit-log"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
 
   <footer class="foot">
     <span>TouchAI</span>
-    <span class="foot-sep">·</span>
-    <span>Building for AI to touch</span>
+    <span class="sep">·</span>
+    <span>The touch layer for AI agents</span>
+    <span class="sep">·</span>
+    <span>Hands, not brain</span>
   </footer>
 
   <script type="module" src="/js/main.js"></script>

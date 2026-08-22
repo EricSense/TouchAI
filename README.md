@@ -1,12 +1,10 @@
 # TouchAI
 
-**Hardware-aware AI.**
+**Hardware-aware AI.** Deploy anywhere, anytime.
 
 ## What it does
 
-TouchAI makes AI know where it is. It creates a deep relationship between AI models and their physical host machines.
-
-Models today are homeless. TouchAI gives them a home on the machine.
+TouchAI makes AI know where it is — a deep relationship between models and their physical host machines.
 
 ## How it works
 
@@ -14,30 +12,33 @@ Models today are homeless. TouchAI gives them a home on the machine.
 Scan → Adapt → Route → Run → Remember
 ```
 
-1. **Scan** — read the host (8 layers)  
-2. **Adapt** — device, dtype, budget for this machine  
-3. **Route** — Local / Cloud / Coding  
-4. **Run** — execute with that plan  
-5. **Remember** — machine memory for depth  
+## Deploy anywhere · anytime
 
-## Live
+| Target | Command |
+|--------|---------|
+| Node (any host) | `npm run build && npm start` |
+| Docker | `docker compose up --build` |
+| Vercel | `vercel --prod` |
+| Netlify | `netlify deploy --prod --dir=dist` |
+| Render | blueprint in `render.yaml` |
+| Fly.io | `fly deploy` |
+| Embed SDK | `npm install ./sdk` → `createTouchAI()` |
 
-[touchai-kohl.vercel.app](https://touchai-kohl.vercel.app)
+Live: [touchai-kohl.vercel.app](https://touchai-kohl.vercel.app)
 
 ```bash
 npm install
-npm run dev
+npm run build
+npm start
+# → http://localhost:4173
 ```
 
 ## SDK
 
-```bash
-npm install ./sdk
-```
-
 ```js
 import { createTouchAI } from 'touchai-sdk'
 
-const touch = await createTouchAI()
-await touch.runInference('What is my hardware situation?')
+const touch = await createTouchAI() // browser or Node
+console.log(touch.deploy)           // anywhere · anytime targets
+await touch.runInference('How do I deploy anywhere?')
 ```

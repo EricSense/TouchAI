@@ -2,18 +2,20 @@
  * TouchAI Device — persistent situated profile that compounds over time.
  */
 
+import { storage } from './env.js';
+
 const KEY = 'touchai-device-profile-v1';
 
 function load() {
   try {
-    return JSON.parse(localStorage.getItem(KEY)) ?? emptyProfile();
+    return JSON.parse(storage.getItem(KEY)) ?? emptyProfile();
   } catch {
     return emptyProfile();
   }
 }
 
 function save(profile) {
-  localStorage.setItem(KEY, JSON.stringify(profile));
+  storage.setItem(KEY, JSON.stringify(profile));
 }
 
 function emptyProfile() {

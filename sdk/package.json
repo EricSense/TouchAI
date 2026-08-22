@@ -1,7 +1,7 @@
 {
   "name": "touchai-sdk",
-  "version": "0.3.0",
-  "description": "TouchAI — hardware-aware AI. Scan, adapt, route, run on the host.",
+  "version": "0.4.0",
+  "description": "TouchAI — hardware-aware AI. Deploy on any host, anytime.",
   "type": "module",
   "main": "./src/index.js",
   "module": "./src/index.js",

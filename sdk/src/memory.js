@@ -1,19 +1,21 @@
 /**
- * Persistent conversation memory for TouchAI Device (Situated Agent).
+ * Persistent conversation memory for TouchAI (Situated Agent).
  */
+
+import { storage } from './env.js';
 
 const KEY = 'touchai-device-memory-v1';
 
 function loadRaw() {
   try {
-    return JSON.parse(localStorage.getItem(KEY)) ?? { entries: [], history: [] };
+    return JSON.parse(storage.getItem(KEY)) ?? { entries: [], history: [] };
   } catch {
     return { entries: [], history: [] };
   }
 }
 
 function saveRaw(data) {
-  localStorage.setItem(KEY, JSON.stringify(data));
+  storage.setItem(KEY, JSON.stringify(data));
 }
 
 export class MemoryStore {

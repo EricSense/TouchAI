@@ -59,6 +59,15 @@ async function answer(query, hw, model, plan) {
       `Right now: ${plan.device}/${plan.dtype}, route ${route.name}.`,
     ].join('\n');
   }
+  if (/deploy|anywhere|anytime|docker|vercel|hosting|ship/.test(q)) {
+    return [
+      'TouchAI deploys anywhere, anytime.',
+      'Static · Docker · Vercel · Netlify · Render · Fly · any Node host · embed the SDK.',
+      'npm run build && npm start',
+      'docker compose up --build',
+      `This runtime: ${hw.runtime ?? 'host'} · ${hw.platform} · ${plan.device}/${plan.dtype}.`,
+    ].join('\n');
+  }
   if (/route|which assistant|heavy|should handle|prefer|local(ly)?|coding task|next task/.test(q)) {
     return `Routing on this host:\n${formatRouteDecision(route)}`;
   }

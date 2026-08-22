@@ -6,10 +6,13 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   server: { port: 5173 },
-  build: { outDir: 'dist', target: 'esnext' },
   resolve: {
     alias: {
       'touchai-sdk': path.resolve(root, 'sdk/src/index.js'),
     },
+  },
+  build: {
+    outDir: 'dist',
+    target: 'esnext',
   },
 });

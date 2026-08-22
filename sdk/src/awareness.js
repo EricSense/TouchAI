@@ -2,18 +2,20 @@
  * TouchAI awareness persistence — History & User layers across sessions.
  */
 
+import { storage } from './env.js';
+
 const KEY = 'touchai-awareness';
 
 function loadStore() {
   try {
-    return JSON.parse(localStorage.getItem(KEY)) ?? {};
+    return JSON.parse(storage.getItem(KEY)) ?? {};
   } catch {
     return {};
   }
 }
 
 function saveStore(data) {
-  localStorage.setItem(KEY, JSON.stringify(data));
+  storage.setItem(KEY, JSON.stringify(data));
 }
 
 export function recordScan(hwSummary) {
@@ -49,8 +51,8 @@ export function getAwarenessHistory() {
 }
 
 export async function scanPower() {
-  if (!navigator.getBattery) {
-    return { source: 'desktop · plugged', level: '100%', charging: true, budget: 'unlimited' };
+  if (typeof navigator === 'undefined' || !navigator.getBattery) {
+    return { source: 'host · AC', level: '100%', charging: true, budget: 'unlimited' };
   }
   try {
     const bat = await navigator.getBattery();
@@ -72,7 +74,7 @@ export async function scanSensors() {
   let cameras = 0;
   let mics = 0;
 
-  if (navigator.mediaDevices?.enumerateDevices) {
+  if (typeof navigator !== 'undefined' && navigator.mediaDevices?.enumerateDevices) {
     try {
       const devices = await navigator.mediaDevices.enumerateDevices();
       for (const d of devices) {
@@ -84,9 +86,9 @@ export async function scanSensors() {
 
   if (cameras) sensors.push(`${cameras} camera${cameras > 1 ? 's' : ''}`);
   if (mics) sensors.push(`${mics} mic${mics > 1 ? 's' : ''}`);
-  if ('geolocation' in navigator) sensors.push('GPS');
-  if (window.DeviceOrientationEvent) sensors.push('orientation');
-  if (window.DeviceMotionEvent) sensors.push('accelerometer');
+  if (typeof navigator !== 'undefined' && 'geolocation' in navigator) sensors.push('GPS');
+  if (typeof window !== 'undefined' && window.DeviceOrientationEvent) sensors.push('orientation');
+  if (typeof window !== 'undefined' && window.DeviceMotionEvent) sensors.push('accelerometer');
   if (typeof Accelerometer !== 'undefined') sensors.push('motion · Generic Sensor');
   if (typeof AmbientLightSensor !== 'undefined') sensors.push('ambient light');
 
@@ -102,14 +104,16 @@ export function scanPeripherals() {
   const connected = [];
   const available = [];
 
-  if (navigator.getGamepads) {
-    const pads = [...navigator.getGamepads()].filter(Boolean);
-    if (pads.length) connected.push(`${pads.length} gamepad${pads.length > 1 ? 's' : ''}`);
+  if (typeof navigator !== 'undefined') {
+    if (navigator.getGamepads) {
+      const pads = [...navigator.getGamepads()].filter(Boolean);
+      if (pads.length) connected.push(`${pads.length} gamepad${pads.length > 1 ? 's' : ''}`);
+    }
+    if ('usb' in navigator) available.push('USB');
+    if ('hid' in navigator) available.push('HID');
+    if ('bluetooth' in navigator) available.push('Bluetooth');
+    if ('serial' in navigator) available.push('Serial');
   }
-  if ('usb' in navigator) available.push('USB');
-  if ('hid' in navigator) available.push('HID');
-  if ('bluetooth' in navigator) available.push('Bluetooth');
-  if ('serial' in navigator) available.push('Serial');
 
   return {
     connected: connected.length ? connected.join(' · ') : 'none detected',
@@ -119,12 +123,14 @@ export function scanPeripherals() {
 
 export function scanThermal(cores, ramGb) {
   let heapPressure = null;
-  if (performance.memory) {
+  if (typeof performance !== 'undefined' && performance.memory) {
     const m = performance.memory;
     heapPressure = m.usedJSHeapSize / m.jsHeapSizeLimit;
   }
 
-  const conn = navigator.connection ?? navigator.mozConnection ?? navigator.webkitConnection;
+  const conn = typeof navigator !== 'undefined'
+    ? (navigator.connection ?? navigator.mozConnection ?? navigator.webkitConnection)
+    : null;
   let state = 'nominal';
   let headroom = 'high';
 

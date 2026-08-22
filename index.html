@@ -26,6 +26,7 @@
       <a href="#what">What</a>
       <a href="#how">How</a>
       <a href="#live">Live</a>
+      <a href="#deploy">Deploy</a>
       <a href="#sdk">SDK</a>
     </nav>
   </header>
@@ -101,6 +102,20 @@
       </div>
     </section>
 
+    <section class="block" id="deploy">
+      <p class="kicker">Deploy anywhere · anytime</p>
+      <h2>Ship TouchAI on any host.</h2>
+      <p class="copy">Same build. Same pipeline. Browser, Node, container, or CDN — TouchAI situates on whatever machine is running it.</p>
+      <div class="deploy-grid" id="deployGrid"></div>
+      <pre class="code"><code># Anywhere with Node
+npm install && npm run build && npm start
+
+# Anywhere with Docker
+docker compose up --build
+
+# Vercel / Netlify / Render / Fly — configs included</code></pre>
+    </section>
+
     <section class="block" id="sdk">
       <p class="kicker">SDK</p>
       <h2>Same pipeline in your product.</h2>
@@ -109,9 +124,8 @@
 import { createTouchAI } from 'touchai-sdk'
 
 const touch = await createTouchAI()
-// touch.hardware — Scan
-// touch.plan     — Adapt
-// touch.route    — Route
+// Works in browser or Node — binds to this host now
+console.log(touch.deploy) // anywhere · anytime targets
 await touch.runInference('Can we run locally?')</code></pre>
     </section>
   </main>

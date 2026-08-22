@@ -1,27 +1,22 @@
 # touchai-sdk
 
-TouchAI — hardware-aware AI for developers.
+Hardware-aware AI. **Deploy on any host, anytime.**
 
-## What it does
-
-Gives AI models deep knowledge of the physical host they run on.
-
-## How it works
+Works in the browser and in Node. Same pipeline:
 
 ```
 Scan → Adapt → Route → Run → Remember
 ```
 
-```js
-import { createTouchAI } from 'touchai-sdk'
-
-const touch = await createTouchAI()
-console.log(touch.hardware) // Scan
-console.log(touch.plan)     // Adapt
-console.log(touch.route)    // Route
-await touch.runInference('Can we run locally?')
-```
-
 ```bash
 npm install ./sdk
+```
+
+```js
+import { createTouchAI, deployManifest } from 'touchai-sdk'
+
+const touch = await createTouchAI()
+console.log(touch.runtime) // browser | node
+console.log(touch.deploy)  // portable targets
+await touch.runInference('Can we run locally?')
 ```

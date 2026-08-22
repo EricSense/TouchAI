@@ -1,6 +1,6 @@
 /**
- * TouchAI Hardware Scanner — full 8-layer awareness stack.
- * Every layer uses live browser APIs and session telemetry.
+ * TouchAI Hardware Scanner — 8-layer awareness.
+ * Works in the browser and on Node hosts (deploy anywhere).
  */
 
 import {
@@ -8,8 +8,12 @@ import {
   scanMemoryDetail, scanUserPatterns, scanHistoryLayer, getAwarenessHistory,
 } from './awareness.js';
 import { HARDWARE_LAYERS } from './layers.js';
+import { isBrowser, isNode } from './env.js';
 
 function getGpuInfo() {
+  if (!isBrowser()) {
+    return { renderer: isNode() ? 'Node host · no WebGL' : 'Unavailable', vendor: 'n/a' };
+  }
   try {
     const canvas = document.createElement('canvas');
     const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
@@ -48,11 +52,12 @@ function inferNpu(ua, arch, platform) {
   if (p === 'macOS' && arch === 'arm64') return 'Apple Neural Engine · active';
   if (p === 'iOS' || p === 'iPadOS') return 'Apple Neural Engine · on-chip';
   if (/Android/i.test(ua) && /Pixel|Samsung|Galaxy/i.test(ua)) return 'Hexagon / Samsung NPU · detected';
-  if (typeof navigator.ml !== 'undefined') return 'WebNN accelerator · available';
+  if (typeof navigator !== 'undefined' && typeof navigator.ml !== 'undefined') return 'WebNN accelerator · available';
   return 'WASM compute path · CPU/GPU';
 }
 
 function detectFormFactor() {
+  if (!isBrowser()) return 'Server';
   const w = window.innerWidth;
   const touch = navigator.maxTouchPoints > 0;
   if (w < 480) return touch ? 'Phone' : 'Compact';
@@ -65,15 +70,19 @@ function detectWasmFeatures() {
   const features = [];
   try {
     if (typeof WebAssembly === 'object') features.push('core');
-    if (WebAssembly.validate(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0]))) features.push('validate');
-    if (typeof WebAssembly.instantiateStreaming === 'function') features.push('streaming');
+    if (typeof WebAssembly !== 'undefined' && WebAssembly.validate?.(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0]))) {
+      features.push('validate');
+    }
+    if (typeof WebAssembly !== 'undefined' && typeof WebAssembly.instantiateStreaming === 'function') {
+      features.push('streaming');
+    }
   } catch { /* noop */ }
   return features.join(' + ') || 'unavailable';
 }
 
 function formatRam(gb) {
-  if (gb == null) return 'Browser API · estimating from platform';
-  return `${gb} GB · deviceMemory`;
+  if (gb == null) return 'RAM not exposed';
+  return `${gb} GB`;
 }
 
 function recommendModel(hardware) {
@@ -98,16 +107,60 @@ function buildSiliconLayer(platform, arch, cores, gpu, npu, wasm) {
 
 function buildContext(hw) {
   const a = hw.awareness;
-  const parts = [
+  return [
     `Running on ${hw.platform} (${hw.arch}).`,
     `${a.silicon.cores}. GPU: ${a.silicon.gpu}.`,
     `Thermal: ${a.thermal.state} · ${a.thermal.headroom}.`,
     `Power: ${a.power.level} · ${a.power.budget}.`,
     `Sensors: ${a.sensors.active}.`,
     `User rhythm: ${a.user.rhythm}.`,
-    'TouchAI situates inference with all 8 awareness layers — hardware-aware AI on this machine.',
-  ];
-  return parts.join(' ');
+    'TouchAI situates inference with all 8 awareness layers — deploy anywhere, anytime.',
+  ].join(' ');
+}
+
+async function scanNodeHost() {
+  try {
+    // Opaque import so Vite never pulls node:os into the browser bundle
+    const loadOs = new Function('return import("node:os")');
+    const os = await loadOs();
+    const total = os.totalmem();
+    const free = os.freemem();
+    const cpus = os.cpus() || [];
+    return {
+      platform: os.platform(),
+      arch: os.arch(),
+      cores: cpus.length || 1,
+      ramGb: +(total / 1024 ** 3).toFixed(2),
+      freeGb: +(free / 1024 ** 3).toFixed(2),
+      gpu: { renderer: 'Node host · no WebGL', vendor: 'n/a' },
+      ua: `node/${process.version}`,
+      navPlatform: os.platform(),
+      hostname: os.hostname(),
+      uptimeSec: Math.round(os.uptime()),
+      load: typeof os.loadavg === 'function' ? os.loadavg().map((n) => +n.toFixed(2)) : [0, 0, 0],
+    };
+  } catch {
+    return {
+      platform: 'node',
+      arch: 'unknown',
+      cores: 1,
+      ramGb: 1,
+      freeGb: 0,
+      gpu: { renderer: 'Unavailable', vendor: 'Unknown' },
+      ua: '',
+      navPlatform: 'node',
+    };
+  }
+}
+
+async function scanBrowserHost() {
+  const ua = navigator.userAgent;
+  const gpu = getGpuInfo();
+  const arch = detectArch(ua, navigator.platform);
+  const platform = detectPlatform(ua, navigator.platform);
+  const ramGb = navigator.deviceMemory ?? null;
+  const cores = navigator.hardwareConcurrency ?? null;
+  return { platform, arch, cores, ramGb, freeGb: null, gpu, ua, navPlatform: navigator.platform };
 }
 
 let cached = null;
@@ -115,28 +168,47 @@ let cached = null;
 export async function scanHardware(force = false) {
   if (cached && !force) return cached;
 
-  const ua = navigator.userAgent;
-  const gpu = getGpuInfo();
-  const arch = detectArch(ua, navigator.platform);
-  const platform = detectPlatform(ua, navigator.platform);
-  const ramGb = navigator.deviceMemory ?? null;
-  const cores = navigator.hardwareConcurrency ?? null;
+  const host = isBrowser()
+    ? await scanBrowserHost()
+    : isNode()
+      ? await scanNodeHost()
+      : {
+          platform: 'Unknown',
+          arch: 'unknown',
+          cores: null,
+          ramGb: null,
+          freeGb: null,
+          gpu: { renderer: 'Unavailable', vendor: 'Unknown' },
+          ua: '',
+          navPlatform: 'unknown',
+        };
+
+  const { platform, arch, cores, ramGb, freeGb, gpu, ua, navPlatform } = host;
   const summary = `${platform} · ${arch} · ${cores ?? '?'} cores`;
 
   const [power, sensors] = await Promise.all([scanPower(), scanSensors()]);
   const thermal = scanThermal(cores, ramGb);
   const memory = scanMemoryDetail(ramGb);
+  if (freeGb != null) memory.heap = `${freeGb} GB free`;
   const peripherals = scanPeripherals();
   const store = getAwarenessHistory();
   const history = scanHistoryLayer(store, summary);
   const user = scanUserPatterns(getAwarenessHistory());
 
-  const silicon = buildSiliconLayer(platform, arch, cores, gpu, inferNpu(ua, arch, navigator.platform), detectWasmFeatures());
+  const silicon = buildSiliconLayer(
+    platform,
+    arch,
+    cores,
+    gpu,
+    inferNpu(ua, arch, navPlatform),
+    detectWasmFeatures(),
+  );
 
   const awareness = { silicon, thermal, power, memory, sensors, peripherals, history, user };
 
   cached = {
     id: 'local',
+    runtime: isBrowser() ? 'browser' : isNode() ? 'node' : 'unknown',
     platform,
     arch,
     cores,
@@ -145,16 +217,18 @@ export async function scanHardware(force = false) {
     gpu: gpu.renderer,
     gpuVendor: gpu.vendor,
     npu: silicon.npu,
-    display: `${screen.width}×${screen.height} · ${window.devicePixelRatio}x DPR`,
-    viewport: `${window.innerWidth}×${window.innerHeight}`,
+    display: isBrowser()
+      ? `${screen.width}×${screen.height} · ${window.devicePixelRatio}x DPR`
+      : 'headless',
+    viewport: isBrowser() ? `${window.innerWidth}×${window.innerHeight}` : 'n/a',
     formFactor: detectFormFactor(),
-    touch: navigator.maxTouchPoints > 0,
-    touchPoints: navigator.maxTouchPoints,
+    touch: isBrowser() ? navigator.maxTouchPoints > 0 : false,
+    touchPoints: isBrowser() ? navigator.maxTouchPoints : 0,
     wasm: silicon.wasm,
     inferenceBackend: 'TouchAI Runtime · adaptive',
     networkPolicy: 'hardware-adaptive',
-    language: navigator.language,
-    online: navigator.onLine,
+    language: isBrowser() ? navigator.language : (process.env.LANG ?? 'en'),
+    online: isBrowser() ? navigator.onLine : true,
     awareness,
     layers: HARDWARE_LAYERS.map((l) => ({
       name: l.layer,

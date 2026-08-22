@@ -1,9 +1,6 @@
 import {
   createTouchAI,
-  scanHardware,
-  adaptExecution,
-  recommendAssistant,
-  HARDWARE_LAYERS,
+  DEPLOY_TARGETS,
 } from 'touchai-sdk';
 
 const heroHost = document.getElementById('heroHost');
@@ -15,14 +12,15 @@ const askForm = document.getElementById('askForm');
 const askInput = document.getElementById('askInput');
 const chips = document.getElementById('chips');
 const rescanBtn = document.getElementById('rescan');
+const deployGrid = document.getElementById('deployGrid');
 
 let touch = null;
 
 const PROMPTS = [
   'What does TouchAI do?',
   'How does TouchAI work?',
+  'How do I deploy anywhere?',
   'What is my hardware situation?',
-  'Which assistant should handle a heavy job?',
   'Can we run locally?',
 ];
 
@@ -32,11 +30,22 @@ function esc(s) {
   return n.innerHTML;
 }
 
+function renderDeploy() {
+  if (!deployGrid) return;
+  deployGrid.innerHTML = DEPLOY_TARGETS.map((t) => `
+    <article class="deploy-card">
+      <h3>${esc(t.name)}</h3>
+      <p>${esc(t.notes)}</p>
+      <code>${esc(t.command)}</code>
+    </article>
+  `).join('');
+}
+
 function renderSituation(hw) {
   situationEl.innerHTML = `
     <div class="sit-top">
       <strong>${esc(hw.platform)}</strong>
-      <span>${esc(hw.arch)} · ${esc(String(hw.cores))} cores · ${esc(hw.ram)}</span>
+      <span>${esc(hw.arch)} · ${esc(String(hw.cores))} cores · ${esc(hw.ram)} · ${esc(hw.runtime ?? 'host')}</span>
     </div>
     <div class="layers">
       ${hw.layers.map((l) => `
@@ -83,7 +92,7 @@ async function refresh(force = false) {
   try {
     touch = await createTouchAI({ forceScan: force });
     const { hardware: hw, plan, route } = touch;
-    heroHost.textContent = `This host · ${hw.platform} · ${plan.device}/${plan.dtype} · ${route.name}`;
+    heroHost.textContent = `This host · ${hw.platform} · ${plan.device}/${plan.dtype} · ${route.name} · deploy anywhere`;
     renderSituation(hw);
     renderAdapt(plan);
     renderRoute(route);
@@ -114,11 +123,6 @@ askForm.addEventListener('submit', (e) => {
 
 rescanBtn.addEventListener('click', () => refresh(true));
 
-addMsg('assistant', 'TouchAI makes AI hardware-aware.\nAsk what it does, how it works, or about this host.');
+renderDeploy();
+addMsg('assistant', 'TouchAI deploys anywhere, anytime.\nAsk what it does, how it works, or how to deploy.');
 refresh(false);
-
-// Keep layers constant available for debugging
-void HARDWARE_LAYERS;
-void scanHardware;
-void adaptExecution;
-void recommendAssistant;

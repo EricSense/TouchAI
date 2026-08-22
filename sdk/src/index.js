@@ -37,6 +37,8 @@ export {
   situatedSummary,
 } from './device-profile.js';
 export { recommendAssistant, formatRouteDecision } from './route.js';
+export { deployManifest, deployCommands, DEPLOY_TARGETS } from './deploy.js';
+export { runtimeId, isBrowser, isNode } from './env.js';
 export { MemoryStore } from './memory.js';
 export { getAwarenessHistory, recordQuery } from './awareness.js';
 
@@ -45,22 +47,27 @@ import { adaptExecution, detectCapabilities, canRunLocally } from './adapt.js';
 import { attestIntegrity } from './attest.js';
 import { generate } from './inference.js';
 import { recommendAssistant } from './route.js';
+import { deployManifest } from './deploy.js';
+import { runtimeId } from './env.js';
 import { SDK_VERSION } from './layers.js';
 
-/** Bound Hardware-Aware AI client for one machine session */
+/** Bound Hardware-Aware AI client — works on any host, anytime */
 export async function createTouchAI(options = {}) {
   const hw = await scanHardware(Boolean(options.forceScan));
   const capabilities = await detectCapabilities();
   const plan = await adaptExecution(options.modelId ?? hw.recommendedModel, hw, capabilities);
+  const route = recommendAssistant(hw, plan);
 
   return {
     version: SDK_VERSION,
     product: 'Hardware-Aware AI',
+    runtime: runtimeId(),
     hardware: hw,
     capabilities,
     plan,
-    route: recommendAssistant(hw, plan),
+    route,
     canRun: canRunLocally(hw, plan),
+    deploy: deployManifest(hw, plan),
     scanHardware: (force) => scanHardware(force),
     detectCapabilities,
     adaptExecution: async (modelId) => adaptExecution(modelId ?? hw.recommendedModel, hw),

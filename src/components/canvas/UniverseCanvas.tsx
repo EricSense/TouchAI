@@ -121,7 +121,9 @@ function CanvasInner({ initial }: { initial: UniverseSnapshot }) {
       x: window.innerWidth / 2 + 40,
       y: window.innerHeight / 2,
     });
-    const offset = records.length * 28;
+    const index = records.length;
+    const col = index % 3;
+    const row = Math.floor(index / 3);
     markSaving();
     const node = await readError(
       await fetch(`/api/universe/${initial.id}/nodes`, {
@@ -130,8 +132,8 @@ function CanvasInner({ initial }: { initial: UniverseSnapshot }) {
         body: JSON.stringify({
           ...input,
           type: createType,
-          positionX: center.x - 110 + offset,
-          positionY: center.y - 40 + (offset % 160),
+          positionX: center.x - 280 + col * 280,
+          positionY: center.y - 90 + row * 150,
         }),
       }),
     );

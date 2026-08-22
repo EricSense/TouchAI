@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String     @id @default(cuid())
+  name         String
+  email        String     @unique
+  passwordHash String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  universes    Universe[]
+}
+
+model Universe {
+  id          String       @id @default(cuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  nodes       Node[]
+  connections Connection[]
+  activities  Activity[]
+}
+
+model Node {
+  id          String   @id @default(cuid())
+  universeId  String
+  universe    Universe @relation(fields: [universeId], references: [id], onDelete: Cascade)
+  name        String
+  type        String
+  description String   @default("")
+  status      String   @default("Idea")
+  priority    String   @default("Medium")
+  tags        String   @default("")
+  notes       String   @default("")
+  positionX   Float    @default(0)
+  positionY   Float    @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  sourceConnections Connection[] @relation("SourceNode")
+  targetConnections Connection[] @relation("TargetNode")
+}
+
+model Connection {
+  id           String   @id @default(cuid())
+  universeId   String
+  universe     Universe @relation(fields: [universeId], references: [id], onDelete: Cascade)
+  sourceNodeId String
+  targetNodeId String
+  sourceNode   Node     @relation("SourceNode", fields: [sourceNodeId], references: [id], onDelete: Cascade)
+  targetNode   Node     @relation("TargetNode", fields: [targetNodeId], references: [id], onDelete: Cascade)
+  relationship String   @default("Related to")
+  createdAt    DateTime @default(now())
+}
+
+model Activity {
+  id         String   @id @default(cuid())
+  universeId String
+  universe   Universe @relation(fields: [universeId], references: [id], onDelete: Cascade)
+  message    String
+  createdAt  DateTime @default(now())
+}

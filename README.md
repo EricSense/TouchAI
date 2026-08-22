@@ -32,6 +32,8 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+Vercel preview builds as Next.js (this repo used to be Vite). The deploy creates a SQLite schema during build. On Vercel the live database lives in `/tmp`, so preview data can reset between instances — set `DATABASE_URL` and `AUTH_SECRET` in the Vercel project for a durable host later.
+
 ## Pages
 
 | Route | Purpose |

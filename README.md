@@ -1,44 +1,49 @@
-# TouchAI
+# Billion Universe
 
-**Hardware-aware AI.** Deploy anywhere, anytime.
+**Build your own business universe.**
 
-## What it does
+Billion Universe is a visual operating system for everything a person is building — businesses, projects, ideas, skills, resources, goals, and people — on one interconnected canvas.
 
-TouchAI makes AI know where it is — a deep relationship between models and their physical host machines.
+## The core loop
 
-## How it works
+1. Create an account and a private Universe.
+2. Add nodes to an infinite canvas.
+3. Connect them with relationships.
+4. Move the map. Save it. Return later.
+5. Read insights, then ask Universe Intelligence what to build next.
 
-```
-Scan → Adapt → Route → Run → Remember
-```
+## Stack
 
-## Deploy anywhere · anytime
+- Next.js (App Router) + TypeScript
+- Tailwind CSS
+- React Flow (`@xyflow/react`)
+- Prisma + SQLite
+- Signed-cookie authentication
 
-| Target | Command |
-|--------|---------|
-| Node (any host) | `npm run build && npm start` |
-| Docker | `docker compose up --build` |
-| Vercel | `vercel --prod` |
-| Netlify | `netlify deploy --prod --dir=dist` |
-| Render | blueprint in `render.yaml` |
-| Fly.io | `fly deploy` |
-| Embed SDK | `npm install ./sdk` → `createTouchAI()` |
-
-Live: [touchai-kohl.vercel.app](https://touchai-kohl.vercel.app)
+## Run locally
 
 ```bash
+cp .env.example .env
 npm install
-npm run build
-npm start
-# → http://localhost:4173
+npx prisma generate
+npx prisma db push
+npm run dev
 ```
 
-## SDK
+Open [http://localhost:3000](http://localhost:3000).
 
-```js
-import { createTouchAI } from 'touchai-sdk'
+Vercel preview builds as Next.js (this repo used to be Vite). The deploy creates a SQLite schema during build. On Vercel the live database lives in `/tmp`, so preview data can reset between instances — set `DATABASE_URL` and `AUTH_SECRET` in the Vercel project for a durable host later.
 
-const touch = await createTouchAI() // browser or Node
-console.log(touch.deploy)           // anywhere · anytime targets
-await touch.runInference('How do I deploy anywhere?')
-```
+## Pages
+
+| Route | Purpose |
+| --- | --- |
+| `/` | Landing |
+| `/signup` `/login` | Authentication |
+| `/dashboard` | Universe summary |
+| `/universe/:id` | Interactive canvas |
+| `/insights` | Graph analytics |
+| `/intelligence` | Universe Intelligence (structured mock strategist) |
+| `/settings` | Profile, universe name, logout |
+
+Universe Intelligence is intentionally not a full model in this MVP. It reads the live graph and answers with placeholder strategist logic so the architecture and UI are already in place.
